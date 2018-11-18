@@ -3,6 +3,8 @@ package com.urquieta.something.game;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
 
+// TODO(Misael): @URGENT make the PC version of the clases to see how
+// it will all be handle.
 public class Game extends Thread implements Runnable
 {
     private boolean   isRunning;
