@@ -8,9 +8,6 @@ import android.view.Window;
 import com.urquieta.something.game.Game;
 import com.urquieta.something.platform.Screen;
 
-// TODO(Misael): Make a script on python where we tell it what changes
-// from each build, since the platform clases will need to change the
-// pc and the android version constantly.
 public class MainActivity extends Activity
 {
     /** Called when the activity is first created. */

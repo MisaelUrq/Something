@@ -18,13 +18,12 @@ public class AndroidScreen extends SurfaceView implements SurfaceHolder.Callback
         this.holder = getHolder();
         this.holder.addCallback(this);
         setFocusable(true);
-
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO(Misael): I asume this cannot be empty...
-        
+
     }
 
     @Override
