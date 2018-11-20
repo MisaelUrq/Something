@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import com.urquieta.something.game.Game;
 
 public class AndroidScreen extends SurfaceView implements SurfaceHolder.Callback {
+    protected int width;
+    protected int height;
     private Game game;
     private Canvas game_canvas;
     private SurfaceHolder holder;

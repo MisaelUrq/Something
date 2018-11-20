@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class PCRenderer {
-    private Screen screen;
+    protected Screen screen;
 
     public PCRenderer(Screen screen) {
         this.screen = screen;
@@ -17,7 +17,7 @@ public class PCRenderer {
             Graphics graphics = this.screen.getCanvas().getBufferStrategy().getDrawGraphics();
             if (graphics != null) {
                 graphics.setColor(new Color(color, true));
-                graphics.fillRect(x, y, width, height);
+                graphics.fillRect(x, y, width - x, height - y);
             }
         }
     }

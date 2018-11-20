@@ -10,11 +10,11 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 // NOTE(Misael): Not necesary for the PC build.
-import com.urquieta.something.Context;
+import com.urquieta.something.platform.pc.Context;
 
 public class PCScreen extends Canvas {
-    private final int width  = 300;
-    private final int height = 450;
+    protected int width  = 300;
+    protected int height = 450;
     private Game game;
     private JFrame frame;
     BufferStrategy buffer;

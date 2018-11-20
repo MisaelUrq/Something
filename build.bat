@@ -15,12 +15,20 @@ SET DEGUG=1
 
 if %BUILD_FOR_ANDROID% == 1 (
    if %DEGUG% == 1 (
-      ant debug ))
+      py -3 switch_build.py "Android"
+      ant debug
+      py -3 switch_build.py "PC" ))
 
 if %BUILD_FOR_ANDROID% == 1 (
    if %DEGUG% == 0 (
-      ant release ))
+      py -3 switch_build.py "Android"
+      ant release
+      py -3 switch_build.py "PC" ))
+
 
 if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
-     javac -g -Xdiags:verbose -Xlint:all -d bin src/com/urquieta/something/PCMain.java src/com/urquieta/something/game/*.java src/com/urquieta/something/platform/*.java src/com/urquieta/something/platform/pc/*.java ))
+     javac -g -Xdiags:verbose -Xlint:all -d bin src/com/urquieta/something/PCMain.java src/com/urquieta/something/game/*.java src/com/urquieta/something/platform/*.java src/com/urquieta/something/platform/pc/*.java
+     pushd bin
+     jar -cvmf ..\MANIFEST.MF Something.jar com/urquieta/something/*.class com/urquieta/something/game/*.class com/urquieta/something/platform/*.class com/urquieta/something/platform/pc/*.class
+     popd ))

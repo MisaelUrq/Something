@@ -33,6 +33,8 @@ public class Game extends Thread implements Runnable
 
     @Override
     public void run() {
+        // TODO(Misael): Fix this wierd thing, we need a better frame
+        // count and to pass the delta to the update.
         long startTime;
         long timeMiliseconds = 1000/FPS_CAP;
         long waitTime;
@@ -40,13 +42,14 @@ public class Game extends Thread implements Runnable
         long totalTime  = 0;
         long targetTime = timeMiliseconds;
 
+        double delta = 0.0;
         while (this.isRunning) {
             // Get the time on the frame
             startTime = System.nanoTime();
 
             // Game code goes here....
 
-            this.GameUpdate();
+            this.GameUpdate(delta);
 
             // Get the time at the end of the frame.
             timeMiliseconds = (System.nanoTime() - startTime)/MILLION;
@@ -86,11 +89,9 @@ public class Game extends Thread implements Runnable
         }
     }
 
-    private void GameUpdate() {
-        this.main_canvas.beginDraw();
-
-        this.renderer.DrawRect(10, 10, 100, 100, 0xFFFF00FF);
-
-        this.main_canvas.endDraw();
+    private void GameUpdate(double delta) {
+        this.renderer.BeginDraw();
+        this.renderer.DrawRect(-1f, -1f, 0f, 0f, 0xFFFF0000);
+        this.renderer.EndDraw();
     }
 }
