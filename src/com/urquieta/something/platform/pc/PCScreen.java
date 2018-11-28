@@ -13,8 +13,8 @@ import javax.swing.JFrame;
 import com.urquieta.something.platform.pc.Context;
 
 public class PCScreen extends Canvas {
-    protected int width  = 300;
-    protected int height = 450;
+    public static int width  = 300;
+    public static int height = 450;
     private Game game;
     private JFrame frame;
     BufferStrategy buffer;

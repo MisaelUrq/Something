@@ -2,6 +2,8 @@ package com.urquieta.something.game;
 
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
+import com.urquieta.something.platform.Input;
+import com.urquieta.something.platform.InputEvent;
 
 // TODO(Misael): @URGENT make the PC version of the clases to see how
 // it will all be handle.
@@ -13,6 +15,7 @@ public class Game extends Thread implements Runnable
 
     private Screen main_canvas;
     private Renderer renderer;
+    private Input input;
 
     public Game()
     {
@@ -22,8 +25,13 @@ public class Game extends Thread implements Runnable
 
     public void startThread()
     {
-        this.isRunning = true;
-        this.start();
+        if (this.renderer != null &&
+            this.main_canvas != null &&
+            this.input != null)
+        {
+            this.isRunning = true;
+            this.start();
+        }
     }
 
     public void setScreen(Screen screen) {
@@ -31,53 +39,23 @@ public class Game extends Thread implements Runnable
         this.renderer = new Renderer(this.main_canvas);
     }
 
+    public void setInput(Input input) {
+        this.input = input;
+    }
+
     @Override
     public void run() {
-        // TODO(Misael): Fix this wierd thing, we need a better frame
-        // count and to pass the delta to the update.
-        long startTime;
-        long timeMiliseconds = 1000/FPS_CAP;
-        long waitTime;
-        int  frameCount = 0;
-        long totalTime  = 0;
-        long targetTime = timeMiliseconds;
-
         double delta = 0.0;
+        // TODO(Misael): IMPORTANT Make a proper frame counter!!
         while (this.isRunning) {
-            // Get the time on the frame
-            startTime = System.nanoTime();
 
-            // Game code goes here....
 
             this.GameUpdate(delta);
 
-            // Get the time at the end of the frame.
-            timeMiliseconds = (System.nanoTime() - startTime)/MILLION;
-            waitTime = targetTime - timeMiliseconds;
-            try {
-                if (waitTime > 0) {
-                    this.sleep(waitTime);
-                }
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            totalTime += System.nanoTime() + startTime;
-            frameCount++;
-            if (frameCount > FPS_CAP) {
-                long avarageFPS = 1000/((totalTime/frameCount)/MILLION);
-                frameCount = 0;
-                totalTime  = 0;
-                // TODO(Misael): Use loggin system as it will help to
-                // set apart diferent types of errors and to make a
-                // way to view them more easily to log on android.
-                System.out.println("AvarageFPS: "+avarageFPS+".");
-            }
         }
     }
 
     public void stopThread() {
-
         while (this.isRunning) {
             try {
                 this.join();
@@ -90,8 +68,14 @@ public class Game extends Thread implements Runnable
     }
 
     private void GameUpdate(double delta) {
+        InputEvent input_event = this.input.GetInputEvent();
+        float x = input_event.x;
+        float y = input_event.y;
+        float width  = x + 0.5f;
+        float height = y - 0.5f;
+
         this.renderer.BeginDraw();
-        this.renderer.DrawRect(-1f, -1f, 0f, 0f, 0xFFFF0000);
+        this.renderer.DrawRect(x, y, width, height, 0xFFFF0000);
         this.renderer.EndDraw();
     }
 }

@@ -25,23 +25,23 @@ public class Screen extends PCScreen { // @Class
     }
 
     public int widthInPixels(float position) {
-        return (int)(((position + 1)*((float)super.width - 0.0f)-0.0f)/2);
+        return (int)(((position + 1)*((float)Screen.width - 0.0f)-0.0f)/2);
     }
 
     public int heightInPixels(float position) {
-        return (int)(((position + 1)*((float)super.height - 0.0f)-0.0f)/2);
+        return (int)(((position + 1)*((float)Screen.height - 0.0f)-0.0f)/2);
     }
 
     public void SetSize(int width, int height) {
-        super.width  = width;
-        super.height = height;
+        Screen.width  = width;
+        Screen.height = height;
     }
 
     public int GetWidth() {
-        return super.width;
+        return Screen.width;
     }
 
     public int GetHeight() {
-        return super.height;
+        return Screen.height;
     }
 }

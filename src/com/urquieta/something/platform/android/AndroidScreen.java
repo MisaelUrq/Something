@@ -24,8 +24,9 @@ public class AndroidScreen extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // TODO(Misael): I asume this cannot be empty...
-
+        // NOTE(Misael): I asume this cannot be empty, so I put this,
+        // could be wrong.
+        game.startThread();
     }
 
     @Override
