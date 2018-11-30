@@ -9,8 +9,8 @@ import com.urquieta.something.platform.pc.View;// @PC
 import com.urquieta.something.platform.InputEvent;
 
 public class Input extends PCInput { // @Class
-    public Input(View view) {
-        super(view);
+    public Input() {
+        super();
     }
 
     public void GetMousePosition(float x, float y) {

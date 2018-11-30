@@ -8,8 +8,8 @@ import android.graphics.Canvas;
 import com.urquieta.something.game.Game;
 
 public class AndroidScreen extends SurfaceView implements SurfaceHolder.Callback {
-    protected int width;
-    protected int height;
+    protected static int width;
+    protected static int height;
     private Game game;
     private Canvas game_canvas;
     private SurfaceHolder holder;
@@ -24,13 +24,13 @@ public class AndroidScreen extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // NOTE(Misael): I asume this cannot be empty, so I put this,
-        // could be wrong.
-        game.startThread();
+        // TODO(Misael): Find out how to preserve the state of the
+        // game after the app is put to rest.
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        this.holder.setFixedSize(this.width, this.height);
         game.startThread();
     }
 

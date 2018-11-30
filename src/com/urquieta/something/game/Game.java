@@ -9,9 +9,9 @@ import com.urquieta.something.platform.InputEvent;
 // it will all be handle.
 public class Game extends Thread implements Runnable
 {
-    private boolean   isRunning;
-    private final int FPS_CAP = 30;
-    private final int MILLION = 1000000;
+    private boolean   is_running;
+    private final int TARGET_FPS = 30;
+    private final int TARGET_DELTA = 1000  / TARGET_FPS;
 
     private Screen main_canvas;
     private Renderer renderer;
@@ -20,7 +20,7 @@ public class Game extends Thread implements Runnable
     public Game()
     {
         super();
-        this.isRunning = false;
+        this.is_running = false;
     }
 
     public void startThread()
@@ -29,7 +29,7 @@ public class Game extends Thread implements Runnable
             this.main_canvas != null &&
             this.input != null)
         {
-            this.isRunning = true;
+            this.is_running = true;
             this.start();
         }
     }
@@ -45,21 +45,37 @@ public class Game extends Thread implements Runnable
 
     @Override
     public void run() {
+        double start_time = (double)System.nanoTime() / (double)1000000000;
         double delta = 0.0;
-        // TODO(Misael): IMPORTANT Make a proper frame counter!!
-        while (this.isRunning) {
 
+        while (this.is_running) {
+            double before_time = (double)System.nanoTime() / (double)1000000000;
 
             this.GameUpdate(delta);
 
+            double after_time = (double)System.nanoTime() / (double)1000000000;
+            delta = (after_time - before_time);
+
+            if (TARGET_DELTA > delta) {
+                this.SleepThread((long)(TARGET_DELTA - delta)); // @PC_Replace: 'this' -> 'Thread'
+            }
+        }
+    }
+
+    private void SleepThread(long time_to_sleep) {
+        try {
+            this.sleep(time_to_sleep);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void stopThread() {
-        while (this.isRunning) {
+        while (this.is_running) {
             try {
                 this.join();
-                this.isRunning = false;
+                this.is_running = false;
             }
             catch (Exception e) {
                 e.printStackTrace();

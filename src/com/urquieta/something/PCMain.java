@@ -10,7 +10,7 @@ public class PCMain
     {
         Game game = new Game();
         Screen game_screen = new Screen(game, null);
-        Input game_input = new Input(null);
+        Input game_input = new Input();
         game_screen.addKeyListener(game_input);
         game_screen.addMouseMotionListener(game_input);
         game.setScreen(game_screen);

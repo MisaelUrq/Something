@@ -1,6 +1,5 @@
 package com.urquieta.something.platform.android;
 
-
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
@@ -11,8 +10,7 @@ public class AndroidInput implements OnTouchListener {
     private boolean is_touched;
     InputEvent input_event;
 
-    public AndroidInput(View view) {
-        view.setOnTouchListener(this);
+    public AndroidInput() {
         this.input_event = new InputEvent();
     }
 
@@ -35,19 +33,20 @@ public class AndroidInput implements OnTouchListener {
                 break;
             }
 
-            input_event.x = (int)(event.getX());
-            input_event.y = (int)(event.getY());
+            input_event.x =  (((event.getX() / v.getWidth())  * 2) - 1.0f);
+            input_event.y = -(((event.getY() / v.getHeight()) * 2) - 1.0f);
+            System.out.println("DEBUG: ["+input_event.x+", "+input_event.y+"]");
             return true;
         }
     }
 
-    public int getTouchX() {
+    public float getTouchX() {
         synchronized(this) {
             return this.input_event.x;
         }
     }
 
-    public int getTouchY() {
+    public float getTouchY() {
         synchronized(this) {
             return this.input_event.y;
         }

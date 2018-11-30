@@ -23,7 +23,7 @@ public class Renderer extends PCRenderer { // @Class
 
     public void BeginDraw() {
         super.screen.beginDraw();
-        this.DrawRect(-1f, 1f, 1f, -1f, 0xFFFFFFFF);
+        this.DrawRect(-1f, 1f, 1f, -1f, 0xFFFFFF00);
     }
 
     public void EndDraw() {

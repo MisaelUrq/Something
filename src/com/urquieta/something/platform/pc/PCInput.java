@@ -12,14 +12,12 @@ import com.urquieta.something.platform.Screen;
 
 public class PCInput implements KeyListener, MouseMotionListener {
     private static final int MAX_KEYS = 256;
-    private View view_null;
     public boolean[] keys; // For now none are used.
     InputEvent input_event;
 
-    public PCInput(View view) {
+    public PCInput() {
         this.input_event = new InputEvent();
         this.keys = new boolean[MAX_KEYS];
-        this.view_null = view;
     }
 
     public void Update() {
