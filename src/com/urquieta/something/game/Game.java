@@ -10,8 +10,9 @@ import com.urquieta.something.platform.InputEvent;
 public class Game extends Thread implements Runnable
 {
     private boolean   is_running;
-    private final int TARGET_FPS = 30;
-    private final int TARGET_DELTA = 1000  / TARGET_FPS;
+    private final int  TARGET_FPS = 30;
+    private final long ONE_BILLION = 1000000000;
+    private final long TARGET_DELTA = ONE_BILLION / TARGET_FPS;
 
     private Screen main_canvas;
     private Renderer renderer;
@@ -45,29 +46,42 @@ public class Game extends Thread implements Runnable
 
     @Override
     public void run() {
-        double start_time = (double)System.nanoTime() / (double)1000000000;
+        long   start_time = System.nanoTime();
         double delta = 0.0;
+        int fps = 0;
+        long last_fps_time = 0;
+
 
         while (this.is_running) {
-            double before_time = (double)System.nanoTime() / (double)1000000000;
+            long before_time   = System.nanoTime();
+            long update_lenght = before_time - start_time;
+            start_time = before_time;
+            delta = update_lenght / ((double)TARGET_DELTA);
+            last_fps_time += update_lenght;
+            fps++;
+
+            if (last_fps_time >= ONE_BILLION)
+            {
+                last_fps_time = 0;
+                fps = 0;
+            }
 
             this.GameUpdate(delta);
 
-            double after_time = (double)System.nanoTime() / (double)1000000000;
-            delta = (after_time - before_time);
-
-            if (TARGET_DELTA > delta) {
-                this.SleepThread((long)(TARGET_DELTA - delta)); // @PC_Replace: 'this' -> 'Thread'
-            }
+            double after_time = System.nanoTime();
+            this.SleepThread((start_time - System.nanoTime() + TARGET_DELTA) / 1000000); // @PC_Replace: 'this' -> 'Thread'
         }
     }
 
     private void SleepThread(long time_to_sleep) {
-        try {
-            this.sleep(time_to_sleep);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        if (time_to_sleep > 0)
+        {
+            try {
+                this.sleep(time_to_sleep);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -83,15 +97,23 @@ public class Game extends Thread implements Runnable
         }
     }
 
+    private void DrawGameBoard(int width_count, int height_count) {
+        float y_position = -0.9f;
+        for (int index = 0; index < height_count; index++) {
+            float x_position = -0.9f;
+            y_position += 0.3f;
+            for (int jndex = 0; jndex < width_count; jndex++) {
+                x_position += 0.3f;
+                this.renderer.DrawCircle(x_position, y_position, 0.03f, 0xFFFF0000);
+            }
+        }
+    }
+
     private void GameUpdate(double delta) {
         InputEvent input_event = this.input.GetInputEvent();
-        float x = input_event.x;
-        float y = input_event.y;
-        float width  = x + 0.5f;
-        float height = y - 0.5f;
-
         this.renderer.BeginDraw();
-        this.renderer.DrawRect(x, y, width, height, 0xFFFF0000);
+        this.DrawGameBoard(5, 6);
+        this.renderer.DrawPoint(input_event.x, input_event.y, 0xFF00FF00);
         this.renderer.EndDraw();
     }
 }

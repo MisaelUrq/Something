@@ -21,4 +21,14 @@ public class PCRenderer {
             }
         }
     }
+
+    public void DrawCircle(int x, int y, int radius, int color) {
+        if (this.screen.getCanvas() != null) {
+            Graphics graphics = this.screen.getCanvas().getBufferStrategy().getDrawGraphics();
+            if (graphics != null) {
+                graphics.setColor(new Color(color, true));
+                graphics.fillOval(x-radius, y-radius, radius*2, radius*2);
+            }
+        }
+    }
 }

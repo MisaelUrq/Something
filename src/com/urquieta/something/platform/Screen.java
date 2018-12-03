@@ -24,12 +24,19 @@ public class Screen extends PCScreen { // @Class
         super.endDraw();
     }
 
-    public int widthInPixels(float position) {
-        return (int)(((position + 1)*((float)Screen.width - 0.0f)-0.0f)/2);
+    public int XPositionInPixels(float position) {
+        return Math.round((position + 1)*(float)Screen.width/2);
     }
 
-    public int heightInPixels(float position) {
-        return (int)(((position + 1)*((float)Screen.height - 0.0f)-0.0f)/2);
+    public int YPositionInPixels(float position) {
+        return Math.round((position + 1)*(float)Screen.height/2);
+    }
+
+    public int lengthInPixels(float position) {
+        int width_result  = Math.round(position * Screen.width);
+        int height_result = Math.round(position * Screen.height);
+        int result = Math.round((width_result + height_result) / 2);
+        return result;
     }
 
     public void SetSize(int width, int height) {
