@@ -7,9 +7,9 @@ import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.board.Circle;
 
-public class Game extends Thread implements Runnable
+public class Game implements Runnable
 {
-    private boolean   is_running;
+    volatile private boolean   is_running;
     private final int  TARGET_FPS = 30;
     private final long ONE_BILLION = 1000000000;
     private final long TARGET_DELTA = ONE_BILLION / TARGET_FPS;
@@ -18,6 +18,7 @@ public class Game extends Thread implements Runnable
     private Renderer renderer;
     private Input input;
     private GameState game_state;
+    private Thread thread;
 
     public Game()
     {
@@ -25,14 +26,19 @@ public class Game extends Thread implements Runnable
         this.is_running = false;
     }
 
+    public boolean IsOk() {
+        return (this.renderer != null &&
+                this.main_canvas != null &&
+                this.input != null);
+    }
+
     public void startThread()
     {
-        if (this.renderer != null &&
-            this.main_canvas != null &&
-            this.input != null)
+        if (this.IsOk())
         {
             this.is_running = true;
-            this.start();
+            thread = new Thread(this);
+            thread.start();
         }
     }
 
@@ -49,8 +55,8 @@ public class Game extends Thread implements Runnable
     public void run() {
         long   start_time = System.nanoTime();
         double delta = 0.0;
-        int fps = 0;
-        long last_fps_time = 0;
+        int    fps = 0;
+        long   last_fps_time = 0;
 
         this.Initialize();
         while (this.is_running) {
@@ -78,7 +84,7 @@ public class Game extends Thread implements Runnable
         if (time_to_sleep > 0)
         {
             try {
-                this.sleep(time_to_sleep);
+                thread.sleep(time_to_sleep);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -87,10 +93,11 @@ public class Game extends Thread implements Runnable
     }
 
     public void stopThread() {
-        while (this.is_running) {
+        this.is_running = false;
+        while (true) {
             try {
-                this.join();
-                this.is_running = false;
+                thread.join();
+                break;
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -126,6 +133,18 @@ public class Game extends Thread implements Runnable
 
     private void Initialize() {
         game_state = new GameState();
+    }
+
+    public void Pause() {
+        this.stopThread();
+    }
+
+    public void Resume() {
+        this.startThread();
+    }
+
+    public Screen GetScreen() {
+        return this.main_canvas;
     }
 
     private void GameUpdate(double delta) {
