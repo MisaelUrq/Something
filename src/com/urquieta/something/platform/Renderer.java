@@ -8,26 +8,42 @@ import com.urquieta.something.platform.Screen;
 public class Renderer extends PCRenderer { // @Class
     private float point_size = 0.01f;
 
+    // Should this be here? or in the parent class?  That way we just
+    // pass the PixelPoint to the Platform Renderer.
+    private class PixelPoint {
+        public int x, y;
+        public PixelPoint(Renderer r, float x, float y) {
+            this.x = r.screen.XPositionInPixels(x);
+            this.y = r.screen.YPositionInPixels(y);
+        }
+    }
+
     public Renderer(Screen screen) {
         super(screen);
     }
 
     public void DrawRect(float x, float y, float width, float height, int color) {
-        int pixel_x = super.screen.XPositionInPixels(x);
-        int pixel_y = super.screen.YPositionInPixels(-y);
-        int pixel_width = super.screen.XPositionInPixels(width);
-        int pixel_height = super.screen.YPositionInPixels(-height);
-        super.DrawRect(pixel_x,
-                       pixel_y,
-                       pixel_width,
-                       pixel_height, color);
+        PixelPoint pixel_point = new PixelPoint(this, x, -y);
+        PixelPoint distance_point = new PixelPoint(this, width, -height);
+        super.DrawRect(pixel_point.x,
+                       pixel_point.y,
+                       distance_point.x,
+                       distance_point.y, color);
     }
 
     public void DrawCircle(float x, float y, float radius, int color) {
-        int pixel_x = super.screen.XPositionInPixels(x);
-        int pixel_y = super.screen.YPositionInPixels(-y);
+        PixelPoint pixel_point = new PixelPoint(this, x, -y);
         int pixel_redius  = super.screen.lengthInPixels(radius);
-        super.DrawCircle(pixel_x, pixel_y, pixel_redius, color);
+        super.DrawCircle(pixel_point.x, pixel_point.y,
+                         pixel_redius, color);
+    }
+
+    public void DrawLine(float x1, float y1, float x2, float y2, int color) {
+        PixelPoint point_1 = new PixelPoint(this, x1, -y1);
+        PixelPoint point_2 = new PixelPoint(this, x2, -y2);
+        super.DrawLine(point_1.x, point_1.y,
+                       point_2.x, point_2.y,
+                       color);
     }
 
     public void BeginDraw() {

@@ -3,14 +3,14 @@ package com.urquieta.something.platform.pc;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-// import java.awt.event.MouseListener;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.pc.View;
 import com.urquieta.something.platform.Screen;
 
-public class PCInput implements KeyListener, MouseMotionListener {
+public class PCInput implements KeyListener, MouseMotionListener, MouseListener {
     private static final int MAX_KEYS = 256;
     public boolean[] keys; // For now none are used.
     InputEvent input_event;
@@ -57,6 +57,34 @@ public class PCInput implements KeyListener, MouseMotionListener {
     @Override
     public void mouseMoved(MouseEvent event) {
         this.input_event.type = InputEvent.TOUCH_MOVED;
+        this.ComputeMouseCoordinates(event);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent event) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent event) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent event) {
+        this.input_event.type = InputEvent.TOUCH_UP;
+        this.ComputeMouseCoordinates(event);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent event) {
+        this.input_event.type = InputEvent.TOUCH_DOWN;
+        this.ComputeMouseCoordinates(event);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent event) {
+        this.input_event.type = InputEvent.TOUCH_DOWN;
         this.ComputeMouseCoordinates(event);
     }
 

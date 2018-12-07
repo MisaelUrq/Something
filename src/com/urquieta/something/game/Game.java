@@ -4,9 +4,8 @@ import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
+import com.urquieta.something.game.GameState;
 
-// TODO(Misael): @URGENT make the PC version of the clases to see how
-// it will all be handle.
 public class Game extends Thread implements Runnable
 {
     private boolean   is_running;
@@ -17,6 +16,7 @@ public class Game extends Thread implements Runnable
     private Screen main_canvas;
     private Renderer renderer;
     private Input input;
+    private GameState game_state;
 
     public Game()
     {
@@ -51,7 +51,7 @@ public class Game extends Thread implements Runnable
         int fps = 0;
         long last_fps_time = 0;
 
-
+        this.Initialize();
         while (this.is_running) {
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
@@ -98,22 +98,56 @@ public class Game extends Thread implements Runnable
     }
 
     private void DrawGameBoard(int width_count, int height_count) {
-        float y_position = -0.9f;
+        float padding_x = 0.15f;
+        float padding_y = 0.15f;
+        float start_x_position = -((padding_x * (float)(width_count+1)  / 2.0f));
+        float start_y_position =  ((padding_y * (float)(height_count+1) / 2.0f));
+        float y_position = start_y_position;
         for (int index = 0; index < height_count; index++) {
-            float x_position = -0.9f;
-            y_position += 0.3f;
+            float x_position = start_x_position;
+            y_position -= padding_y;
             for (int jndex = 0; jndex < width_count; jndex++) {
-                x_position += 0.3f;
-                this.renderer.DrawCircle(x_position, y_position, 0.03f, 0xFFFF0000);
+                x_position += padding_x;
+                this.renderer.DrawCircle(x_position, y_position, 0.02f, 0xFFAA89A4);
             }
         }
     }
 
+    private void Initialize() {
+        game_state = new GameState();
+    }
+
     private void GameUpdate(double delta) {
-        InputEvent input_event = this.input.GetInputEvent();
+        this.game_state.current_input = this.input.GetInputEvent();
+        InputEvent event = this.game_state.current_input;
+
+        if (event.type == InputEvent.TOUCH_DOWN) {
+            this.game_state.last_input = new InputEvent();
+            this.game_state.last_input.x = event.x;
+            this.game_state.last_input.y = event.y;
+            this.game_state.last_input.type = event.type;
+        }
+
+        if (event.type != InputEvent.TOUCH_DRAGGED) {
+            this.game_state.last_input = new InputEvent();
+            this.game_state.last_input.x = event.x;
+            this.game_state.last_input.y = event.y;
+            this.game_state.last_input.type = event.type;
+       }
+
         this.renderer.BeginDraw();
-        this.DrawGameBoard(5, 6);
-        this.renderer.DrawPoint(input_event.x, input_event.y, 0xFF00FF00);
+        this.DrawGameBoard(5, 5);
+
+        if (game_state.current_input.type == InputEvent.TOUCH_DRAGGED) {
+            this.renderer.DrawLine(game_state.last_input.x, game_state.last_input.y,
+                                   game_state.current_input.x, game_state.current_input.y,
+                                   0xFF0000FF);
+        }
+
+        this.renderer.DrawLine( 0f, 1f, 0f, -1f, 0xFFFF0000);
+        this.renderer.DrawLine(-1f, 0f, 1f,  0f, 0xFFFF0000);
+        // Position of the last input.
+        this.renderer.DrawCircle(game_state.current_input.x, game_state.current_input.y, 0.01f, 0xFF00FF00);
         this.renderer.EndDraw();
     }
 }

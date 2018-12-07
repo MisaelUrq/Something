@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import com.urquieta.something.platform.pc.Context;
 
 public class PCScreen extends Canvas {
+    private static final long serialVersionUID = 1L;
     public static int width  = 300;
     public static int height = 450;
     private Game game;

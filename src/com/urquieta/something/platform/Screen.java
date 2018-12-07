@@ -9,6 +9,7 @@ import com.urquieta.something.platform.pc.PCScreen;// @PC
 import com.urquieta.something.game.Game;
 
 public class Screen extends PCScreen { // @Class
+    private static final long serialVersionUID = 1L;
 
     public Screen(Game game, Context context) {
         super(game, context);
