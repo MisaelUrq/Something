@@ -5,6 +5,7 @@ import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.game.GameState;
+import com.urquieta.something.game.board.Circle;
 
 public class Game extends Thread implements Runnable
 {
@@ -97,18 +98,28 @@ public class Game extends Thread implements Runnable
         }
     }
 
-    private void DrawGameBoard(int width_count, int height_count) {
+    private void DrawGameBoard(int width_count, int height_count, float circles_proportion) {
+        // TODO(Misael]): Find a way to make this dependent on the circle proportion.
         float padding_x = 0.15f;
         float padding_y = 0.15f;
+        // TODO(Misael): On android this gets kind of wrong and it move them a little to the left.
         float start_x_position = -((padding_x * (float)(width_count+1)  / 2.0f));
         float start_y_position =  ((padding_y * (float)(height_count+1) / 2.0f));
         float y_position = start_y_position;
+        float radius = ((circles_proportion / this.main_canvas.GetWidth()) +
+                        (circles_proportion / this.main_canvas.GetHeight())) / 2;
+        int color = 0xFFA090F7;
         for (int index = 0; index < height_count; index++) {
             float x_position = start_x_position;
             y_position -= padding_y;
             for (int jndex = 0; jndex < width_count; jndex++) {
                 x_position += padding_x;
-                this.renderer.DrawCircle(x_position, y_position, 0.02f, 0xFFAA89A4);
+                Circle circle = new Circle(x_position, y_position, radius, color);
+                if (circle.HasCollide(this.game_state.current_input.x,
+                                      this.game_state.current_input.y)) {
+                    circle.SetColor(0xFFFF0000);
+                }
+                circle.Draw(this.renderer);
             }
         }
     }
@@ -136,7 +147,7 @@ public class Game extends Thread implements Runnable
        }
 
         this.renderer.BeginDraw();
-        this.DrawGameBoard(5, 5);
+        this.DrawGameBoard(5, 5, 10);
 
         if (game_state.current_input.type == InputEvent.TOUCH_DRAGGED) {
             this.renderer.DrawLine(game_state.last_input.x, game_state.last_input.y,

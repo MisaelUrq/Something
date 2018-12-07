@@ -7,7 +7,7 @@ SET arg4=%4
 SET arg5=%5
 SET arg6=%6
 
-SET BUILD_FOR_ANDROID=0
+SET BUILD_FOR_ANDROID=1
 SET INSTALL_ON_PHONE=0
 SET RUN_AVD= 0
 SET BUILD_FOR_PC=1
@@ -26,9 +26,12 @@ if %BUILD_FOR_ANDROID% == 1 (
       py -3 switch_build.py "PC" ))
 
 
+SET CODE=com/urquieta/something
+SET SRC=src/%CODE%
+
 if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
-     javac -g -Xdiags:verbose -Xlint:all -d bin src/com/urquieta/something/PCMain.java src/com/urquieta/something/game/*.java src/com/urquieta/something/platform/*.java src/com/urquieta/something/platform/pc/*.java
+     javac -g -Xdiags:verbose -Xlint:all -d bin %SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar com/urquieta/something/*.class com/urquieta/something/game/*.class com/urquieta/something/platform/*.class com/urquieta/something/platform/pc/*.class
+     jar -cvmf ..\MANIFEST.MF Something.jar %CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/Circle.class
      popd ))
