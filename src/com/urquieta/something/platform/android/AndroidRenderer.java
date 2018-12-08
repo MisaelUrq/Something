@@ -27,6 +27,7 @@ public class AndroidRenderer {
             paint.setColor(color);
             float pos_x = x-radius;
             float pos_y = y-radius;
+            radius = 2 * radius;
             RectF rect = new RectF(pos_x, pos_y,
                                    radius+pos_x,
                                    radius+pos_y);

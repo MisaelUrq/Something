@@ -9,7 +9,6 @@ import com.urquieta.something.game.board.Circle;
 
 public class Game implements Runnable
 {
-    volatile private boolean   is_running;
     private final int  TARGET_FPS = 30;
     private final long ONE_BILLION = 1000000000;
     private final long TARGET_DELTA = ONE_BILLION / TARGET_FPS;
@@ -23,7 +22,10 @@ public class Game implements Runnable
     public Game()
     {
         super();
-        this.is_running = false;
+    }
+
+    public Screen GetScreen() {
+        return this.main_canvas;
     }
 
     public boolean IsOk() {
@@ -36,7 +38,10 @@ public class Game implements Runnable
     {
         if (this.IsOk())
         {
-            this.is_running = true;
+            if (this.game_state == null) {
+                this.game_state = new GameState();
+            }
+            this.game_state.SetRunning(true);
             thread = new Thread(this);
             thread.start();
         }
@@ -58,8 +63,8 @@ public class Game implements Runnable
         int    fps = 0;
         long   last_fps_time = 0;
 
-        this.Initialize();
-        while (this.is_running) {
+        while (this.game_state.IsRunning()) {
+            // Compute frame info
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
             start_time = before_time;
@@ -73,6 +78,8 @@ public class Game implements Runnable
                 fps = 0;
             }
 
+            // Update game.
+            // NOTE(Misael Urquieta): Maybe divide this into sections?
             this.GameUpdate(delta);
 
             double after_time = System.nanoTime();
@@ -93,7 +100,7 @@ public class Game implements Runnable
     }
 
     public void stopThread() {
-        this.is_running = false;
+        this.game_state.SetRunning(false);
         while (true) {
             try {
                 thread.join();
@@ -103,6 +110,14 @@ public class Game implements Runnable
                 e.printStackTrace();
             }
         }
+    }
+
+    public void Pause() {
+        this.stopThread();
+    }
+
+    public void Resume() {
+        this.startThread();
     }
 
     private void DrawGameBoard(int width_count, int height_count, float circles_proportion) {
@@ -121,33 +136,20 @@ public class Game implements Runnable
             y_position -= padding_y;
             for (int jndex = 0; jndex < width_count; jndex++) {
                 x_position += padding_x;
-                Circle circle = new Circle(x_position, y_position, radius, color);
+                Circle circle = new Circle(this.renderer, x_position, y_position, radius, color);
                 if (circle.HasCollide(this.game_state.current_input.x,
                                       this.game_state.current_input.y)) {
                     circle.SetColor(0xFFFF0000);
+                    circle.DEBUG_DrawPostionLocation();
                 }
-                circle.Draw(this.renderer);
+                circle.Draw();
+                circle.DEBUG_DrawRectOverArea();
             }
         }
     }
 
-    private void Initialize() {
-        game_state = new GameState();
-    }
-
-    public void Pause() {
-        this.stopThread();
-    }
-
-    public void Resume() {
-        this.startThread();
-    }
-
-    public Screen GetScreen() {
-        return this.main_canvas;
-    }
-
     private void GameUpdate(double delta) {
+        // TODO(Misael Urquieta): Clean up this, I don't think this should be like this.
         this.game_state.current_input = this.input.GetInputEvent();
         InputEvent event = this.game_state.current_input;
 

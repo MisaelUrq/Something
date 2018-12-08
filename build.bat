@@ -31,7 +31,7 @@ SET SRC=src/%CODE%
 
 if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
-     javac -g -Xdiags:verbose -Xlint:all -d bin %SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java
+     javac -g -Xdiags:verbose -Xlint:all -d bin %SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar %CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/Circle.class
+     jar -cvmf ..\MANIFEST.MF Something.jar %CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class
      popd ))

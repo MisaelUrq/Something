@@ -33,10 +33,14 @@ public class Screen extends PCScreen { // @Class
         return Math.round((position + 1)*(float)Screen.height/2);
     }
 
-    public int lengthInPixels(float position) {
-        int width_result  = Math.round(position * Screen.width);
-        int height_result = Math.round(position * Screen.height);
-        int result = Math.round((width_result + height_result) / 2);
+    public int lengthInPixels(float length) {
+        int width_result  = Math.round(length * Screen.width);
+        int height_result = Math.round(length * Screen.height);
+
+        // NOTE(Misael Urquieta): This is 4, because the length if
+        // given in a state from 0 - 1, and the screen length is from
+        // -1 to 1.
+        int result = Math.round((width_result + height_result) / 4);
         return result;
     }
 

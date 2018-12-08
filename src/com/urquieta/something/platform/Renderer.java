@@ -8,8 +8,8 @@ import com.urquieta.something.platform.Screen;
 public class Renderer extends PCRenderer { // @Class
     private float point_size = 0.01f;
 
-    // Should this be here? or in the parent class?  That way we just
-    // pass the PixelPoint to the Platform Renderer.
+    // NOTE(Misael): Should this be here? or in the parent class?
+    // NOTE(Misael): We should pass only the screen, not the renderer.
     private class PixelPoint {
         public int x, y;
         public PixelPoint(Renderer r, float x, float y) {
@@ -33,9 +33,9 @@ public class Renderer extends PCRenderer { // @Class
 
     public void DrawCircle(float x, float y, float radius, int color) {
         PixelPoint pixel_point = new PixelPoint(this, x, -y);
-        int pixel_redius  = super.screen.lengthInPixels(radius);
+        int pixel_radius  = super.screen.lengthInPixels(radius);
         super.DrawCircle(pixel_point.x, pixel_point.y,
-                         pixel_redius, color);
+                         pixel_radius, color);
     }
 
     public void DrawLine(float x1, float y1, float x2, float y2, int color) {
