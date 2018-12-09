@@ -20,6 +20,10 @@ public abstract class GameObject {
         this.DEBUG_area_position_2 = new Vec2(0, 0);
     }
 
+    public final Vec2 GetPosition() {
+        return this.position;
+    }
+
     public abstract void Draw();
 
     public void DEBUG_DrawPostionLocation() {

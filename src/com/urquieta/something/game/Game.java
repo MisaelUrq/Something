@@ -135,33 +135,24 @@ public class Game implements Runnable
         this.game_state.current_input = this.input.GetInputEvent();
         InputEvent event = this.game_state.current_input;
 
-        if (event.type == InputEvent.TOUCH_DOWN) {
-            this.game_state.last_input = new InputEvent();
-            this.game_state.last_input.x = event.x;
-            this.game_state.last_input.y = event.y;
-            this.game_state.last_input.type = event.type;
+        switch (event.type) {
+        case InputEvent.TOUCH_DRAGGED: {
+            this.game_board.PlayerDragged(true);
+        } break;
+        default: {
+            // NOTE(Misael): Do nothing for now...
+            this.game_board.PlayerDragged(false);
         }
-
-        if (event.type != InputEvent.TOUCH_DRAGGED) {
-            this.game_state.last_input = new InputEvent();
-            this.game_state.last_input.x = event.x;
-            this.game_state.last_input.y = event.y;
-            this.game_state.last_input.type = event.type;
         }
 
         this.game_board.UpdateCursor(new Vec2(this.game_state.current_input.x,
                                               this.game_state.current_input.y));
 
+        this.game_board.Update();
+
+        
         this.renderer.BeginDraw();
         this.game_board.Draw();
-
-        this.game_board.DEBUG_DrawPostionLocation();
-
-        if (game_state.current_input.type == InputEvent.TOUCH_DRAGGED) {
-            this.renderer.DrawLine(game_state.last_input.x, game_state.last_input.y,
-                                   game_state.current_input.x, game_state.current_input.y,
-                                   0xFF0000FF);
-        }
 
         this.renderer.DrawCircle(game_state.current_input.x, game_state.current_input.y, 0.01f, 0xFF00FF00);
         this.renderer.EndDraw();

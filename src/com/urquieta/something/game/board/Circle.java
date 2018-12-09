@@ -24,8 +24,16 @@ public class Circle extends GameObject {
         this(renderer, new Vec2(x, y), radius, color);
     }
 
+    public void SetColor(byte r, byte g, byte b, byte a) {
+        this.color = (a << 24) | (r << 16) | (b << 8) | a;
+    }
+
     public void SetColor(int color) {
         this.color = color;
+    }
+
+    public int GetColor() {
+        return this.color;
     }
 
     public void Draw() {
@@ -36,7 +44,7 @@ public class Circle extends GameObject {
     public boolean HasCollide(Vec2 position) {
         return HasCollide(position.x, position.y);
     }
-
+       
     public boolean HasCollide(float x, float y) {
         if ((x > (this.position.x - radius) && x < (this.position.x + radius)) &&
             (y > (this.position.y - radius) && y < (this.position.y + radius))) {

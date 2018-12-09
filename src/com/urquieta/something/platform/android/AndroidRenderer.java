@@ -35,6 +35,19 @@ public class AndroidRenderer {
         }
     }
 
+    public void DrawLine(int x1, int y1, int x2, int y2,
+                         int thickness, int color) {
+        if (this.screen.getCanvas() != null) {
+            Paint paint = new Paint();
+            float width = paint.getStrokeWidth();
+            paint.setColor(color);
+            paint.setStrokeWidth(thickness);
+            this.screen.getCanvas().drawLine(x1, y1, x2, y2, paint);
+            paint.setStrokeWidth(width);
+
+        }
+    }
+
     public void DrawLine(int x1, int y1, int x2, int y2, int color) {
         if (this.screen.getCanvas() != null) {
             Paint paint = new Paint();

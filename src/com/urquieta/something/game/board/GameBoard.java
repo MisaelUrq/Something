@@ -8,9 +8,9 @@ import com.urquieta.something.game.util.Vec2;
 // everywere
 import com.urquieta.something.platform.Renderer;
 import java.util.Random;
+import java.util.ArrayList;
 
 public class GameBoard extends GameObject {
-
     private Circle[] circles_array;
     private int width;
     private int height;
@@ -19,6 +19,8 @@ public class GameBoard extends GameObject {
     private Vec2 cursor_position;
     private Random random;
     private int[] color_palette;
+    private boolean player_dragged;
+    private ArrayList<Vec2> circles_conected_positions;
 
     public GameBoard(Renderer r, int width, int height) {
         super(r, new Vec2(0, 0));
@@ -28,6 +30,8 @@ public class GameBoard extends GameObject {
         this.random = new Random();
         this.cursor_position = new Vec2(0, 0);
         this.color_palette = new int[5];
+        this.player_dragged = false;
+        this.circles_conected_positions = new ArrayList<Vec2>();
         for (int index = 0; index < 5; index++) {
             this.color_palette[index] = ((0xFF << 24) |
                                          ((byte)(random.nextInt() % 0xFF) << 16) |
@@ -63,6 +67,27 @@ public class GameBoard extends GameObject {
         this.cursor_position = new_position;
     }
 
+    public void PlayerDragged(boolean new_status) {
+        this.player_dragged = new_status;
+    }
+
+    // TODO(Misael Urquieta): Make this so only the circles that are
+    // next to eachother can actually be conected, and of the same
+    // color.
+    public void Update() {
+        if (this.player_dragged) {
+            for (Circle circle: this.circles_array) {
+                if (circle.HasCollide(this.cursor_position) &&
+                    (this.circles_conected_positions.contains(circle.GetPosition()) == false)) {
+                    this.circles_conected_positions.add(circle.GetPosition());
+                }
+            }
+        }
+        else {
+            this.circles_conected_positions.clear();
+        }
+    }
+
     public void Draw() {
         for (Circle circle : this.circles_array) {
             if (circle.HasCollide(this.cursor_position)) {
@@ -70,6 +95,16 @@ public class GameBoard extends GameObject {
             }
 
             circle.Draw();
+        }
+
+        if (this.circles_conected_positions.isEmpty() == false) {
+            Vec2 current_position = this.cursor_position;
+            for (int index = this.circles_conected_positions.size()-1;
+                 index >= 0; index--) {
+                Vec2 position = this.circles_conected_positions.get(index);
+                this.r.DrawLine(current_position, position, 0.02f, 0xFFFF00FF);
+                current_position = position;
+            }
         }
     }
 

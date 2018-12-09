@@ -4,6 +4,7 @@ package com.urquieta.something.platform;
 import com.urquieta.something.platform.pc.PCRenderer;// @PC
 
 import com.urquieta.something.platform.Screen;
+import com.urquieta.something.game.util.Vec2;
 
 public class Renderer extends PCRenderer { // @Class
     private float point_size = 0.01f;
@@ -36,6 +37,26 @@ public class Renderer extends PCRenderer { // @Class
         int pixel_radius  = super.screen.lengthInPixels(radius);
         super.DrawCircle(pixel_point.x, pixel_point.y,
                          pixel_radius, color);
+    }
+
+    public void DrawLine(Vec2 p1, Vec2 p2, float thickness, int color) {
+        PixelPoint point_1 = new PixelPoint(this, p1.x, -p1.y);
+        PixelPoint point_2 = new PixelPoint(this, p2.x, -p2.y);
+        int pixel_thickness = super.screen.lengthInPixels(thickness);
+        super.DrawLine(point_1.x, point_1.y,
+                       point_2.x, point_2.y,
+                       pixel_thickness,
+                       color);
+    }
+
+    public void DrawLine(float x1, float y1, float x2, float y2, float thickness, int color) {
+        PixelPoint point_1 = new PixelPoint(this, x1, -y1);
+        PixelPoint point_2 = new PixelPoint(this, x2, -y2);
+        int pixel_thickness = super.screen.lengthInPixels(thickness);
+        super.DrawLine(point_1.x, point_1.y,
+                       point_2.x, point_2.y,
+                       pixel_thickness,
+                       color);
     }
 
     public void DrawLine(float x1, float y1, float x2, float y2, int color) {

@@ -4,6 +4,11 @@ import com.urquieta.something.platform.Screen;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+import java.awt.Stroke;
+import java.awt.geom.Line2D;
+
 
 public class PCRenderer {
     protected Screen screen;
@@ -30,11 +35,24 @@ public class PCRenderer {
         }
     }
 
+    public void DrawLine(int x1, int y1, int x2, int y2, int thickness, int color) {
+        if (this.graphics != null) {
+            Graphics2D graphics_2d = (Graphics2D)graphics;
+            graphics_2d.setColor(new Color(color, true));
+            Stroke stroke = graphics_2d.getStroke();
+            graphics_2d.setStroke(new BasicStroke(thickness));
+            graphics_2d.draw(new Line2D.Float(x1, y1,
+                                              x2, y2));
+            graphics_2d.setStroke(stroke);
+        }
+    }
+
     public void DrawLine(int x1, int y1, int x2, int y2, int color) {
         if (this.graphics != null) {
-            this.graphics.setColor(new Color(color, true));
-            this.graphics.drawLine(x1, y1,
-                                   x2, y2);
+            Graphics2D graphics_2d = (Graphics2D)graphics;
+            graphics_2d.setColor(new Color(color, true));
+            graphics_2d.draw(new Line2D.Float(x1, y1,
+                                              x2, y2));
         }
     }
 }
