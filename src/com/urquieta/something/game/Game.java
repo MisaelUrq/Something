@@ -130,8 +130,13 @@ public class Game implements Runnable
         this.game_board = new GameBoard(this.renderer, 10, 10);
     }
 
+    // TODO(Misael Urquieta): In the android version there's a bug
+    // where it sometimes crashes when after you conect points, as of
+    // now it appears to happen at random times, figure out what's the
+    // cause.
     private void GameUpdate(double delta) {
         // TODO(Misael Urquieta): Clean up this, I don't think this should be like this.
+        this.renderer.BeginDraw();
         this.game_state.current_input = this.input.GetInputEvent();
         InputEvent event = this.game_state.current_input;
 
@@ -140,7 +145,6 @@ public class Game implements Runnable
             this.game_board.PlayerDragged(true);
         } break;
         default: {
-            // NOTE(Misael): Do nothing for now...
             this.game_board.PlayerDragged(false);
         }
         }
@@ -149,11 +153,7 @@ public class Game implements Runnable
                                               this.game_state.current_input.y));
 
         this.game_board.Update();
-
-        
-        this.renderer.BeginDraw();
         this.game_board.Draw();
-
         this.renderer.DrawCircle(game_state.current_input.x, game_state.current_input.y, 0.01f, 0xFF00FF00);
         this.renderer.EndDraw();
     }

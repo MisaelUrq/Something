@@ -24,6 +24,10 @@ public abstract class GameObject {
         return this.position;
     }
 
+    public void SetPosition(Vec2 position) {
+        this.position = position;
+    }
+    
     public abstract void Draw();
 
     public void DEBUG_DrawPostionLocation() {
