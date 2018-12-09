@@ -33,6 +33,10 @@ public class Circle extends GameObject {
                                   this.radius, this.color);
     }
 
+    public boolean HasCollide(Vec2 position) {
+        return HasCollide(position.x, position.y);
+    }
+
     public boolean HasCollide(float x, float y) {
         if ((x > (this.position.x - radius) && x < (this.position.x + radius)) &&
             (y > (this.position.y - radius) && y < (this.position.y + radius))) {

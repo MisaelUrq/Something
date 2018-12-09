@@ -6,6 +6,9 @@ import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.board.Circle;
+import com.urquieta.something.game.board.GameBoard;
+
+import com.urquieta.something.game.util.Vec2;
 
 public class Game implements Runnable
 {
@@ -18,6 +21,8 @@ public class Game implements Runnable
     private Input input;
     private GameState game_state;
     private Thread thread;
+
+    private GameBoard game_board;
 
     public Game()
     {
@@ -63,6 +68,7 @@ public class Game implements Runnable
         int    fps = 0;
         long   last_fps_time = 0;
 
+        Initalize();
         while (this.game_state.IsRunning()) {
             // Compute frame info
             long before_time   = System.nanoTime();
@@ -120,32 +126,8 @@ public class Game implements Runnable
         this.startThread();
     }
 
-    private void DrawGameBoard(int width_count, int height_count, float circles_proportion) {
-        // TODO(Misael]): Find a way to make this dependent on the circle proportion.
-        float padding_x = 0.15f;
-        float padding_y = 0.15f;
-        // TODO(Misael): On android this gets kind of wrong and it move them a little to the left.
-        float start_x_position = -((padding_x * (float)(width_count+1)  / 2.0f));
-        float start_y_position =  ((padding_y * (float)(height_count+1) / 2.0f));
-        float y_position = start_y_position;
-        float radius = ((circles_proportion / this.main_canvas.GetWidth()) +
-                        (circles_proportion / this.main_canvas.GetHeight())) / 2;
-        int color = 0xFFA090F7;
-        for (int index = 0; index < height_count; index++) {
-            float x_position = start_x_position;
-            y_position -= padding_y;
-            for (int jndex = 0; jndex < width_count; jndex++) {
-                x_position += padding_x;
-                Circle circle = new Circle(this.renderer, x_position, y_position, radius, color);
-                if (circle.HasCollide(this.game_state.current_input.x,
-                                      this.game_state.current_input.y)) {
-                    circle.SetColor(0xFFFF0000);
-                    circle.DEBUG_DrawPostionLocation();
-                }
-                circle.Draw();
-                circle.DEBUG_DrawRectOverArea();
-            }
-        }
+    private void Initalize() {
+        this.game_board = new GameBoard(this.renderer, 10, 10);
     }
 
     private void GameUpdate(double delta) {
@@ -165,10 +147,15 @@ public class Game implements Runnable
             this.game_state.last_input.x = event.x;
             this.game_state.last_input.y = event.y;
             this.game_state.last_input.type = event.type;
-       }
+        }
+
+        this.game_board.UpdateCursor(new Vec2(this.game_state.current_input.x,
+                                              this.game_state.current_input.y));
 
         this.renderer.BeginDraw();
-        this.DrawGameBoard(5, 5, 10);
+        this.game_board.Draw();
+
+        this.game_board.DEBUG_DrawPostionLocation();
 
         if (game_state.current_input.type == InputEvent.TOUCH_DRAGGED) {
             this.renderer.DrawLine(game_state.last_input.x, game_state.last_input.y,
@@ -176,9 +163,6 @@ public class Game implements Runnable
                                    0xFF0000FF);
         }
 
-        this.renderer.DrawLine( 0f, 1f, 0f, -1f, 0xFFFF0000);
-        this.renderer.DrawLine(-1f, 0f, 1f,  0f, 0xFFFF0000);
-        // Position of the last input.
         this.renderer.DrawCircle(game_state.current_input.x, game_state.current_input.y, 0.01f, 0xFF00FF00);
         this.renderer.EndDraw();
     }

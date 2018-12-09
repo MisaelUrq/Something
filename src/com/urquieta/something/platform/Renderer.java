@@ -60,4 +60,8 @@ public class Renderer extends PCRenderer { // @Class
     public void EndDraw() {
         super.screen.endDraw();
     }
+
+    public final Screen GetScreen() {
+        return this.screen;
+    }
 }
