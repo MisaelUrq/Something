@@ -84,15 +84,18 @@ public class GameBoard extends GameObject {
                 this.player_move_init = DidPlayerMakeMoveOnCircles(this.objects_array, this.objects_connected);
             }
             else {
-                ConnectPlayerDots(this.objects_array, this.objects_connected);
+                // NOTE(Misael): If true then we make a square of some sort.
+                if (ConnectPlayerDots(this.objects_array, this.objects_connected)) {
+                    int color = this.objects_connected.get(0).GetColor();
+                    this.objects_connected.clear();
+                    ClearObjectsOfColor(this.objects_array, color);
+                }
             }
         }
         else {
             if (objects_connected.size() > 1) {
                 for (GameBoardObject object: this.objects_connected) {
-                    Vec2 position = GetIndexPositionFromScreenPosition(object.GetPosition());
-                    int index = VecToIndex(position);
-                    this.objects_array[index] = new GameBoardObject(this.r, object.GetPosition());
+                    DeleteObjectFromArray(this.objects_array, object);
                 }
             }
             this.objects_connected.clear();
@@ -132,6 +135,20 @@ public class GameBoard extends GameObject {
                 array[x] = object;
             }
         }
+    }
+
+    private void ClearObjectsOfColor(GameBoardObject[] array, int color) {
+        for (GameBoardObject object: array) {
+            if (object.GetColor() == color) {
+                DeleteObjectFromArray(array, object);
+            }
+        }
+    }
+
+    private void DeleteObjectFromArray(GameBoardObject[] array, GameBoardObject object) {
+        Vec2 position = GetIndexPositionFromScreenPosition(object.GetPosition());
+        int index = VecToIndex(position);
+        array[index] = new GameBoardObject(this.r, object.GetPosition());
     }
 
     private void UpdateObjectsArray(GameBoardObject[] array) {
@@ -230,7 +247,6 @@ public class GameBoard extends GameObject {
         }
     }
 
-
     private boolean DidPlayerMakeMoveOnCircles(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
         for (GameBoardObject object: array) {
             if (object instanceof Circle) {
@@ -245,18 +261,25 @@ public class GameBoard extends GameObject {
         return false;
     }
 
-    private void ConnectPlayerDots(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
-        Circle last_circle_conected = (Circle)list.get(list.size()-1);
+    private boolean ConnectPlayerDots(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
+        int list_size = list.size();
+        Circle last_circle_conected = (Circle)list.get(list_size-1);
         int color = ((Circle)list.get(0)).GetColor();
         Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
         Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
         for (Circle c: circles_around_position) {
-            if (c.HasCollide(this.cursor_position) &&
-                (color == c.GetColor()) &&
-                (this.objects_connected.contains(c) == false)) {
-                this.objects_connected.add(c);
-                return;
+            if(c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+                int index = list.indexOf(c);
+                if (index == -1) {
+                    list.add(c);
+                }
+                else if (index < list_size-3) {
+                    list.add(c);
+                    return true;
+                }
+                break;
             }
         }
+        return false;
     }
 }

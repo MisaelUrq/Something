@@ -10,18 +10,32 @@ public class GameBoardObject extends GameObject {
     protected boolean can_be_used;
     protected boolean can_fall;
     private   Vec2 position_to_go;
+    protected int color;
 
     public GameBoardObject(Renderer r, Vec2 position) {
-        this(r, position, false, true, false);
+        this(r, position, 0, false, true, false);
     }
 
-    public GameBoardObject(Renderer r, Vec2 position,
+    public GameBoardObject(Renderer r, Vec2 position, int color,
                            boolean touchable, boolean can_be_used, boolean can_fall) {
         super(r, position);
         this.is_touchable = touchable;
         this.can_be_used = can_be_used;
         this.can_fall = can_fall;
         this.position_to_go = position;
+        this.color = color;
+    }
+
+    public void SetColor(byte r, byte g, byte b, byte a) {
+        this.color = (a << 24) | (r << 16) | (b << 8) | a;
+    }
+
+    public void SetColor(int color) {
+        this.color = color;
+    }
+
+    public int GetColor() {
+        return this.color;
     }
 
     public boolean CanFall() {
