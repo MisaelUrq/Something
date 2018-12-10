@@ -15,7 +15,7 @@ public class GameBoard extends GameObject {
     private GameBoardObject[] objects_array;
     private int width;
     private int height;
-    private final float objects_proportion = 10;
+    private final float objects_proportion = 12.5f;
     private Renderer r;
     private Vec2 cursor_position;
     private Random random;
@@ -79,7 +79,7 @@ public class GameBoard extends GameObject {
     }
 
     public void Update(double delta) {
-        if (this.player_dragged) {
+        if (this.player_dragged && this.is_update_done) {
             if (this.player_move_init == false) {
                 this.player_move_init = DidPlayerMakeMoveOnCircles(this.objects_array, this.objects_connected);
             }
@@ -100,15 +100,12 @@ public class GameBoard extends GameObject {
         }
 
         UpdateObjectsArray(this.objects_array);
-        if (this.is_update_done) {
-            CreateNewObjects(this.objects_array);
-        }
+        CreateNewObjects(this.objects_array);
         UpdateObjectPositions(delta, this.objects_array);
     }
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
-        int speed = 5;
-        float position_delta = (float)delta * (this.object_padding / speed);
+        float position_delta = (float)delta * (this.object_padding / 4);
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.GetPosition().Equals(object.GetPositionToGo()) == false) {
@@ -122,9 +119,6 @@ public class GameBoard extends GameObject {
         }
     }
 
-    // TODO(Misael Urquieta): Bug found, sometimes the position of
-    // the circle will not be calculated correctly and it will be
-    // put a little down than normal.
     private void CreateNewObjects(GameBoardObject[] array) {
         for (int x = 0; x < this.width; x++) {
             if (array[x].CanSpaceBeUsed()) {
@@ -153,6 +147,7 @@ public class GameBoard extends GameObject {
                             array[jndex] = Temp;
                             array[index].PositionToMove(array[jndex].GetPosition());
                             array[jndex].SetPosition(array[index].GetPosition());
+                            array[jndex].PositionToMove(array[index].GetPosition());
                             break;
                         }
                     }
