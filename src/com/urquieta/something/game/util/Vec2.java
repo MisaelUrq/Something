@@ -13,16 +13,22 @@ public class Vec2 {
         return new Vec2(this.x + other.x, this.y + other.y);
     }
 
-    public Vec2 Add(float number) {
-        return new Vec2(this.x + number, this.y + number);
+    public Vec2 Add(float x, float y) {
+        return new Vec2(this.x + x, this.y + y);
     }
 
-    public Vec2 Substract(float number) {
-        return this.Add(-number);
+    public Vec2 Substract(float x, float y) {
+        return this.Add(-x, -y);
     }
 
-    public Vec2 Move(float number) {
-        return new Vec2(this.x - number, this.y + number);
+    public boolean Equals(Vec2 B) {
+        float compare = 0.001f;
+        if (Math.abs(this.x - B.x) < compare) {
+            if (Math.abs(this.y - B.y) < compare) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String toString() {

@@ -152,7 +152,7 @@ public class Game implements Runnable
         this.game_board.UpdateCursor(new Vec2(this.game_state.current_input.x,
                                               this.game_state.current_input.y));
 
-        this.game_board.Update();
+        this.game_board.Update(delta);
         this.game_board.Draw();
         this.renderer.DrawCircle(game_state.current_input.x, game_state.current_input.y, 0.01f, 0xFF00FF00);
         this.renderer.EndDraw();

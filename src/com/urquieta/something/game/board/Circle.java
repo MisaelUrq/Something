@@ -8,16 +8,12 @@ public class Circle extends GameBoardObject {
     private float radius;
     private int color;
 
-    // TODO(Misael Urquieta): In the game_state make a thing to make
-    // thing depending if we are in realease of debug.
     public Circle(Renderer renderer, Vec2 position, float radius, int color) {
-        super(renderer, position);
+        super(renderer, position, true, false, true);
         this.radius  = radius;
         this.color   = color;
-        // TODO(Misael Urquieta): Make the move better, I think we
-        // need to add the screen length to the move.
-        this.DEBUG_area_position_1 = this.position.Move(radius);
-        this.DEBUG_area_position_2 = this.position.Move(-radius);
+        this.DEBUG_area_position_1 = this.position.Add(-radius, radius);
+        this.DEBUG_area_position_2 = this.position.Add(radius, -radius);
     }
 
     public Circle(Renderer renderer, float x, float y, float radius, int color) {
@@ -43,10 +39,6 @@ public class Circle extends GameBoardObject {
     public void Draw() {
         super.renderer.DrawCircle(this.position.x, this.position.y,
                                   this.radius, this.color);
-    }
-
-    public void Move(Vec2 vector) {
-        super.position = super.position.Add(vector);
     }
 
     public boolean HasCollide(Vec2 position) {
