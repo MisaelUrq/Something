@@ -13,6 +13,11 @@ public class Renderer extends PCRenderer { // @Class
     // NOTE(Misael): We should pass only the screen, not the renderer.
     private class PixelPoint {
         public int x, y;
+
+        public PixelPoint(Renderer r, Vec2 position) {
+            this(r, position.x, -position.y);
+        }
+
         public PixelPoint(Renderer r, float x, float y) {
             this.x = r.screen.XPositionInPixels(x);
             this.y = r.screen.YPositionInPixels(y);
@@ -21,6 +26,11 @@ public class Renderer extends PCRenderer { // @Class
 
     public Renderer(Screen screen) {
         super(screen);
+    }
+
+    public void DrawText(String str, Vec2 position, int color) {
+        PixelPoint pixel_point = new PixelPoint(this, position);
+        super.DrawText(str, pixel_point.x, pixel_point.y, color);
     }
 
     public void DrawRect(float x, float y, float width, float height, int color) {

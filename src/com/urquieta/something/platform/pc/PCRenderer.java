@@ -8,16 +8,25 @@ import java.awt.Graphics2D;
 import java.awt.BasicStroke;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
-
+import java.awt.Font;
 
 public class PCRenderer {
     protected Screen screen;
     private Graphics graphics;
+    private Font font;
 
     public PCRenderer(Screen screen) {
         this.screen = screen;
         if (this.screen.getCanvas() != null) {
             graphics = this.screen.getCanvas().getBufferStrategy().getDrawGraphics();
+            this.font = new Font(Font.SANS_SERIF, 0, 8);
+        }
+    }
+
+    public void DrawText(String str, int x, int y, int color) {
+        if (this.graphics != null) {
+            this.graphics.setColor(new Color(color, true));
+            this.graphics.drawString(str, x, y);
         }
     }
 

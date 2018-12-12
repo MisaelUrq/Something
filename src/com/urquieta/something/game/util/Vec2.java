@@ -22,7 +22,7 @@ public class Vec2 {
     }
 
     public boolean Equals(Vec2 B) {
-        float compare = 0.001f;
+        float compare = 0.00001f;
         if (Math.abs(this.x - B.x) < compare) {
             if (Math.abs(this.y - B.y) < compare) {
                 return true;

@@ -2,6 +2,7 @@ package com.urquieta.something.platform.android;
 
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Canvas;
 
 import com.urquieta.something.platform.Screen;
 
@@ -10,6 +11,14 @@ public class AndroidRenderer {
 
     public AndroidRenderer(Screen screen) {
         this.screen = screen;
+    }
+
+    public void DrawText(String str, int x, int y, int color) {
+        if (this.screen.getCanvas() != null) {
+            Paint paint = new Paint();
+            paint.setColor(color);
+            this.screen.getCanvas().drawText(str, x, y, paint);
+        }
     }
 
     public void DrawRect(int x, int y, int width, int height, int color) {

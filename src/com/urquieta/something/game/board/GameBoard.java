@@ -78,34 +78,50 @@ public class GameBoard extends GameObject {
         this.player_dragged = new_status;
     }
 
+    private boolean player_connected_color = false;
+    @Override
     public void Update(double delta) {
         if (this.player_dragged && this.is_update_done) {
             if (this.player_move_init == false) {
                 this.player_move_init = DidPlayerMakeMoveOnCircles(this.objects_array, this.objects_connected);
             }
-            else {
-                // NOTE(Misael): If true then we make a square of some sort.
-                if (ConnectPlayerDots(this.objects_array, this.objects_connected)) {
-                    int color = this.objects_connected.get(0).GetColor();
-                    this.objects_connected.clear();
-                    ClearObjectsOfColor(this.objects_array, color);
-                }
+            if (!this.player_connected_color) {
+                this.player_connected_color = ConnectPlayerDots(this.objects_array, this.objects_connected);
+            }
+            boolean is_rewind = DidPlayerRewind(this.objects_array, this.objects_connected);
+            if (this.player_connected_color && is_rewind) {
+                this.player_connected_color = false;
             }
         }
         else {
             if (objects_connected.size() > 1) {
-                for (GameBoardObject object: this.objects_connected) {
-                    DeleteObjectFromArray(this.objects_array, object);
+
+                if (player_connected_color) {
+                    int color = this.objects_connected.get(0).GetColor();
+                    this.objects_connected.clear();
+                    ClearObjectsOfColor(this.objects_array, color);
+                    this.player_connected_color = false;
+                }
+                else {
+                    for (GameBoardObject object: this.objects_connected) {
+                        DeleteObjectFromArray(this.objects_array, object);
+                    }
                 }
             }
             this.objects_connected.clear();
             this.player_move_init = false;
         }
 
+        this.time_pass += delta;
         UpdateObjectsArray(this.objects_array);
-        CreateNewObjects(this.objects_array);
+        if (time_pass > 5) {
+            CreateNewObjects(this.objects_array);
+            this.time_pass = 0;
+        }
         UpdateObjectPositions(delta, this.objects_array);
     }
+
+    private double time_pass = 0;
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
         float position_delta = (float)delta * (this.object_padding / 4);
@@ -115,7 +131,10 @@ public class GameBoard extends GameObject {
                 this.is_update_done = false;
                 Vec2 to_move = new Vec2(0, -position_delta);
                 object.Move(to_move);
-                if (object.GetPosition().y < object.GetPositionToGo().y) {
+                float y_current = object.GetPosition().y;
+                float y_dest = object.GetPositionToGo().y;
+                if (y_current < y_dest) {
+                    object.InitAnimation();
                     object.SetPosition(object.GetPositionToGo());
                 }
             }
@@ -159,12 +178,7 @@ public class GameBoard extends GameObject {
                     for (int j = y-1; j >= 0; j--) {
                         int jndex = j*this.width+x;
                         if (array[jndex].CanSpaceBeUsed() == false) {
-                            GameBoardObject Temp = array[index];
-                            array[index] = array[jndex];
-                            array[jndex] = Temp;
-                            array[index].PositionToMove(array[jndex].GetPosition());
-                            array[jndex].SetPosition(array[index].GetPosition());
-                            array[jndex].PositionToMove(array[index].GetPosition());
+                            SwapArrayGameObjectsWithUpdatePosition(array, index, jndex);
                             break;
                         }
                     }
@@ -173,12 +187,14 @@ public class GameBoard extends GameObject {
         }
     }
 
-    private void SwapGameObjects(GameBoardObject A, GameBoardObject B) {
-        GameBoardObject Temp = A;
-        A = B;
-        B = Temp;
-        A.PositionToMove(B.GetPosition());
-        B.SetPosition(A.GetPosition());
+    private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
+                                                        int a, int b) {
+        GameBoardObject Temp = array[a];
+        array[a] = array[b];
+        array[b] = Temp;
+        array[a].PositionToMove(array[b].GetPosition());
+        array[b].SetPosition(array[a].GetPosition());
+        array[b].PositionToMove(array[a].GetPosition());
     }
 
     private int VecToIndex(Vec2 position) {
@@ -256,6 +272,25 @@ public class GameBoard extends GameObject {
                     list.add(circle);
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean DidPlayerRewind(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
+        int list_size = list.size();
+        Circle last_circle_conected = (Circle)list.get(list_size-1);
+        int color = ((Circle)list.get(0)).GetColor();
+        Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
+        Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
+        for (Circle c: circles_around_position) {
+            if(c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+                int index = list.indexOf(c);
+                if (list_size > 1 && index == list_size-2) {
+                    list.remove(list_size-1);
+                    return true;
+                }
+                break;
             }
         }
         return false;

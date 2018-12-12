@@ -33,22 +33,21 @@ public class AndroidInput implements OnTouchListener {
                 break;
             }
 
-            input_event.x =  (((event.getX() / v.getWidth())  * 2) - 1.0f);
-            input_event.y = -(((event.getY() / v.getHeight()) * 2) - 1.0f);
-            System.out.println("DEBUG: ["+input_event.x+", "+input_event.y+"]");
+            input_event.cursor_position.x =  (((event.getX() / v.getWidth())  * 2) - 1.0f);
+            input_event.cursor_position.y = -(((event.getY() / v.getHeight()) * 2) - 1.0f);
             return true;
         }
     }
 
     public float getTouchX() {
         synchronized(this) {
-            return this.input_event.x;
+            return this.input_event.cursor_position.x;
         }
     }
 
     public float getTouchY() {
         synchronized(this) {
-            return this.input_event.y;
+            return this.input_event.cursor_position.y;
         }
     }
 

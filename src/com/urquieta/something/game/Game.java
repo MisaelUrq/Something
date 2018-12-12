@@ -61,6 +61,8 @@ public class Game implements Runnable
         this.input = input;
     }
 
+    private int average_fps = 0;
+
     @Override
     public void run() {
         long   start_time = System.nanoTime();
@@ -70,7 +72,6 @@ public class Game implements Runnable
 
         Initalize();
         while (this.game_state.IsRunning()) {
-            // Compute frame info
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
             start_time = before_time;
@@ -81,11 +82,10 @@ public class Game implements Runnable
             if (last_fps_time >= ONE_BILLION)
             {
                 last_fps_time = 0;
+                this.average_fps = fps;
                 fps = 0;
             }
 
-            // Update game.
-            // NOTE(Misael Urquieta): Maybe divide this into sections?
             this.GameUpdate(delta);
 
             double after_time = System.nanoTime();
@@ -126,16 +126,14 @@ public class Game implements Runnable
         this.startThread();
     }
 
+    private Circle button_circle_init;
+
     private void Initalize() {
         this.game_board = new GameBoard(this.renderer, 10, 10);
+        this.button_circle_init = new Circle(this.renderer, -.8f, .8f, 0.1f, 0xFF2C2C2C);
     }
 
-    // TODO(Misael Urquieta): In the android version there's a bug
-    // where it sometimes crashes when after you conect points, as of
-    // now it appears to happen at random times, figure out what's the
-    // cause.
     private void GameUpdate(double delta) {
-        // TODO(Misael Urquieta): Clean up this, I don't think this should be like this.
         this.renderer.BeginDraw();
         this.game_state.current_input = this.input.GetInputEvent();
         InputEvent event = this.game_state.current_input;
@@ -149,11 +147,30 @@ public class Game implements Runnable
         }
         }
 
-        this.game_board.UpdateCursor(new Vec2(this.game_state.current_input.x,
-                                              this.game_state.current_input.y));
+        if (this.button_circle_init.HasCollide(event.cursor_position) &&
+            event.type == InputEvent.TOUCH_DOWN) {
+            if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
+                this.game_state.SetState(GameState.DEBUG_MENU);
+                this.button_circle_init.Move(new Vec2(1, 0));
+            }
+            else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
+                this.game_state.SetState(GameState.PLAYING);
+                this.button_circle_init.Move(new Vec2(-1, 0));
+            }
+        }
 
-        this.game_board.Update(delta);
+        if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
+            this.game_board.UpdateCursor(event.cursor_position);
+            this.game_board.Update(delta);
+        }
         this.game_board.Draw();
+        this.button_circle_init.Draw();
+
+        if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
+            String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
+            this.renderer.DrawText(format_output, new Vec2(-1, -1), 0xFF000000);
+        }
+
         this.renderer.EndDraw();
     }
 }

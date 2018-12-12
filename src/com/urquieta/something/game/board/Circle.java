@@ -6,12 +6,14 @@ import com.urquieta.something.game.util.Vec2;
 
 public class Circle extends GameBoardObject {
     private float radius;
+    private final double bounce_animation_time;
 
     public Circle(Renderer renderer, Vec2 position, float radius, int color) {
         super(renderer, position, color, true, false, true);
         this.radius  = radius;
         this.DEBUG_area_position_1 = this.position.Add(-radius, radius);
         this.DEBUG_area_position_2 = this.position.Add(radius, -radius);
+        this.bounce_animation_time = 0.7;
     }
 
     public Circle(Renderer renderer, float x, float y, float radius, int color) {
@@ -22,9 +24,20 @@ public class Circle extends GameBoardObject {
         return this.radius;
     }
 
+    @Override
     public void Draw() {
         super.renderer.DrawCircle(this.position.x, this.position.y,
                                   this.radius, this.color);
+    }
+
+    @Override
+    public void Update(double delta) {
+        if (this.animation_on) {
+            this.animation_current_time += delta;
+            if (this.animation_current_time < this.bounce_animation_time) {
+                this.Move(new Vec2(0, 0.1f));
+            }
+        }
     }
 
     public boolean HasCollide(Vec2 position) {
@@ -39,6 +52,7 @@ public class Circle extends GameBoardObject {
         return false;
     }
 
+    @Override
     public String toString() {
         return "Circle: "+super.GetPosition()+" - radius("+this.radius+") - color("+this.color+")";
     }

@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionListener;
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.pc.View;
 import com.urquieta.something.platform.Screen;
+import com.urquieta.something.game.util.Vec2;
 
 public class PCInput implements KeyListener, MouseMotionListener, MouseListener {
     private static final int MAX_KEYS = 256;
@@ -92,18 +93,14 @@ public class PCInput implements KeyListener, MouseMotionListener, MouseListener 
         return this.input_event;
     }
 
-    public float getTouchX() {
-        return this.input_event.x;
-    }
-
-    public float getTouchY() {
-        return this.input_event.y;
+    public Vec2 GetCursorPosition() {
+        return this.input_event.cursor_position;
     }
 
     private void ComputeMouseCoordinates(MouseEvent event) {
-        this.input_event.x =  ((float)event.getX() / (float)Screen.width) * 2 - 1.0f;
-        this.input_event.y = -(((float)event.getY() / (float)Screen.height) * 2 - 1.0f);
-        this.input_event.x_in_pixels = event.getX();
-        this.input_event.y_in_pixels = event.getY();
+        this.input_event.cursor_position.x =   ((float)event.getX() / (float)Screen.width)  * 2 - 1.0f;
+        this.input_event.cursor_position.y = -(((float)event.getY() / (float)Screen.height) * 2 - 1.0f);
+        this.input_event.cursor_position_pixels.x = event.getX();
+        this.input_event.cursor_position_pixels.y = event.getY();
     }
 }

@@ -27,13 +27,13 @@ public class MainActivity extends Activity
     }
 
     private void InitGame() {
-        this.game = new Game();
+        this.game          = new Game();
         Screen game_screen = new Screen(game, this);
-        Point size = new Point();
+        Input game_input   = new Input();
+        Point size         = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         game_screen.SetSize(size.x, size.y);
         this.game.setScreen(game_screen);
-        Input game_input = new Input();
         game_screen.setOnTouchListener(game_input);
         this.game.setInput(game_input);
     }

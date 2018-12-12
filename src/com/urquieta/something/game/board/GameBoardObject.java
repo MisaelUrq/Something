@@ -66,7 +66,9 @@ public class GameBoardObject extends GameObject {
         return this.is_touchable;
     }
 
-    public void Draw() {
+    @Override
+    public void Update(double delta) {}
 
-    }
+    @Override
+    public void Draw() {}
 }

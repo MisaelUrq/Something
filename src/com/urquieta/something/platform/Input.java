@@ -13,11 +13,6 @@ public class Input extends PCInput { // @Class
         super();
     }
 
-    public void GetMousePosition(float x, float y) {
-        x = super.getTouchX();
-        y = super.getTouchY();
-    }
-
     public InputEvent GetInputEvent() {
         return super.GetInputEvent();
     }
