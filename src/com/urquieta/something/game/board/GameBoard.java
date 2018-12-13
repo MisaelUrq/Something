@@ -80,6 +80,7 @@ public class GameBoard extends GameObject {
     }
 
     private boolean player_connected_color = false;
+
     @Override
     public void Update(double delta) {
         if (this.player_dragged && this.is_update_done) {
@@ -98,7 +99,6 @@ public class GameBoard extends GameObject {
         }
         else {
             if (objects_connected.size() > 1) {
-
                 if (player_connected_color) {
                     int color = this.objects_connected.get(0).GetColor();
                     this.objects_connected.clear();

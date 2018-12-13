@@ -22,13 +22,11 @@ public class PCInput implements KeyListener, MouseMotionListener, MouseListener 
     }
 
     public void Update() {
-        // NOTE(Misael): This is for any keys that need to be pass for
-        // the PC build. This will only be for debbug purposes.
         InputEvent event = this.input_event;
         if (event.prev_type == InputEvent.TOUCH_UP && event.type == InputEvent.TOUCH_CLIC) {
             event.type = InputEvent.TOUCH_CLIC;
             SetEvent(InputEvent.TOUCH_CLIC, 0);
-        } else {
+        } else if (event.prev_type == 0) {
             event.type = 0;
         }
     }
@@ -90,9 +88,8 @@ public class PCInput implements KeyListener, MouseMotionListener, MouseListener 
 
     @Override
     public void mouseClicked(MouseEvent event) {
-        this.input_event.prev_type = this.input_event.type;
-        this.input_event.type = InputEvent.TOUCH_CLIC;
         this.ComputeMouseCoordinatesAndPrevState(event);
+        this.input_event.type = InputEvent.TOUCH_CLIC;
     }
 
     public InputEvent GetInputEvent() {
@@ -109,6 +106,7 @@ public class PCInput implements KeyListener, MouseMotionListener, MouseListener 
     }
 
     private void ComputeMouseCoordinatesAndPrevState(MouseEvent event) {
+        this.input_event.prev_type = this.input_event.type;
         this.input_event.cursor_position.x =   ((float)event.getX() / (float)Screen.width)  * 2 - 1.0f;
         this.input_event.cursor_position.y = -(((float)event.getY() / (float)Screen.height) * 2 - 1.0f);
         this.input_event.cursor_position_pixels.x = event.getX();

@@ -136,7 +136,8 @@ public class Game implements Runnable
     private void Initalize() {
         this.game_board = new GameBoard(this.renderer, 10, 10);
         this.button_circle_init = new Circle(this.renderer, -.85f, .9f, 0.1f, 0xFF2C2C2C);
-        this.ball_sound= this.game_audio.CreateSound("Ball_Bounce.mp3");
+        // TODO(Misael): Make a file or something in orher to read this and other output massages.
+        this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
     }
 
     private void GameUpdate(double delta) {
@@ -146,6 +147,7 @@ public class Game implements Runnable
 
         switch (event.type) {
         case InputEvent.TOUCH_DRAGGED: {
+            // TODO(Misael): Rename this function.
             this.game_board.PlayerDragged(true);
         } break;
         default: {
@@ -153,18 +155,16 @@ public class Game implements Runnable
         }
         }
 
-        if (this.button_circle_init.HasCollide(event.cursor_position)) {
-            this.button_circle_init.SetColor(0xFFFF0000);
-            if (event.type == InputEvent.TOUCH_CLIC) {
-                if (this.ball_sound != null){
-                    this.ball_sound.Play(.5f);
-                }
-                if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
-                    this.game_state.SetState(GameState.DEBUG_MENU);
-                }
-                else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
-                    this.game_state.SetState(GameState.PLAYING);
-                }
+        if (this.button_circle_init.HasCollide(event.cursor_position) &&
+            event.type == InputEvent.TOUCH_CLIC) {
+            if (this.ball_sound != null){
+                this.ball_sound.Play(.5f);
+            }
+            if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
+                this.game_state.SetState(GameState.DEBUG_MENU);
+            }
+            else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
+                this.game_state.SetState(GameState.PLAYING);
             }
         }
 
@@ -180,8 +180,6 @@ public class Game implements Runnable
 
         this.renderer.EndDraw();
     }
-
-
 
     private void SetAudio(Audio audio) {
         this.game_audio = audio;
