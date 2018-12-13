@@ -7,6 +7,8 @@ import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.GameBoard;
+import com.urquieta.something.platform.Audio;
+import com.urquieta.something.platform.Sound;
 
 import com.urquieta.something.game.util.Vec2;
 
@@ -15,12 +17,15 @@ public class Game implements Runnable
     private final int  TARGET_FPS = 30;
     private final long ONE_BILLION = 1000000000;
     private final long TARGET_DELTA = ONE_BILLION / TARGET_FPS;
+    private int average_fps = 0;
 
     private Screen main_canvas;
     private Renderer renderer;
     private Input input;
     private GameState game_state;
     private Thread thread;
+    private Audio  game_audio;
+    private Sound  ball_sound;
 
     private GameBoard game_board;
 
@@ -36,7 +41,8 @@ public class Game implements Runnable
     public boolean IsOk() {
         return (this.renderer != null &&
                 this.main_canvas != null &&
-                this.input != null);
+                this.input != null &&
+                this.game_audio != null);
     }
 
     public void startThread()
@@ -52,16 +58,12 @@ public class Game implements Runnable
         }
     }
 
-    public void setScreen(Screen screen) {
-        this.main_canvas = screen;
-        this.renderer = new Renderer(this.main_canvas);
-    }
+    public void Init(Screen screen, Input input, Audio audio) {
+        this.SetScreen(screen);
+        this.SetInput(input);
+        this.SetAudio(audio);
 
-    public void setInput(Input input) {
-        this.input = input;
     }
-
-    private int average_fps = 0;
 
     @Override
     public void run() {
@@ -100,7 +102,8 @@ public class Game implements Runnable
                 thread.sleep(time_to_sleep);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                // TODO(Misael): Change this for an actual loggin system.
+                System.out.println("SOMETHING_ERROR: "+e);
             }
         }
     }
@@ -113,7 +116,8 @@ public class Game implements Runnable
                 break;
             }
             catch (Exception e) {
-                e.printStackTrace();
+                // TODO(Misael): Change this for an actual loggin system.
+                System.out.println("SOMETHING_ERROR: "+e);
             }
         }
     }
@@ -126,11 +130,13 @@ public class Game implements Runnable
         this.startThread();
     }
 
+    // TODO(Misael): Delete this and replace with and actual button.
     private Circle button_circle_init;
 
     private void Initalize() {
         this.game_board = new GameBoard(this.renderer, 10, 10);
-        this.button_circle_init = new Circle(this.renderer, -.8f, .8f, 0.1f, 0xFF2C2C2C);
+        this.button_circle_init = new Circle(this.renderer, -.85f, .9f, 0.1f, 0xFF2C2C2C);
+        this.ball_sound= this.game_audio.CreateSound("Ball_Bounce.mp3");
     }
 
     private void GameUpdate(double delta) {
@@ -147,22 +153,23 @@ public class Game implements Runnable
         }
         }
 
-        if (this.button_circle_init.HasCollide(event.cursor_position) &&
-            event.type == InputEvent.TOUCH_DOWN) {
-            if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
-                this.game_state.SetState(GameState.DEBUG_MENU);
-                this.button_circle_init.Move(new Vec2(1, 0));
-            }
-            else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
-                this.game_state.SetState(GameState.PLAYING);
-                this.button_circle_init.Move(new Vec2(-1, 0));
+        if (this.button_circle_init.HasCollide(event.cursor_position)) {
+            this.button_circle_init.SetColor(0xFFFF0000);
+            if (event.type == InputEvent.TOUCH_CLIC) {
+                if (this.ball_sound != null){
+                    this.ball_sound.Play(.5f);
+                }
+                if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
+                    this.game_state.SetState(GameState.DEBUG_MENU);
+                }
+                else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
+                    this.game_state.SetState(GameState.PLAYING);
+                }
             }
         }
 
-        if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
-            this.game_board.UpdateCursor(event.cursor_position);
-            this.game_board.Update(delta);
-        }
+        this.game_board.UpdateCursor(event.cursor_position);
+        this.game_board.Update(delta);
         this.game_board.Draw();
         this.button_circle_init.Draw();
 
@@ -172,5 +179,20 @@ public class Game implements Runnable
         }
 
         this.renderer.EndDraw();
+    }
+
+
+
+    private void SetAudio(Audio audio) {
+        this.game_audio = audio;
+    }
+
+    private void SetScreen(Screen screen) {
+        this.main_canvas = screen;
+        this.renderer = new Renderer(this.main_canvas);
+    }
+
+    private void SetInput(Input input) {
+        this.input = input;
     }
 }

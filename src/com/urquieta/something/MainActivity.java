@@ -9,6 +9,7 @@ import android.graphics.Point;
 import com.urquieta.something.game.Game;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Input;
+import com.urquieta.something.platform.Audio;
 
 public class MainActivity extends Activity
 {
@@ -31,11 +32,12 @@ public class MainActivity extends Activity
         Screen game_screen = new Screen(game, this);
         Input game_input   = new Input();
         Point size         = new Point();
+        Audio game_audio   = new Audio();
+        game_audio.Init(this);
         getWindowManager().getDefaultDisplay().getSize(size);
         game_screen.SetSize(size.x, size.y);
-        this.game.setScreen(game_screen);
         game_screen.setOnTouchListener(game_input);
-        this.game.setInput(game_input);
+        this.game.Init(game_screen, game_input, game_audio);
     }
 
     @Override

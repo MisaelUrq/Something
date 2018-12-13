@@ -3,17 +3,19 @@ package com.urquieta.something.platform;
 import com.urquieta.something.game.util.Vec2;
 
 public class InputEvent {
-   // NOTE(Misael): This are for only for the android version.
     public static final int TOUCH_DOWN    = (1 << 1);
     public static final int TOUCH_UP      = (1 << 2);
     public static final int TOUCH_DRAGGED = (1 << 3);
     public static final int TOUCH_HOLD    = (1 << 4);
     public static final int TOUCH_MOVED   = (1 << 5);
+    public static final int TOUCH_CLIC    = (1 << 6);
 
-    public static final int KEY_DOWN      = (1 << 6);
-    public static final int KEY_UP        = (1 << 7);
+    // NOTE(Misael): Only for the PC version.
+    public static final int KEY_DOWN      = (1 << 7);
+    public static final int KEY_UP        = (1 << 8);
 
     public int type;
+    public int prev_type;
     public Vec2 cursor_position;
     public Vec2 cursor_position_pixels;
 

@@ -14,6 +14,8 @@ public class Input extends PCInput { // @Class
     }
 
     public InputEvent GetInputEvent() {
-        return super.GetInputEvent();
+        Update();
+        InputEvent event = super.GetInputEvent();
+        return event;
     }
 }

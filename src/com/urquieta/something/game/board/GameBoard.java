@@ -15,10 +15,11 @@ public class GameBoard extends GameObject {
     private GameBoardObject[] objects_array;
     private int width;
     private int height;
-    private final float objects_proportion = 12.5f;
+    private final float objects_proportion = 14f;
     private Renderer r;
     private Vec2 cursor_position;
     private Random random;
+    // TODO(Misael): Make a color class and maybe a color palette class?
     private int[] color_palette;
     private boolean player_dragged;
     private boolean player_move_init;
@@ -85,12 +86,14 @@ public class GameBoard extends GameObject {
             if (this.player_move_init == false) {
                 this.player_move_init = DidPlayerMakeMoveOnCircles(this.objects_array, this.objects_connected);
             }
-            if (!this.player_connected_color) {
+            else if (!this.player_connected_color) {
                 this.player_connected_color = ConnectPlayerDots(this.objects_array, this.objects_connected);
             }
-            boolean is_rewind = DidPlayerRewind(this.objects_array, this.objects_connected);
-            if (this.player_connected_color && is_rewind) {
-                this.player_connected_color = false;
+            if (this.objects_connected.size() > 1) {
+                boolean is_rewind = DidPlayerRewind(this.objects_array, this.objects_connected);
+                if (this.player_connected_color && is_rewind) {
+                    this.player_connected_color = false;
+                }
             }
         }
         else {
@@ -134,7 +137,6 @@ public class GameBoard extends GameObject {
                 float y_current = object.GetPosition().y;
                 float y_dest = object.GetPositionToGo().y;
                 if (y_current < y_dest) {
-                    object.InitAnimation();
                     object.SetPosition(object.GetPositionToGo());
                 }
             }
@@ -308,7 +310,7 @@ public class GameBoard extends GameObject {
                 if (index == -1) {
                     list.add(c);
                 }
-                else if (index < list_size-3) {
+                else if (index >= 0 && index < list_size-3) {
                     list.add(c);
                     return true;
                 }
