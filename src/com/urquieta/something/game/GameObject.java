@@ -10,6 +10,7 @@ public abstract class GameObject {
     final protected Renderer renderer;
     protected double  animation_current_time;
     protected boolean animation_on;
+    protected int color;
 
     protected Vec2 DEBUG_area_position_1;         // TODO(Misael Urquieta): Find a better name.
     protected Vec2 DEBUG_area_position_2;         // TODO(Misael Urquieta): Find a better name.
@@ -17,11 +18,12 @@ public abstract class GameObject {
     public GameObject(Renderer renderer, Vec2 position) {
         this.position = position;
         this.renderer = renderer;
-        this.DEBUG_area_position_1 = new Vec2(0, 0);
-        this.DEBUG_area_position_2 = new Vec2(0, 0);
+        this.DEBUG_area_position_1 = new Vec2(position.x-0.01f, position.y+0.01f);
+        this.DEBUG_area_position_2 = new Vec2(position.x+.01f,  position.y-0.01f);
         this.animation_current_time = 0;
         this.animation_on   = false;
         this.delta_position = new Vec2(0, 0);
+        this.color = 0xFF000000;
     }
 
     public final Vec2 GetPosition() {

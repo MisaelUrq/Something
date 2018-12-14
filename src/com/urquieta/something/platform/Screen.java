@@ -7,6 +7,7 @@ import com.urquieta.something.platform.pc.Context;// @PC
 import com.urquieta.something.platform.pc.PCScreen;// @PC
 
 import com.urquieta.something.game.Game;
+import com.urquieta.something.game.util.Vec2;
 
 public class Screen extends PCScreen { // @Class
     private static final long serialVersionUID = 1L;
@@ -44,9 +45,21 @@ public class Screen extends PCScreen { // @Class
         return result;
     }
 
+    public float PixelsToLength(int pixels) {
+        float width_result = (float)pixels / (float)Screen.width;
+        float height_result = (float)pixels / (float)Screen.height;
+        float result = (width_result+height_result)*4;
+        System.out.println(result);
+        return result;
+    }
+
     public void SetSize(int width, int height) {
         Screen.width  = width;
         Screen.height = height;
+    }
+
+    public Vec2 GetSize() {
+        return new Vec2(Screen.width, Screen.height);
     }
 
     public int GetWidth() {

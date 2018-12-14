@@ -15,7 +15,7 @@ public class GameBoard extends GameObject {
     private GameBoardObject[] objects_array;
     private int width;
     private int height;
-    private final float objects_proportion = 14f;
+    private float objects_proportion;
     private Renderer r;
     private Vec2 cursor_position;
     private Random random;
@@ -24,7 +24,7 @@ public class GameBoard extends GameObject {
     private boolean player_dragged;
     private boolean player_move_init;
     private ArrayList<GameBoardObject> objects_connected;
-    private float   object_padding;
+    private Vec2    object_padding;
     private float start_x_position;
     private float start_y_position;
     private boolean is_update_done;
@@ -39,16 +39,20 @@ public class GameBoard extends GameObject {
         this.color_palette = new int[5];
         this.player_dragged = false;
         this.player_move_init = false;
-        this.object_padding = 0.15f;
+        Vec2 screen_size=  r.GetScreen().GetSize();
+        // TODO(Misael): Find a way to make the padding more dependent
+        // on the width and height of the board itself.
+        float padding = 40;
+        this.objects_proportion = padding/3;
+        this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
         this.objects_connected = new ArrayList<GameBoardObject>();
-        this.start_x_position = -((this.object_padding * (float)(this.width+1)  / 2.0f));
-        this.start_y_position =  ((this.object_padding * (float)(this.height+1) / 2.0f));
+        this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
+        this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
         this.color_palette[0] =  0xFFFF0000;
         this.color_palette[1] =  0xFF00FF00;
         this.color_palette[2] =  0xFF0000FF;
         this.color_palette[3] =  0xFFFF00FF;
         this.color_palette[4] =  0xFF00FFFF;
-
         this.objects_array = InitGameObjectArray();
         this.is_update_done = true;
     }
@@ -60,9 +64,9 @@ public class GameBoard extends GameObject {
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
-            y_position -= this.object_padding;
+            y_position -= this.object_padding.y;
             for (int x = 0; x < width; x++) {
-                x_position += this.object_padding;
+                x_position += this.object_padding.x;
                 int color = this.color_palette[Math.abs(random.nextInt() % 5)];
                 array[width * y + x] = new Circle(this.r, x_position, y_position, radius,
                                                   color);
@@ -155,13 +159,13 @@ public class GameBoard extends GameObject {
     private void CreateNewObjects(GameBoardObject[] array) {
         for (int x = 0; x < this.width; x++) {
             if (array[x].CanSpaceBeUsed()) {
-                Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding),
+                Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding.x),
                                          this.start_y_position);
                 float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                                 (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
                 Circle object = new Circle(this.r, position, radius,
                                            this.color_palette[Math.abs(random.nextInt() % 5)]);
-                object.PositionToMove(object.GetPosition().Substract(0, this.object_padding));
+                object.PositionToMove(object.GetPosition().Substract(0, this.object_padding.y));
                 array[x] = object;
             }
         }
@@ -243,11 +247,11 @@ public class GameBoard extends GameObject {
     }
 
     private Vec2 GetIndexPositionFromScreenPosition(Vec2 entity_position) {
-        float start_x_position = -((this.object_padding * (float)(this.width+1)  / 2.0f));
-        float start_y_position =  ((this.object_padding * (float)(this.height+1) / 2.0f));
+        float start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
+        float start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
 
-        float x =  (entity_position.x - start_x_position) / this.object_padding;
-        float y = -(entity_position.y - start_y_position) / this.object_padding;
+        float x =  (entity_position.x - start_x_position) / this.object_padding.x;
+        float y = -(entity_position.y - start_y_position) / this.object_padding.y;
         int  x_index = Math.round(x)-1;
         int  y_index = Math.round(y)-1;
         Vec2 index_position = new Vec2(x_index, y_index);

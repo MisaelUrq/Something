@@ -1,16 +1,16 @@
 package com.urquieta.something.game;
 
+import com.urquieta.something.game.GameState;
+import com.urquieta.something.game.board.Circle;
+import com.urquieta.something.game.board.GameBoard;
+import com.urquieta.something.game.util.Vec2;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
-import com.urquieta.something.game.GameState;
-import com.urquieta.something.game.board.Circle;
-import com.urquieta.something.game.board.GameBoard;
 import com.urquieta.something.platform.Audio;
 import com.urquieta.something.platform.Sound;
-
-import com.urquieta.something.game.util.Vec2;
+import com.urquieta.something.game.ui.Button;
 
 public class Game implements Runnable
 {
@@ -131,11 +131,12 @@ public class Game implements Runnable
     }
 
     // TODO(Misael): Delete this and replace with and actual button.
-    private Circle button_circle_init;
+    private Button button_debug;
 
     private void Initalize() {
         this.game_board = new GameBoard(this.renderer, 10, 10);
-        this.button_circle_init = new Circle(this.renderer, -.85f, .9f, 0.1f, 0xFF2C2C2C);
+        // 15 * 15 Max for screen. But it does not look good. For now the target if of 10 * 10.
+        this.button_debug = new Button(this.renderer, new Vec2(-.9f, .9f), .2f, .2f, "Debug", 0xFF2C2C2C, 0xFFFFFFFF);
         // TODO(Misael): Make a file or something in orher to read this and other output massages.
         this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
     }
@@ -155,7 +156,7 @@ public class Game implements Runnable
         }
         }
 
-        if (this.button_circle_init.HasCollide(event.cursor_position) &&
+        if (this.button_debug.IsPressed(event) &&
             event.type == InputEvent.TOUCH_CLIC) {
             if (this.ball_sound != null){
                 this.ball_sound.Play(.5f);
@@ -171,7 +172,7 @@ public class Game implements Runnable
         this.game_board.UpdateCursor(event.cursor_position);
         this.game_board.Update(delta);
         this.game_board.Draw();
-        this.button_circle_init.Draw();
+        this.button_debug.Draw();
 
         if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
