@@ -6,6 +6,7 @@ import com.urquieta.something.platform.Renderer;
 
 public abstract class GameObject {
     protected Vec2 position;
+    protected Vec2 delta_position;
     final protected Renderer renderer;
     protected double  animation_current_time;
     protected boolean animation_on;
@@ -20,10 +21,24 @@ public abstract class GameObject {
         this.DEBUG_area_position_2 = new Vec2(0, 0);
         this.animation_current_time = 0;
         this.animation_on   = false;
+        this.delta_position = new Vec2(0, 0);
     }
 
     public final Vec2 GetPosition() {
         return this.position;
+    }
+
+    public Vec2 GetDeltaPosition() {
+        return this.delta_position;
+    }
+
+    public void SetDeltaPosition(Vec2 position) {
+        this.delta_position = position;
+    }
+
+    public void SetDeltaPosition(float x, float y) {
+        this.delta_position.x = x;
+        this.delta_position.y = y;
     }
 
     public void SetPosition(Vec2 position) {

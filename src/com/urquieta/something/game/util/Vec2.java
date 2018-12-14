@@ -9,12 +9,31 @@ public class Vec2 {
         this.y = y;
     }
 
+    public void AddSelf(Vec2 other) {
+        this.x += other.x;
+        this.y += other.y;
+    }
+
+    public void AddSelf(float x, float y) {
+        this.x += x;
+        this.y += y;
+    }
+
     public Vec2 Add(Vec2 other) {
         return new Vec2(this.x + other.x, this.y + other.y);
     }
 
     public Vec2 Add(float x, float y) {
         return new Vec2(this.x + x, this.y + y);
+    }
+
+    public Vec2 Mul(float n) {
+        return new Vec2(n*x, n*y);
+    }
+
+    public void MulSelf(float n) {
+        this.x = n*this.x;
+        this.y = n*this.y;
     }
 
     public Vec2 Substract(float x, float y) {

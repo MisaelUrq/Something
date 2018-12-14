@@ -121,23 +121,32 @@ public class GameBoard extends GameObject {
             CreateNewObjects(this.objects_array);
             this.time_pass = 0;
         }
-        UpdateObjectPositions(delta, this.objects_array);
+        UpdateObjectPositions((float)delta, this.objects_array);
     }
 
     private double time_pass = 0;
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
-        float position_delta = (float)delta * (this.object_padding / 4);
+        float speed = 0.003f;
+        float t = (float)delta;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.GetPosition().Equals(object.GetPositionToGo()) == false) {
                 this.is_update_done = false;
-                Vec2 to_move = new Vec2(0, -position_delta);
-                object.Move(to_move);
+                Vec2 a = new Vec2(0, -speed); // Acceleration
+                Vec2 v = object.GetDeltaPosition(); // Velocity
+                Vec2 p = object.GetPosition(); //  Position
+
+                Vec2 offset = a.Mul(t*t*.5f); // P' = 05*at^2 + vt + p
+                offset.AddSelf(v.Mul(t));
+                offset.AddSelf(p);
+                object.SetPosition(offset);
+                object.SetDeltaPosition(a.Mul(t).Add(v)); // V' = at + v
                 float y_current = object.GetPosition().y;
                 float y_dest = object.GetPositionToGo().y;
                 if (y_current < y_dest) {
                     object.SetPosition(object.GetPositionToGo());
+                    object.SetDeltaPosition(0, 0);
                 }
             }
         }
