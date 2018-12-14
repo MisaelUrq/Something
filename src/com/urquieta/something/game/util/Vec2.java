@@ -27,6 +27,14 @@ public class Vec2 {
         return new Vec2(this.x + x, this.y + y);
     }
 
+    public Vec2 Sub(Vec2 other) {
+        return new Vec2(this.x - other.x, this.y - other.y);
+    }
+
+    public Vec2 Sub(float x, float y) {
+        return new Vec2(this.x - x, this.y - y);
+    }
+
     public Vec2 Mul(float n) {
         return new Vec2(n*x, n*y);
     }

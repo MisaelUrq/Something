@@ -42,8 +42,8 @@ public class GameBoard extends GameObject {
         Vec2 screen_size=  r.GetScreen().GetSize();
         // TODO(Misael): Find a way to make the padding more dependent
         // on the width and height of the board itself.
-        float padding = 40;
-        this.objects_proportion = padding/3;
+        float padding = 45;
+        this.objects_proportion = padding/3.3f;
         this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
         this.objects_connected = new ArrayList<GameBoardObject>();
         this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
@@ -132,23 +132,14 @@ public class GameBoard extends GameObject {
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
         float speed = 0.003f;
-        float t = (float)delta;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.GetPosition().Equals(object.GetPositionToGo()) == false) {
                 this.is_update_done = false;
                 Vec2 a = new Vec2(0, -speed); // Acceleration
-                Vec2 v = object.GetDeltaPosition(); // Velocity
-                Vec2 p = object.GetPosition(); //  Position
+                object.ComputeMove((float)delta, a);
 
-                Vec2 offset = a.Mul(t*t*.5f); // P' = 05*at^2 + vt + p
-                offset.AddSelf(v.Mul(t));
-                offset.AddSelf(p);
-                object.SetPosition(offset);
-                object.SetDeltaPosition(a.Mul(t).Add(v)); // V' = at + v
-                float y_current = object.GetPosition().y;
-                float y_dest = object.GetPositionToGo().y;
-                if (y_current < y_dest) {
+                if (object.GetPosition().y < object.GetPositionToGo().y) {
                     object.SetPosition(object.GetPositionToGo());
                     object.SetDeltaPosition(0, 0);
                 }

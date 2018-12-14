@@ -14,6 +14,7 @@ public abstract class GameObject {
 
     protected Vec2 DEBUG_area_position_1;         // TODO(Misael Urquieta): Find a better name.
     protected Vec2 DEBUG_area_position_2;         // TODO(Misael Urquieta): Find a better name.
+    private   Vec2 position_to_go;
 
     public GameObject(Renderer renderer, Vec2 position) {
         this.position = position;
@@ -23,7 +24,26 @@ public abstract class GameObject {
         this.animation_current_time = 0;
         this.animation_on   = false;
         this.delta_position = new Vec2(0, 0);
+        this.position_to_go = position;
         this.color = 0xFF000000;
+    }
+
+
+    public void ComputeMove(float t, Vec2 acceleration) {
+        Vec2 v = GetDeltaPosition();
+        Vec2 p = GetPosition();
+
+        Vec2 offset = acceleration.Mul(t*t*.5f);
+        offset.AddSelf(v.Mul(t));
+        offset.AddSelf(p);
+
+        SetPosition(offset);
+        SetDeltaPosition(acceleration.Mul(t).Add(v));
+    }
+
+    public void EndMove() {
+        SetPosition(GetPositionToGo());
+        SetDeltaPosition(0, 0);
     }
 
     public final Vec2 GetPosition() {
@@ -69,4 +89,18 @@ public abstract class GameObject {
                                this.DEBUG_area_position_2.x, this.DEBUG_area_position_2.y,
                                color);
     }
+
+    public void PositionToMove(Vec2 position) {
+        this.position_to_go = position;
+    }
+
+    public void PositionToMove(float x, float y) {
+        PositionToMove(new Vec2(x, y));
+    }
+
+    public Vec2 GetPositionToGo() {
+        return this.position_to_go;
+    }
+
+
 }

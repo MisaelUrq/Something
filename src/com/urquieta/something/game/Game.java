@@ -11,6 +11,7 @@ import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.Audio;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.ui.Button;
+import com.urquieta.something.game.ui.DebugMenu;
 
 public class Game implements Runnable
 {
@@ -131,12 +132,12 @@ public class Game implements Runnable
     }
 
     // TODO(Misael): Delete this and replace with and actual button.
-    private Button button_debug;
+    private DebugMenu debug_menu;
 
     private void Initalize() {
-        this.game_board = new GameBoard(this.renderer, 10, 10);
         // 15 * 15 Max for screen. But it does not look good. For now the target if of 10 * 10.
-        this.button_debug = new Button(this.renderer, new Vec2(-.9f, .9f), .2f, .2f, "Debug", 0xFF2C2C2C, 0xFFFFFFFF);
+        this.game_board = new GameBoard(this.renderer, 10, 10);
+        this.debug_menu = new DebugMenu(this.renderer);
         // TODO(Misael): Make a file or something in orher to read this and other output massages.
         this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
     }
@@ -156,23 +157,13 @@ public class Game implements Runnable
         }
         }
 
-        if (this.button_debug.IsPressed(event) &&
-            event.type == InputEvent.TOUCH_CLIC) {
-            if (this.ball_sound != null){
-                this.ball_sound.Play(.5f);
-            }
-            if (this.game_state.GetStateOfGame() == GameState.PLAYING) {
-                this.game_state.SetState(GameState.DEBUG_MENU);
-            }
-            else if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
-                this.game_state.SetState(GameState.PLAYING);
-            }
-        }
-
+        this.debug_menu.UpdateEvent(event);
         this.game_board.UpdateCursor(event.cursor_position);
+
+        this.debug_menu.Update(delta);
         this.game_board.Update(delta);
         this.game_board.Draw();
-        this.button_debug.Draw();
+        this.debug_menu.Draw();
 
         if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);

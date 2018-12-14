@@ -49,7 +49,6 @@ public class Screen extends PCScreen { // @Class
         float width_result = (float)pixels / (float)Screen.width;
         float height_result = (float)pixels / (float)Screen.height;
         float result = (width_result+height_result)*4;
-        System.out.println(result);
         return result;
     }
 
