@@ -28,8 +28,12 @@ public class Game implements Runnable
     private Audio  game_audio;
     private Sound  ball_sound;
 
-    private GameBoard game_board;
 
+    public String format_board = new String();
+    public  boolean is_resuming = false;
+    private GameBoard game_board;
+    private DebugMenu debug_menu;
+    
     public Game()
     {
         super();
@@ -53,7 +57,7 @@ public class Game implements Runnable
             if (this.game_state == null) {
                 this.game_state = new GameState();
             }
-            this.game_state.SetRunning(true);
+            GameState.is_game_running = true;
             thread = new Thread(this);
             thread.start();
         }
@@ -63,7 +67,6 @@ public class Game implements Runnable
         this.SetScreen(screen);
         this.SetInput(input);
         this.SetAudio(audio);
-
     }
 
     @Override
@@ -73,8 +76,8 @@ public class Game implements Runnable
         int    fps = 0;
         long   last_fps_time = 0;
 
-        Initalize();
-        while (this.game_state.IsRunning()) {
+        Initalize(format_board);
+        while (GameState.is_game_running) {
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
             start_time = before_time;
@@ -110,7 +113,7 @@ public class Game implements Runnable
     }
 
     public void stopThread() {
-        this.game_state.SetRunning(false);
+        GameState.is_game_running = false;
         while (true) {
             try {
                 thread.join();
@@ -123,29 +126,36 @@ public class Game implements Runnable
         }
     }
 
+    public String ToFileFormat() {
+        return this.game_board.ToFileFormat();
+    }
+    
     public void Pause() {
         this.stopThread();
     }
 
-    public void Resume() {
+    public void Resume(String format) {
+        this.format_board = format;
+        System.out.println("SOMETHING: "+format);
         this.startThread();
     }
 
-    // TODO(Misael): Delete this and replace with and actual button.
-    private DebugMenu debug_menu;
-
-    private void Initalize() {
-        // 15 * 15 Max for screen. But it does not look good. For now the target if of 10 * 10.
-        this.game_board = new GameBoard(this.renderer, 10, 10);
-        this.debug_menu = new DebugMenu(this.renderer);
-        // TODO(Misael): Make a file or something in orher to read this and other output massages.
+    private void Initalize(String board_format) {
+        // 15 * 15 Max for screen. But it does not look good. For now the target is of 10 * 10.
+        if (!board_format.isEmpty()) {
+            this.game_board = new GameBoard(this.renderer, board_format);
+        } else {
+            this.game_board = new GameBoard(this.renderer, 10, 10);
+        }
         this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
+        this.debug_menu = new DebugMenu(this.renderer, ball_sound);
+        // TODO(Misael): Make a file or something in orher to read this and other output massages.
+
     }
 
     private void GameUpdate(double delta) {
         this.renderer.BeginDraw();
-        this.game_state.current_input = this.input.GetInputEvent();
-        InputEvent event = this.game_state.current_input;
+        InputEvent event = this.input.GetInputEvent();
 
         switch (event.type) {
         case InputEvent.TOUCH_DRAGGED: {
@@ -158,14 +168,17 @@ public class Game implements Runnable
         }
 
         this.debug_menu.UpdateEvent(event);
-        this.game_board.UpdateCursor(event.cursor_position);
-
         this.debug_menu.Update(delta);
-        this.game_board.Update(delta);
+
+        if (GameState.is_menu_active == false) {
+            this.game_board.UpdateCursor(event.cursor_position);
+            this.game_board.Update(delta);
+        }
+
         this.game_board.Draw();
         this.debug_menu.Draw();
 
-        if (this.game_state.GetStateOfGame() == GameState.DEBUG_MENU) {
+        if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
             this.renderer.DrawText(format_output, new Vec2(-1, -1), 0xFF000000);
         }

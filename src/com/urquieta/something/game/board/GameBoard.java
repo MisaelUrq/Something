@@ -29,6 +29,34 @@ public class GameBoard extends GameObject {
     private float start_y_position;
     private boolean is_update_done;
 
+    public GameBoard(Renderer r, String format) {
+        super(r, new Vec2(0, 0));
+        this.width  = (int)format.charAt(0);
+        this.height = (int)format.charAt(1);
+        this.r = renderer;
+        this.random = new Random();
+        this.cursor_position = new Vec2(0, 0);
+        this.color_palette = new int[5];
+        this.player_dragged = false;
+        this.player_move_init = false;
+        Vec2 screen_size=  r.GetScreen().GetSize();
+        // TODO(Misael): Find a way to make the padding more dependent
+        // on the width and height of the board itself.
+        float padding = 45;
+        this.objects_proportion = padding/3.3f;
+        this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
+        this.objects_connected = new ArrayList<GameBoardObject>();
+        this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
+        this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
+        this.color_palette[0] =  0xFFFF0000;
+        this.color_palette[1] =  0xFF00FF00;
+        this.color_palette[2] =  0xFF0000FF;
+        this.color_palette[3] =  0xFFFF00FF;
+        this.color_palette[4] =  0xFF00FFFF;
+        this.objects_array = InitGameObjectArray(format.substring(2, format.length()));
+        this.is_update_done = true;
+    }
+    
     public GameBoard(Renderer r, int width, int height) {
         super(r, new Vec2(0, 0));
         this.width = width;
@@ -322,5 +350,38 @@ public class GameBoard extends GameObject {
             }
         }
         return false;
+    }
+
+    private GameBoardObject[] InitGameObjectArray(String format) {
+        GameBoardObject[] array = new GameBoardObject[width * height];
+        float y_position = start_y_position;
+        float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
+                        (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
+        int object_format_offset = 9;
+
+        System.out.println(format);
+        for (int y = 0; y < height; y++) {
+            float x_position = start_x_position;
+            y_position -= this.object_padding.y;
+            for (int x = 0; x < width; x++) {
+                int index = width * y + x;
+                char type = format.charAt(index*object_format_offset);
+                String color_format = format.substring(index*object_format_offset+1,
+                                                       index*object_format_offset+9);
+                x_position += this.object_padding.x;
+                int color = (int)Long.parseLong(color_format, 16);
+                array[index] = new Circle(this.r, x_position, y_position, radius,
+                                          color);
+            }
+        }
+        return array;
+    }
+    
+    public String ToFileFormat() {
+        String Result = ((char)width)+""+((char)height);
+        for (GameBoardObject o: objects_array) {
+            Result += o.ToFileFormat();
+        }
+        return Result;
     }
 }

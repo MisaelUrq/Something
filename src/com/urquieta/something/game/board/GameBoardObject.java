@@ -52,6 +52,8 @@ public class GameBoardObject extends GameObject {
         return this.is_touchable;
     }
 
+    public String ToFileFormat() { return null; }
+    
     @Override
     public void Update(double delta) {}
 

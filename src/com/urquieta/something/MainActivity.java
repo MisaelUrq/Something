@@ -6,6 +6,8 @@ import android.view.WindowManager;
 import android.view.Window;
 import android.graphics.Point;
 
+import android.content.SharedPreferences;
+
 import com.urquieta.something.game.Game;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Input;
@@ -43,12 +45,18 @@ public class MainActivity extends Activity
     @Override
     public void onPause() {
         super.onPause();
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putString("game", game.ToFileFormat());
+        editor.commit();
         game.Pause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        game.Resume();
+        game.is_resuming = true;
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        String format = preferences.getString("game", "DEFAULT");
+        game.Resume(format);
     }
 }

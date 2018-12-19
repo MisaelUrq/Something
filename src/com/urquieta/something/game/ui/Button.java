@@ -17,7 +17,7 @@ public class Button extends GameObject {
 
     // TODO(Misael): Make one to display images.
     public Button(Renderer render, Vec2 position, float width, float height,
-                  String message, int color, int color_text) {
+                  String message, int color, int color_text, Sound sound) {
         super(render, position);
         this.message = message;
         // float message_length = render.GetScreen().PixelsToLength(message.length());
@@ -25,7 +25,7 @@ public class Button extends GameObject {
         this.height = height;
         this.color = color;
         this.color_text = color_text;
-        this.sound = null;
+        this.sound = sound;
     }
 
     @Override
@@ -43,6 +43,8 @@ public class Button extends GameObject {
         super.renderer.DrawText(this.message, position.Add(-(x-.03f), -.02f), color_text);
     }
 
+    
+    
     private boolean HasCollide(Vec2 input) {
         float x = this.width/2;
         float y = this.height/2;
