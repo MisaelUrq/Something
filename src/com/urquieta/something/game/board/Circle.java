@@ -36,6 +36,8 @@ public class Circle extends GameBoardObject {
                                   this.radius, this.color);
     }
 
+    // TODO(Misael): Find a way to implement animations. This I think
+    // it's really bad.
     @Override
     public void Update(double delta) {
         if (this.animation_on) {

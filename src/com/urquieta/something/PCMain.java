@@ -4,11 +4,13 @@ import com.urquieta.something.game.Game;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.Audio;
+import com.urquieta.something.output.OutputSystem;
 
 public class PCMain
 {
     public static void main(String[] args)
     {
+        OutputSystem.WriteErrosOnFile("dump/", "pc_something.output");
         Game   game        = new Game();
         Screen game_screen = new Screen(game, null);
         Input  game_input  = new Input();

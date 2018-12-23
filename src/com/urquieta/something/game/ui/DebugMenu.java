@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class DebugMenu extends GameObject {
     private Button open_close;
     private Button show_hide_fps;
+    private Button start_new_game;
     private boolean is_open;
     private InputEvent event;
     private boolean is_done;
@@ -25,9 +26,12 @@ public class DebugMenu extends GameObject {
         this.objects  = new ArrayList<GameObject>();
         this.open_close = new Button(renderer, new Vec2(-.85f, .95f), .3f, .1f, "Debug",
                                      0xffafafaf, 0xff2d2d2d, sound);
-        this.show_hide_fps = new Button(renderer, new Vec2(-1.7f, .9f), .2f, .1f, "FPS",
+        this.show_hide_fps = new Button(renderer, new Vec2(-1.75f, .9f), .2f, .1f, "FPS",
                                         0xffafafaf, 0xff2d2d2d, sound);
+        this.start_new_game = new Button(renderer, new Vec2(-1.75f, .78f), .42f, .1f, "New Game",
+                                         0xffafafaf, 0xff2d2d2d, sound);
         this.objects.add(this.show_hide_fps);
+        this.objects.add(this.start_new_game);
         
         this.is_open = false;
         this.event = new InputEvent();
@@ -76,6 +80,10 @@ public class DebugMenu extends GameObject {
 
         if (show_hide_fps.IsPressed(event)) {
             GameState.state ^= GameState.SHOW_FPS;
+        }
+
+        if (start_new_game.IsPressed(event)) {
+            GameState.state ^= GameState.PLAYING;
         }
 
         if (is_done == false) {

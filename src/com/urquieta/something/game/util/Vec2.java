@@ -44,10 +44,6 @@ public class Vec2 {
         this.y = n*this.y;
     }
 
-    public Vec2 Substract(float x, float y) {
-        return this.Add(-x, -y);
-    }
-
     public boolean Equals(Vec2 B) {
         float compare = 0.00001f;
         if (Math.abs(this.x - B.x) < compare) {

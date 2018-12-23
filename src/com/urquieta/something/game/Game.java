@@ -12,6 +12,7 @@ import com.urquieta.something.platform.Audio;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.ui.Button;
 import com.urquieta.something.game.ui.DebugMenu;
+import com.urquieta.something.output.OutputSystem;
 
 public class Game implements Runnable
 {
@@ -142,18 +143,24 @@ public class Game implements Runnable
 
     private void Initalize(String board_format) {
         // 15 * 15 Max for screen. But it does not look good. For now the target is of 10 * 10.
-        if (!board_format.isEmpty()) {
+        if (board_format.length() >= 10) {
             this.game_board = new GameBoard(this.renderer, board_format);
         } else {
             this.game_board = new GameBoard(this.renderer, 10, 10);
         }
         this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
         this.debug_menu = new DebugMenu(this.renderer, ball_sound);
-        // TODO(Misael): Make a file or something in orher to read this and other output massages.
-
+        GameState.state = 0;
+        GameState.state ^= GameState.PLAYING;
     }
 
     private void GameUpdate(double delta) {
+        if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
+            this.game_board = new GameBoard(this.renderer, 10, 10);
+            GameState.state ^= GameState.PLAYING;
+            return;
+        }
+        
         this.renderer.BeginDraw();
         InputEvent event = this.input.GetInputEvent();
 

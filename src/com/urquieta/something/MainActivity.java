@@ -12,6 +12,7 @@ import com.urquieta.something.game.Game;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.Audio;
+import com.urquieta.something.output.OutputSystem;
 
 public class MainActivity extends Activity
 {
@@ -25,6 +26,7 @@ public class MainActivity extends Activity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                              WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        OutputSystem.SetLevel(OutputSystem.ERRORS);
         InitGame();
         setContentView(game.GetScreen());
     }

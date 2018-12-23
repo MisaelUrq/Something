@@ -17,7 +17,8 @@ SET APP_NAME=Something
 SET CODE=com/urquieta/something
 SET SRC=src/%CODE%
 SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/android/*.java %SRC%/game/util/*.java 
-SET PC_CODE=%SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java %SRC%/game/ui/*.java
+SET PC_CODE=%SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java %SRC%/game/ui/*.java %SRC%/output/*.java
+SET FILES_CLASSES=%CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class %CODE%/game/ui/*.class %CODE%/output/*.class
 
 rem rem TODO(Misael): Make the build without ant.
 rem SET AAPT="C:\Android\android-sdk\build-tools\28.0.3\aapt.exe"
@@ -54,5 +55,5 @@ if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
      javac -g -Xdiags:verbose -Xlint:all -d bin %PC_CODE%
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar %CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class %CODE%/game/ui/*.class
+     jar -cvmf ..\MANIFEST.MF Something.jar %FILES_CLASSES% 
      popd ))

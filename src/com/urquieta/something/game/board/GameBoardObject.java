@@ -8,7 +8,7 @@ import com.urquieta.something.game.util.Vec2;
 public class GameBoardObject extends GameObject {
     protected boolean is_touchable;
     protected boolean can_be_used;
-    protected boolean can_fall;
+    protected boolean can_move;
     protected int color;
 
     public GameBoardObject(Renderer r, Vec2 position) {
@@ -16,11 +16,11 @@ public class GameBoardObject extends GameObject {
     }
 
     public GameBoardObject(Renderer r, Vec2 position, int color,
-                           boolean touchable, boolean can_be_used, boolean can_fall) {
+                           boolean touchable, boolean can_be_used, boolean can_move) {
         super(r, position);
         this.is_touchable = touchable;
         this.can_be_used = can_be_used;
-        this.can_fall = can_fall;
+        this.can_move = can_move;
         this.color = color;
     }
 
@@ -36,14 +36,14 @@ public class GameBoardObject extends GameObject {
         return this.color;
     }
 
-    public boolean CanFall() {
-        return this.can_fall;
+    public boolean CanMove() {
+        return this.can_move;
     }
 
     public void Move(Vec2 vector) {
         super.position = super.position.Add(vector);
     }
-
+    
     public boolean CanSpaceBeUsed() {
         return this.can_be_used;
     }

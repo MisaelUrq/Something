@@ -2,8 +2,11 @@ package com.urquieta.something.game.board;
 
 import com.urquieta.something.game.GameObject;
 import com.urquieta.something.game.board.Circle;
+import com.urquieta.something.game.board.Wall;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
+
+import com.urquieta.something.output.OutputSystem;
 
 // TODO(Misael): Make the renderer static, so we can envoke it from
 // everywere
@@ -90,14 +93,20 @@ public class GameBoard extends GameObject {
         float y_position = start_y_position;
         float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
+        int wall_random = (Math.abs(random.nextInt()) % 79);
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
             y_position -= this.object_padding.y;
             for (int x = 0; x < width; x++) {
+                int index = width * y + x;
                 x_position += this.object_padding.x;
                 int color = this.color_palette[Math.abs(random.nextInt() % 5)];
-                array[width * y + x] = new Circle(this.r, x_position, y_position, radius,
-                                                  color);
+                if (index % wall_random == 0) {
+                    array[index] = new Wall(this.r, x_position, y_position, radius*10);
+                } else {
+                    array[index] = new Circle(this.r, x_position, y_position, radius,
+                                              color);
+                }
             }
         }
         return array;
@@ -142,18 +151,22 @@ public class GameBoard extends GameObject {
                         DeleteObjectFromArray(this.objects_array, object);
                     }
                 }
+                this.is_update_done = false;
             }
             this.objects_connected.clear();
             this.player_move_init = false;
+
         }
 
         this.time_pass += delta;
-        UpdateObjectsArray(this.objects_array);
-        if (time_pass > 5) {
-            CreateNewObjects(this.objects_array);
-            this.time_pass = 0;
+        if (this.is_update_done == false) {
+            UpdateObjectsArray(this.objects_array);
+            if (time_pass > 5) {
+                CreateNewObjects(this.objects_array);
+                this.time_pass = 0;
+            }
+            UpdateObjectPositions((float)delta, this.objects_array);
         }
-        UpdateObjectPositions((float)delta, this.objects_array);
     }
 
     private double time_pass = 0;
@@ -168,8 +181,7 @@ public class GameBoard extends GameObject {
                 object.ComputeMove((float)delta, a);
 
                 if (object.GetPosition().y < object.GetPositionToGo().y) {
-                    object.SetPosition(object.GetPositionToGo());
-                    object.SetDeltaPosition(0, 0);
+                    object.EndMove();
                 }
             }
         }
@@ -177,15 +189,23 @@ public class GameBoard extends GameObject {
 
     private void CreateNewObjects(GameBoardObject[] array) {
         for (int x = 0; x < this.width; x++) {
-            if (array[x].CanSpaceBeUsed()) {
+            int index = 0;
+            int row = 0;
+            for (row = 0; row < this.height; row++) {
+                if (array[row*width+x].CanSpaceBeUsed()) {
+                    index = row*width+x;
+                    break;
+                }
+            }
+            if (array[index].CanSpaceBeUsed()) {
                 Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding.x),
                                          this.start_y_position);
                 float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                                 (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
                 Circle object = new Circle(this.r, position, radius,
                                            this.color_palette[Math.abs(random.nextInt() % 5)]);
-                object.PositionToMove(object.GetPosition().Substract(0, this.object_padding.y));
-                array[x] = object;
+                object.PositionToMove(object.GetPosition().Sub(0, (row+1)*this.object_padding.y));
+                array[index] = object;
             }
         }
     }
@@ -211,7 +231,7 @@ public class GameBoard extends GameObject {
                 if (array[index].CanSpaceBeUsed()) {
                     for (int j = y-1; j >= 0; j--) {
                         int jndex = j*this.width+x;
-                        if (array[jndex].CanSpaceBeUsed() == false) {
+                        if (array[jndex].CanSpaceBeUsed() == false && array[jndex].CanMove()) {
                             SwapArrayGameObjectsWithUpdatePosition(array, index, jndex);
                             break;
                         }
@@ -220,7 +240,7 @@ public class GameBoard extends GameObject {
             }
         }
     }
-
+        
     private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
                                                         int a, int b) {
         GameBoardObject Temp = array[a];
@@ -231,6 +251,7 @@ public class GameBoard extends GameObject {
         array[b].PositionToMove(array[a].GetPosition());
     }
 
+    // NOTE(Misael): Asumes that the input position is of another board object.
     private int VecToIndex(Vec2 position) {
         return (int)position.y * this.width + (int)position.x;
     }
@@ -240,7 +261,11 @@ public class GameBoard extends GameObject {
         int size = 0;
         int x = (int)position.x;
         int y = (int)position.y;
-
+        int left = y * this.width + (x-1);
+        int right = y * this.width + (x+1);
+        int up = (y-1) * this.width + x;
+        int down = (y+1) * this.width + x;
+        
         if (x < 1) { array_size--; }
         if (y < 1) { array_size--; }
         if (x >= this.width-1)  { array_size--; }
@@ -250,17 +275,17 @@ public class GameBoard extends GameObject {
         // other types of objects, and now all of them can be
         // interatable.
         Circle[] array = new Circle[array_size];
-        if (x < 1 == false) {
-            array[size++] = (Circle)board_array[y * this.width + (x-1)];
+        if (x < 1 == false && board_array[left] instanceof Circle) {
+            array[size++] = (Circle)board_array[left];
         }
-        if (x >= this.width-1 == false) {
-            array[size++] = (Circle)board_array[y * this.width + (x+1)];
+        if (x >= this.width-1 == false && board_array[right] instanceof Circle) {
+            array[size++] = (Circle)board_array[right];
         }
-        if (y < 1 == false) {
-            array[size++] = (Circle)board_array[(y-1) * this.width + x];
+        if (y < 1 == false && board_array[up] instanceof Circle) {
+            array[size++] = (Circle)board_array[up];
         }
-        if (y >= this.height-1 == false) {
-            array[size++] = (Circle)board_array[(y+1) * this.width + x];
+        if (y >= this.height-1 == false && board_array[down] instanceof Circle) {
+            array[size++] = (Circle)board_array[down];
         }
         return array;
     }
@@ -279,10 +304,7 @@ public class GameBoard extends GameObject {
 
     public void Draw() {
         for (GameBoardObject object: this.objects_array) {
-            if (object instanceof Circle) {
-                Circle circle = (Circle)object;
-                circle.Draw();
-            }
+            object.Draw();
         }
 
         if (this.objects_connected.isEmpty() == false) {
@@ -318,7 +340,7 @@ public class GameBoard extends GameObject {
         Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
         Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
         for (Circle c: circles_around_position) {
-            if(c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+            if(c != null && c.HasCollide(this.cursor_position) && color == c.GetColor()) {
                 int index = list.indexOf(c);
                 if (list_size > 1 && index == list_size-2) {
                     list.remove(list_size-1);
@@ -337,7 +359,7 @@ public class GameBoard extends GameObject {
         Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
         Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
         for (Circle c: circles_around_position) {
-            if(c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+            if(c != null && c.HasCollide(this.cursor_position) && color == c.GetColor()) {
                 int index = list.indexOf(c);
                 if (index == -1) {
                     list.add(c);
@@ -358,8 +380,6 @@ public class GameBoard extends GameObject {
         float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
         int object_format_offset = 9;
-
-        System.out.println(format);
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
             y_position -= this.object_padding.y;
@@ -370,8 +390,18 @@ public class GameBoard extends GameObject {
                                                        index*object_format_offset+9);
                 x_position += this.object_padding.x;
                 int color = (int)Long.parseLong(color_format, 16);
-                array[index] = new Circle(this.r, x_position, y_position, radius,
-                                          color);
+                switch (type) {
+                case 'C': {
+                    array[index] = new Circle(this.r, x_position, y_position, radius,
+                                              color);
+                } break;
+                case 'W': {
+                    array[index] = new Wall(this.r, x_position, y_position, radius);
+                } break;
+                default: {
+                    OutputSystem.DebugPrint("Try to create an unknow type of GameObject! Wrong Format String!", 2);
+                }
+                }
             }
         }
         return array;
@@ -379,7 +409,9 @@ public class GameBoard extends GameObject {
     
     public String ToFileFormat() {
         String Result = ((char)width)+""+((char)height);
+        int index = 1;
         for (GameBoardObject o: objects_array) {
+            index++;
             Result += o.ToFileFormat();
         }
         return Result;
