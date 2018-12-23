@@ -28,8 +28,8 @@ public class Game implements Runnable
     private Thread thread;
     private Audio  game_audio;
     private Sound  ball_sound;
-
-
+    private Sound  collect_sound;
+    
     public String format_board = new String();
     public  boolean is_resuming = false;
     private GameBoard game_board;
@@ -143,20 +143,23 @@ public class Game implements Runnable
 
     private void Initalize(String board_format) {
         // 15 * 15 Max for screen. But it does not look good. For now the target is of 10 * 10.
+        this.collect_sound = this.game_audio.CreateSound("Collect.wav");
+        
         if (board_format.length() >= 10) {
-            this.game_board = new GameBoard(this.renderer, board_format);
+            this.game_board = new GameBoard(this.renderer, board_format, collect_sound);
         } else {
-            this.game_board = new GameBoard(this.renderer, 10, 10);
+            this.game_board = new GameBoard(this.renderer, 10, 10, collect_sound);
         }
         this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
         this.debug_menu = new DebugMenu(this.renderer, ball_sound);
+
         GameState.state = 0;
         GameState.state ^= GameState.PLAYING;
     }
 
     private void GameUpdate(double delta) {
         if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
-            this.game_board = new GameBoard(this.renderer, 10, 10);
+            this.game_board = new GameBoard(this.renderer, 10, 10, collect_sound);
             GameState.state ^= GameState.PLAYING;
             return;
         }

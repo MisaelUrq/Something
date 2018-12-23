@@ -5,7 +5,7 @@ import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.Wall;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
-
+import com.urquieta.something.platform.Sound;
 import com.urquieta.something.output.OutputSystem;
 
 // TODO(Misael): Make the renderer static, so we can envoke it from
@@ -31,40 +31,31 @@ public class GameBoard extends GameObject {
     private float start_x_position;
     private float start_y_position;
     private boolean is_update_done;
-
-    public GameBoard(Renderer r, String format) {
-        super(r, new Vec2(0, 0));
+    private int last_color_clear;
+    private boolean player_connected_color;
+    private Sound collect_sound;
+    
+    public GameBoard(Renderer renderer, String format, Sound collect_sound) {
+        super(renderer, new Vec2(0, 0));
         this.width  = (int)format.charAt(0);
         this.height = (int)format.charAt(1);
         this.r = renderer;
-        this.random = new Random();
-        this.cursor_position = new Vec2(0, 0);
-        this.color_palette = new int[5];
-        this.player_dragged = false;
-        this.player_move_init = false;
-        Vec2 screen_size=  r.GetScreen().GetSize();
-        // TODO(Misael): Find a way to make the padding more dependent
-        // on the width and height of the board itself.
-        float padding = 45;
-        this.objects_proportion = padding/3.3f;
-        this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
-        this.objects_connected = new ArrayList<GameBoardObject>();
-        this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
-        this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
-        this.color_palette[0] =  0xFFFF0000;
-        this.color_palette[1] =  0xFF00FF00;
-        this.color_palette[2] =  0xFF0000FF;
-        this.color_palette[3] =  0xFFFF00FF;
-        this.color_palette[4] =  0xFF00FFFF;
+        CommonInit(collect_sound);
         this.objects_array = InitGameObjectArray(format.substring(2, format.length()));
-        this.is_update_done = true;
     }
     
-    public GameBoard(Renderer r, int width, int height) {
-        super(r, new Vec2(0, 0));
+    public GameBoard(Renderer renderer, int width, int height, Sound collect_sound) {
+        super(renderer, new Vec2(0, 0));
         this.width = width;
         this.height = height;
         this.r = renderer;
+        CommonInit(collect_sound);
+        this.objects_array = InitGameObjectArray();
+        
+    }
+
+    private void CommonInit(Sound collect_sound) {
+        this.collect_sound = collect_sound;
         this.random = new Random();
         this.cursor_position = new Vec2(0, 0);
         this.color_palette = new int[5];
@@ -73,10 +64,12 @@ public class GameBoard extends GameObject {
         Vec2 screen_size=  r.GetScreen().GetSize();
         // TODO(Misael): Find a way to make the padding more dependent
         // on the width and height of the board itself.
+        
         float padding = 45;
         this.objects_proportion = padding/3.3f;
         this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
         this.objects_connected = new ArrayList<GameBoardObject>();
+        
         this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
         this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
         this.color_palette[0] =  0xFFFF0000;
@@ -84,16 +77,17 @@ public class GameBoard extends GameObject {
         this.color_palette[2] =  0xFF0000FF;
         this.color_palette[3] =  0xFFFF00FF;
         this.color_palette[4] =  0xFF00FFFF;
-        this.objects_array = InitGameObjectArray();
         this.is_update_done = true;
+        this.last_color_clear = 0;
+        this.player_connected_color = false;
     }
-
+    
     private GameBoardObject[] InitGameObjectArray() {
         GameBoardObject[] array = new GameBoardObject[width * height];
         float y_position = start_y_position;
         float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
-        int wall_random = (Math.abs(random.nextInt()) % 79);
+        int wall_random = (Math.abs(random.nextInt()) % 79)+1;
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
             y_position -= this.object_padding.y;
@@ -120,7 +114,6 @@ public class GameBoard extends GameObject {
         this.player_dragged = new_status;
     }
 
-    private boolean player_connected_color = false;
 
     @Override
     public void Update(double delta) {
@@ -142,6 +135,7 @@ public class GameBoard extends GameObject {
             if (objects_connected.size() > 1) {
                 if (player_connected_color) {
                     int color = this.objects_connected.get(0).GetColor();
+                    last_color_clear = color;
                     this.objects_connected.clear();
                     ClearObjectsOfColor(this.objects_array, color);
                     this.player_connected_color = false;
@@ -157,7 +151,7 @@ public class GameBoard extends GameObject {
             this.player_move_init = false;
 
         }
-
+        
         this.time_pass += delta;
         if (this.is_update_done == false) {
             UpdateObjectsArray(this.objects_array);
@@ -166,6 +160,8 @@ public class GameBoard extends GameObject {
                 this.time_pass = 0;
             }
             UpdateObjectPositions((float)delta, this.objects_array);
+        } else {
+            last_color_clear = 0;
         }
     }
 
@@ -197,13 +193,24 @@ public class GameBoard extends GameObject {
                     break;
                 }
             }
+
+            int color = 0;
+            for(;;) {
+                color = this.color_palette[Math.abs(random.nextInt() % 5)];
+                if (color == last_color_clear) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+                        
             if (array[index].CanSpaceBeUsed()) {
                 Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding.x),
                                          this.start_y_position);
                 float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                                 (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
                 Circle object = new Circle(this.r, position, radius,
-                                           this.color_palette[Math.abs(random.nextInt() % 5)]);
+                                           color);
                 object.PositionToMove(object.GetPosition().Sub(0, (row+1)*this.object_padding.y));
                 array[index] = object;
             }
@@ -326,6 +333,7 @@ public class GameBoard extends GameObject {
                 if (circle.HasCollide(this.cursor_position) &&
                     (list.contains(circle) == false)) {
                     list.add(circle);
+                    collect_sound.Play(1);
                     return true;
                 }
             }
@@ -363,9 +371,11 @@ public class GameBoard extends GameObject {
                 int index = list.indexOf(c);
                 if (index == -1) {
                     list.add(c);
+                    collect_sound.Play(1);
                 }
                 else if (index >= 0 && index < list_size-3) {
                     list.add(c);
+                    collect_sound.Play(1);
                     return true;
                 }
                 break;
