@@ -15,10 +15,11 @@ public class DebugMenu extends GameObject {
     private Button open_close;
     private Button show_hide_fps;
     private Button start_new_game;
+    private Button go_to_start_menu;
     private boolean is_open;
     private InputEvent event;
     private boolean is_done;
-    
+
     ArrayList<GameObject> objects;
 
     public DebugMenu(Renderer renderer, Sound sound) {
@@ -30,9 +31,12 @@ public class DebugMenu extends GameObject {
                                         0xffafafaf, 0xff2d2d2d, sound);
         this.start_new_game = new Button(renderer, new Vec2(-1.75f, .78f), .42f, .1f, "New Game",
                                          0xffafafaf, 0xff2d2d2d, sound);
+        this.go_to_start_menu = new Button(renderer, new Vec2(-1.75f, .66f), .42f, .1f, "Start Menu",
+                                           0xffafafaf, 0xff2d2d2d, sound);
         this.objects.add(this.show_hide_fps);
         this.objects.add(this.start_new_game);
-        
+        this.objects.add(this.go_to_start_menu);
+
         this.is_open = false;
         this.event = new InputEvent();
         this.is_done = true;
@@ -86,6 +90,10 @@ public class DebugMenu extends GameObject {
             GameState.state ^= GameState.PLAYING;
         }
 
+        if (go_to_start_menu.IsPressed(event)) {
+            GameState.current_mode = GameState.START_MENU;
+        }
+
         if (is_done == false) {
             float speed = (this.is_open) ? .05f : -0.05f;
             Vec2 a = new Vec2(speed, 0); // Acceleration
@@ -93,12 +101,12 @@ public class DebugMenu extends GameObject {
             for (GameObject object: objects) {
                 object.ComputeMove(t, a);
             }
-            open_close.ComputeMove(t, a);            
+            open_close.ComputeMove(t, a);
             ComputeMove(t*1.015f, a);
 
             float x_current = this.open_close.GetPosition().x;
             float x_dest = this.open_close.GetPositionToGo().x;
-            
+
             boolean move_ended = false;
             if ((is_open && x_current > x_dest) || (is_open == false && x_current < x_dest)) {
                 move_ended = true;

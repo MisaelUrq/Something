@@ -1,11 +1,4 @@
 @echo off
-REM This is for a future build system.
-SET arg1=%1
-SET arg2=%2
-SET arg3=%3
-SET arg4=%4
-SET arg5=%5
-SET arg6=%6
 
 SET BUILD_FOR_ANDROID=1
 SET INSTALL_ON_PHONE=0
@@ -16,11 +9,11 @@ SET DEGUG=1
 SET APP_NAME=Something
 SET CODE=com/urquieta/something
 SET SRC=src/%CODE%
-SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/android/*.java %SRC%/game/util/*.java 
+SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/android/*.java %SRC%/game/util/*.java
 SET PC_CODE=%SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java %SRC%/game/ui/*.java %SRC%/output/*.java
 SET FILES_CLASSES=%CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class %CODE%/game/ui/*.class %CODE%/output/*.class
 
-rem rem TODO(Misael): Make the build without ant.
+rem TODO(Misael): Make the build without ant.
 rem SET AAPT="C:\Android\android-sdk\build-tools\28.0.3\aapt.exe"
 rem SET DX="C:\Android\android-sdk\build-tools\28.0.3\dx.bat"
 rem SET PLATFORM_ANDROID="C:\Android\android-sdk\platforms\android-16\android.jar"
@@ -55,5 +48,5 @@ if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
      javac -g -Xdiags:verbose -Xlint:all -d bin %PC_CODE%
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar %FILES_CLASSES% 
+     jar -cvmf ..\MANIFEST.MF Something.jar %FILES_CLASSES%
      popd ))

@@ -15,6 +15,15 @@ public class PCSound {
         this.clip = clip;
     }
 
+    public void PlayLoop(float volume) {
+        if (this.clip.isRunning()) {
+            this.clip.stop();
+        }
+        this.clip.setFramePosition(0);
+        this.clip.loop(Clip.LOOP_CONTINUOUSLY);
+        this.clip.start();
+    }
+
     public void Play(float volume) {
         if (this.clip.isRunning()) {
             this.clip.stop();

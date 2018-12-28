@@ -34,42 +34,50 @@ public class GameBoard extends GameObject {
     private int last_color_clear;
     private boolean player_connected_color;
     private Sound collect_sound;
-    
-    public GameBoard(Renderer renderer, String format, Sound collect_sound) {
+    private Sound drop_sound;
+    private Sound clear_color_sound;
+    private int   score;
+
+    public GameBoard(Renderer renderer, String format,
+                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
         this.width  = (int)format.charAt(0);
         this.height = (int)format.charAt(1);
         this.r = renderer;
-        CommonInit(collect_sound);
+        CommonInit(collect_sound, drop_sound, clear_color_sound);
         this.objects_array = InitGameObjectArray(format.substring(2, format.length()));
     }
-    
-    public GameBoard(Renderer renderer, int width, int height, Sound collect_sound) {
+
+    public GameBoard(Renderer renderer, int width, int height,
+                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
         this.width = width;
         this.height = height;
         this.r = renderer;
-        CommonInit(collect_sound);
+        CommonInit(collect_sound, drop_sound, clear_color_sound);
         this.objects_array = InitGameObjectArray();
-        
+
     }
 
-    private void CommonInit(Sound collect_sound) {
+    private void CommonInit(Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         this.collect_sound = collect_sound;
+        this.drop_sound    = drop_sound;
+        this.clear_color_sound = clear_color_sound;
         this.random = new Random();
-        this.cursor_position = new Vec2(0, 0);
-        this.color_palette = new int[5];
-        this.player_dragged = false;
+        this.cursor_position  = new Vec2(0, 0);
+        this.color_palette    = new int[5];
+        this.player_dragged   = false;
         this.player_move_init = false;
-        Vec2 screen_size=  r.GetScreen().GetSize();
+        Vec2 screen_size =  r.GetScreen().GetSize();
+        this.score       = 0;
         // TODO(Misael): Find a way to make the padding more dependent
         // on the width and height of the board itself.
-        
+
         float padding = 45;
         this.objects_proportion = padding/3.3f;
-        this.object_padding = new Vec2(padding/screen_size.x, padding/screen_size.y);
-        this.objects_connected = new ArrayList<GameBoardObject>();
-        
+        this.object_padding     = new Vec2(padding/screen_size.x, padding/screen_size.y);
+        this.objects_connected  = new ArrayList<GameBoardObject>();
+
         this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
         this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
         this.color_palette[0] =  0xFFFF0000;
@@ -81,13 +89,13 @@ public class GameBoard extends GameObject {
         this.last_color_clear = 0;
         this.player_connected_color = false;
     }
-    
+
     private GameBoardObject[] InitGameObjectArray() {
         GameBoardObject[] array = new GameBoardObject[width * height];
         float y_position = start_y_position;
         float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
-        int wall_random = (Math.abs(random.nextInt()) % 79)+1;
+        int wall_random = (Math.abs(random.nextInt()) % 79)+13;
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
             y_position -= this.object_padding.y;
@@ -114,7 +122,6 @@ public class GameBoard extends GameObject {
         this.player_dragged = new_status;
     }
 
-
     @Override
     public void Update(double delta) {
         if (this.player_dragged && this.is_update_done) {
@@ -133,11 +140,13 @@ public class GameBoard extends GameObject {
         }
         else {
             if (objects_connected.size() > 1) {
+                this.score += objects_connected.size();
                 if (player_connected_color) {
+                    this.clear_color_sound.Play(1);
                     int color = this.objects_connected.get(0).GetColor();
                     last_color_clear = color;
                     this.objects_connected.clear();
-                    ClearObjectsOfColor(this.objects_array, color);
+                    this.score += ClearObjectsOfColor(this.objects_array, color);
                     this.player_connected_color = false;
                 }
                 else {
@@ -151,7 +160,7 @@ public class GameBoard extends GameObject {
             this.player_move_init = false;
 
         }
-        
+
         this.time_pass += delta;
         if (this.is_update_done == false) {
             UpdateObjectsArray(this.objects_array);
@@ -203,7 +212,7 @@ public class GameBoard extends GameObject {
                     break;
                 }
             }
-                        
+
             if (array[index].CanSpaceBeUsed()) {
                 Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding.x),
                                          this.start_y_position);
@@ -217,12 +226,15 @@ public class GameBoard extends GameObject {
         }
     }
 
-    private void ClearObjectsOfColor(GameBoardObject[] array, int color) {
+    private int ClearObjectsOfColor(GameBoardObject[] array, int color) {
+        int objects_remove = 0;
         for (GameBoardObject object: array) {
             if (object.GetColor() == color) {
+                ++objects_remove;
                 DeleteObjectFromArray(array, object);
             }
         }
+        return objects_remove;
     }
 
     private void DeleteObjectFromArray(GameBoardObject[] array, GameBoardObject object) {
@@ -247,7 +259,7 @@ public class GameBoard extends GameObject {
             }
         }
     }
-        
+
     private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
                                                         int a, int b) {
         GameBoardObject Temp = array[a];
@@ -272,7 +284,7 @@ public class GameBoard extends GameObject {
         int right = y * this.width + (x+1);
         int up = (y-1) * this.width + x;
         int down = (y+1) * this.width + x;
-        
+
         if (x < 1) { array_size--; }
         if (y < 1) { array_size--; }
         if (x >= this.width-1)  { array_size--; }
@@ -309,6 +321,8 @@ public class GameBoard extends GameObject {
         return index_position;
     }
 
+    // NOTE(Misael): Maybe this need to be ajust depending on the score?
+    private Vec2 score_position = new Vec2(.5f, .9f);
     public void Draw() {
         for (GameBoardObject object: this.objects_array) {
             object.Draw();
@@ -324,6 +338,8 @@ public class GameBoard extends GameObject {
                 current_position = position;
             }
         }
+
+        this.r.DrawText("Score: "+this.score, this.score_position, 0xFF131313);
     }
 
     private boolean DidPlayerMakeMoveOnCircles(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
@@ -352,6 +368,7 @@ public class GameBoard extends GameObject {
                 int index = list.indexOf(c);
                 if (list_size > 1 && index == list_size-2) {
                     list.remove(list_size-1);
+                    this.drop_sound.Play(1);
                     return true;
                 }
                 break;
@@ -416,7 +433,10 @@ public class GameBoard extends GameObject {
         }
         return array;
     }
-    
+
+    // TODO(Misael): Make a better way to actually save the game,
+    // since this is really not gone help in the long run, since every
+    // time I want to scale it i'm gone have problems.
     public String ToFileFormat() {
         String Result = ((char)width)+""+((char)height);
         int index = 1;

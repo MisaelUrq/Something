@@ -11,8 +11,10 @@ import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.Audio;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.ui.Button;
+import com.urquieta.something.game.ui.StartMenu;
 import com.urquieta.something.game.ui.DebugMenu;
 import com.urquieta.something.output.OutputSystem;
+
 
 public class Game implements Runnable
 {
@@ -27,14 +29,14 @@ public class Game implements Runnable
     private GameState game_state;
     private Thread thread;
     private Audio  game_audio;
-    private Sound  ball_sound;
-    private Sound  collect_sound;
-    
-    public String format_board = new String();
-    public  boolean is_resuming = false;
+
+    public  String    format_board = new String();
+    public  boolean   is_resuming = false;
     private GameBoard game_board;
     private DebugMenu debug_menu;
-    
+    private Sound     background_sound;
+    private StartMenu start_menu;
+
     public Game()
     {
         super();
@@ -58,7 +60,7 @@ public class Game implements Runnable
             if (this.game_state == null) {
                 this.game_state = new GameState();
             }
-            GameState.is_game_running = true;
+            GameState.SetRunning(true);
             thread = new Thread(this);
             thread.start();
         }
@@ -78,7 +80,7 @@ public class Game implements Runnable
         long   last_fps_time = 0;
 
         Initalize(format_board);
-        while (GameState.is_game_running) {
+        while (GameState.IsRunning()) {
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
             start_time = before_time;
@@ -114,7 +116,7 @@ public class Game implements Runnable
     }
 
     public void stopThread() {
-        GameState.is_game_running = false;
+        GameState.SetRunning(false);
         while (true) {
             try {
                 thread.join();
@@ -130,62 +132,98 @@ public class Game implements Runnable
     public String ToFileFormat() {
         return this.game_board.ToFileFormat();
     }
-    
+
     public void Pause() {
         this.stopThread();
     }
 
     public void Resume(String format) {
         this.format_board = format;
-        System.out.println("SOMETHING: "+format);
         this.startThread();
     }
 
     private void Initalize(String board_format) {
-        // 15 * 15 Max for screen. But it does not look good. For now the target is of 10 * 10.
-        this.collect_sound = this.game_audio.CreateSound("Collect.wav");
-        
-        if (board_format.length() >= 10) {
-            this.game_board = new GameBoard(this.renderer, board_format, collect_sound);
-        } else {
-            this.game_board = new GameBoard(this.renderer, 10, 10, collect_sound);
-        }
-        this.ball_sound = this.game_audio.CreateSound("Ball_Bounce.wav");
-        this.debug_menu = new DebugMenu(this.renderer, ball_sound);
+        Sound collect_sound = this.game_audio.CreateSound("collect.wav");
+        Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
+        Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+        // TODO(Misael): Find a better button sound.
+        Sound button_sound      = this.game_audio.CreateSound("button.wav");
+        this.background_sound   = this.game_audio.CreateSound("background.wav");
 
-        GameState.state = 0;
+        // NOTE(Misael): Make the sound initalize in another function maybe?
+        if (board_format.length() >= 10) {
+            this.game_board = new GameBoard(this.renderer, board_format,
+                                            collect_sound, drop_sound, clear_color_sound);
+        } else {
+            this.game_board = new GameBoard(this.renderer, 10, 10,
+                                            collect_sound, drop_sound, clear_color_sound);
+        }
+
+        this.debug_menu = new DebugMenu(this.renderer, button_sound);
+
+        GameState.SetAllDefault();
         GameState.state ^= GameState.PLAYING;
+        this.start_menu = new StartMenu(this.renderer, button_sound);
+        this.background_sound.PlayLoop(1);
     }
 
     private void GameUpdate(double delta) {
         if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
-            this.game_board = new GameBoard(this.renderer, 10, 10, collect_sound);
+            // TODO(Misael): I don't like this, the sound should not
+            // be loaded again... or maybe? When we have a concept of levels maybe, right now, NO!!
+            Sound collect_sound     = this.game_audio.CreateSound("collect.wav");
+            Sound drop_sound        = this.game_audio.CreateSound("drop.wav");
+            Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+            this.game_board = new GameBoard(this.renderer, 10, 10,
+                                            collect_sound, drop_sound, clear_color_sound);
             GameState.state ^= GameState.PLAYING;
             return;
         }
-        
+
+        // TODO(Misael): On android we got an exception saying that comming from this call... this:
+        // java.lang.IllegalStateException: Surface has already been released.
+ 	// at android.view.Surface.checkNotReleasedLocked(Surface.java:564)
+ 	// at android.view.Surface.lockCanvas(Surface.java:306)
+ 	// at android.view.SurfaceView$3.internalLockCanvas(SurfaceView.java:1043)
+ 	// at android.view.SurfaceView$3.lockCanvas(SurfaceView.java:1003)
+ 	// at com.urquieta.something.platform.android.AndroidScreen.beginDraw(AndroidScreen.java:43)
+ 	// at com.urquieta.something.platform.Screen.beginDraw(Screen.java:21)
+ 	// at com.urquieta.something.platform.Renderer.BeginDraw(Renderer.java:81)
         this.renderer.BeginDraw();
         InputEvent event = this.input.GetInputEvent();
 
-        switch (event.type) {
-        case InputEvent.TOUCH_DRAGGED: {
-            // TODO(Misael): Rename this function.
-            this.game_board.PlayerDragged(true);
+        switch (GameState.current_mode) {
+        case GameState.START_MENU: {
+            if (GameState.is_menu_active == false) {
+                this.start_menu.UpdateEvent(event);
+                this.start_menu.Update(delta);
+            }
+            this.start_menu.Draw();
         } break;
-        default: {
-            this.game_board.PlayerDragged(false);
-        }
+        case GameState.INFINITE_MODE: {
+            if (GameState.is_menu_active == false) {
+                switch (event.type) {
+                case InputEvent.TOUCH_DRAGGED: {
+                    // TODO(Misael): Rename this function.
+                    this.game_board.PlayerDragged(true);
+                } break;
+                default: {
+                    this.game_board.PlayerDragged(false);
+                }
+                }
+
+                this.game_board.UpdateCursor(event.cursor_position);
+                this.game_board.Update(delta);
+            }
+            this.game_board.Draw();
+        } break;
+        default:
+            this.renderer.DrawText("Comming soon! I hope...", new Vec2(-.5f, 0), 0xffcd1076);
         }
 
         this.debug_menu.UpdateEvent(event);
         this.debug_menu.Update(delta);
 
-        if (GameState.is_menu_active == false) {
-            this.game_board.UpdateCursor(event.cursor_position);
-            this.game_board.Update(delta);
-        }
-
-        this.game_board.Draw();
         this.debug_menu.Draw();
 
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
