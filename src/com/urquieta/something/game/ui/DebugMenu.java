@@ -95,7 +95,7 @@ public class DebugMenu extends GameObject {
         }
 
         if (is_done == false) {
-            float speed = (this.is_open) ? .05f : -0.05f;
+            float speed = (this.is_open) ? .03f : -0.03f;
             Vec2 a = new Vec2(speed, 0); // Acceleration
             float t = (float)delta;
             for (GameObject object: objects) {

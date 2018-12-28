@@ -162,33 +162,12 @@ public class Game implements Runnable
         this.debug_menu = new DebugMenu(this.renderer, button_sound);
 
         GameState.SetAllDefault();
-        GameState.state ^= GameState.PLAYING;
+        GameState.state ^= GameState.PLAYING; // NOTE(Misael): We need this for the game to think that we are playing, that way the prev game will continue.
         this.start_menu = new StartMenu(this.renderer, button_sound);
         this.background_sound.PlayLoop(1);
     }
 
     private void GameUpdate(double delta) {
-        if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
-            // TODO(Misael): I don't like this, the sound should not
-            // be loaded again... or maybe? When we have a concept of levels maybe, right now, NO!!
-            Sound collect_sound     = this.game_audio.CreateSound("collect.wav");
-            Sound drop_sound        = this.game_audio.CreateSound("drop.wav");
-            Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
-            this.game_board = new GameBoard(this.renderer, 10, 10,
-                                            collect_sound, drop_sound, clear_color_sound);
-            GameState.state ^= GameState.PLAYING;
-            return;
-        }
-
-        // TODO(Misael): On android we got an exception saying that comming from this call... this:
-        // java.lang.IllegalStateException: Surface has already been released.
- 	// at android.view.Surface.checkNotReleasedLocked(Surface.java:564)
- 	// at android.view.Surface.lockCanvas(Surface.java:306)
- 	// at android.view.SurfaceView$3.internalLockCanvas(SurfaceView.java:1043)
- 	// at android.view.SurfaceView$3.lockCanvas(SurfaceView.java:1003)
- 	// at com.urquieta.something.platform.android.AndroidScreen.beginDraw(AndroidScreen.java:43)
- 	// at com.urquieta.something.platform.Screen.beginDraw(Screen.java:21)
- 	// at com.urquieta.something.platform.Renderer.BeginDraw(Renderer.java:81)
         this.renderer.BeginDraw();
         InputEvent event = this.input.GetInputEvent();
 
@@ -201,6 +180,11 @@ public class Game implements Runnable
             this.start_menu.Draw();
         } break;
         case GameState.INFINITE_MODE: {
+            if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
+                this.game_board.InitNewBoard(10, 10);
+                GameState.state ^= GameState.PLAYING;
+            }
+
             if (GameState.is_menu_active == false) {
                 switch (event.type) {
                 case InputEvent.TOUCH_DRAGGED: {
@@ -216,6 +200,10 @@ public class Game implements Runnable
                 this.game_board.Update(delta);
             }
             this.game_board.Draw();
+        } break;
+        case GameState.EXIT: {
+            // TODO(Misael): If you select this the game won't save...
+            System.exit(0);
         } break;
         default:
             this.renderer.DrawText("Comming soon! I hope...", new Vec2(-.5f, 0), 0xffcd1076);

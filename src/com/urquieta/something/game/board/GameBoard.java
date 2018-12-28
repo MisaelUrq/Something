@@ -51,12 +51,11 @@ public class GameBoard extends GameObject {
     public GameBoard(Renderer renderer, int width, int height,
                      Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
+        this.r = renderer;
         this.width = width;
         this.height = height;
-        this.r = renderer;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
         this.objects_array = InitGameObjectArray();
-
     }
 
     private void CommonInit(Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
@@ -90,20 +89,29 @@ public class GameBoard extends GameObject {
         this.player_connected_color = false;
     }
 
+    public void InitNewBoard(int width, int height) {
+        this.width = width;
+        this.height = height;
+        CommonInit(collect_sound, drop_sound, clear_color_sound);
+        this.objects_array = InitGameObjectArray();
+    }
+
     private GameBoardObject[] InitGameObjectArray() {
         GameBoardObject[] array = new GameBoardObject[width * height];
         float y_position = start_y_position;
         float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
                         (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
-        int wall_random = (Math.abs(random.nextInt()) % 79)+13;
+        int wall_random  = (Math.abs(random.nextInt()) % width*height)+13;
+
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
             y_position -= this.object_padding.y;
+            int magic_number = (Math.abs(random.nextInt()) % (width*height)) / 2;
             for (int x = 0; x < width; x++) {
                 int index = width * y + x;
                 x_position += this.object_padding.x;
                 int color = this.color_palette[Math.abs(random.nextInt() % 5)];
-                if (index % wall_random == 0) {
+                if ((index+1) % wall_random == magic_number) {
                     array[index] = new Wall(this.r, x_position, y_position, radius*10);
                 } else {
                     array[index] = new Circle(this.r, x_position, y_position, radius,
