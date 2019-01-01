@@ -5,45 +5,53 @@ import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.Wall;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
+import com.urquieta.something.game.ui.Button;
+import com.urquieta.something.game.GameState;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.output.OutputSystem;
+import com.urquieta.something.platform.InputEvent;
+import com.urquieta.something.game.save.SaveState;
 
 // TODO(Misael): Make the renderer static, so we can envoke it from
 // everywere
 import com.urquieta.something.platform.Renderer;
+
 import java.util.Random;
 import java.util.ArrayList;
+
 
 public class GameBoard extends GameObject {
     private GameBoardObject[] objects_array;
     private int width;
     private int height;
-    private float objects_proportion;
-    private Renderer r;
-    private Vec2 cursor_position;
+    private float  objects_proportion;
     private Random random;
     // TODO(Misael): Make a color class and maybe a color palette class?
-    private int[] color_palette;
-    private boolean player_dragged;
+    private int[]   color_palette;
+    private InputEvent event;
     private boolean player_move_init;
     private ArrayList<GameBoardObject> objects_connected;
-    private Vec2    object_padding;
+    private Vec2  object_padding;
     private float start_x_position;
     private float start_y_position;
     private boolean is_update_done;
-    private int last_color_clear;
+    private int     last_color_clear;
     private boolean player_connected_color;
-    private Sound collect_sound;
-    private Sound drop_sound;
-    private Sound clear_color_sound;
-    private int   score;
+    private Sound  collect_sound;
+    private Sound  drop_sound;
+    private Sound  clear_color_sound;
+    private int    score;
+    private boolean exit_requested;
+    // NOTE(Misael): We could make this button in the main game, that
+    // way we just renderer on top of every other mode except the
+    // menus. But I'm not sure if that's a great idea.
+    private Button return_to_menu;
 
     public GameBoard(Renderer renderer, String format,
                      Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
         this.width  = (int)format.charAt(0);
         this.height = (int)format.charAt(1);
-        this.r = renderer;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
         this.objects_array = InitGameObjectArray(format.substring(2, format.length()));
     }
@@ -51,7 +59,6 @@ public class GameBoard extends GameObject {
     public GameBoard(Renderer renderer, int width, int height,
                      Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
-        this.r = renderer;
         this.width = width;
         this.height = height;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
@@ -63,11 +70,9 @@ public class GameBoard extends GameObject {
         this.drop_sound    = drop_sound;
         this.clear_color_sound = clear_color_sound;
         this.random = new Random();
-        this.cursor_position  = new Vec2(0, 0);
         this.color_palette    = new int[5];
-        this.player_dragged   = false;
         this.player_move_init = false;
-        Vec2 screen_size =  r.GetScreen().GetSize();
+        Vec2 screen_size =  super.renderer.GetScreen().GetSize();
         this.score       = 0;
         // TODO(Misael): Find a way to make the padding more dependent
         // on the width and height of the board itself.
@@ -87,6 +92,8 @@ public class GameBoard extends GameObject {
         this.is_update_done = true;
         this.last_color_clear = 0;
         this.player_connected_color = false;
+        this.return_to_menu = new Button(this.renderer, new Vec2(.80f, -.90f), .2f, .1f, "Exit",
+                                         0xffafafaf, 0xff2d2d2d, drop_sound);
     }
 
     public void InitNewBoard(int width, int height) {
@@ -99,8 +106,8 @@ public class GameBoard extends GameObject {
     private GameBoardObject[] InitGameObjectArray() {
         GameBoardObject[] array = new GameBoardObject[width * height];
         float y_position = start_y_position;
-        float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
-                        (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
+        float radius = ((objects_proportion / super.renderer.GetScreen().GetWidth()) +
+                        (objects_proportion / super.renderer.GetScreen().GetHeight())) / 2;
         int wall_random  = (Math.abs(random.nextInt()) % width*height)+13;
 
         for (int y = 0; y < height; y++) {
@@ -112,9 +119,9 @@ public class GameBoard extends GameObject {
                 x_position += this.object_padding.x;
                 int color = this.color_palette[Math.abs(random.nextInt() % 5)];
                 if ((index+1) % wall_random == magic_number) {
-                    array[index] = new Wall(this.r, x_position, y_position, radius*10);
+                    array[index] = new Wall(this.renderer, x_position, y_position, radius*10);
                 } else {
-                    array[index] = new Circle(this.r, x_position, y_position, radius,
+                    array[index] = new Circle(this.renderer, x_position, y_position, radius,
                                               color);
                 }
             }
@@ -122,17 +129,14 @@ public class GameBoard extends GameObject {
         return array;
     }
 
-    public void UpdateCursor(Vec2 new_position) {
-        this.cursor_position = new_position;
-    }
-
-    public void PlayerDragged(boolean new_status) {
-        this.player_dragged = new_status;
+    public void UpdateEvent(InputEvent new_event) {
+        this.event = new_event;
     }
 
     @Override
     public void Update(double delta) {
-        if (this.player_dragged && this.is_update_done) {
+        if ((this.event.type == InputEvent.TOUCH_CLIC || this.event.type == InputEvent.TOUCH_DRAGGED)
+            && this.is_update_done) {
             if (this.player_move_init == false) {
                 this.player_move_init = DidPlayerMakeMoveOnCircles(this.objects_array, this.objects_connected);
             }
@@ -180,8 +184,18 @@ public class GameBoard extends GameObject {
         } else {
             last_color_clear = 0;
         }
+
+        if (this.return_to_menu.IsPressed(event)) {
+            this.exit_requested = true;
+        } else {
+            // TODO(Misael): We don't really need this, find a better
+            // way to express this, since I don't want to set this to
+            // false, every time.
+            this.exit_requested = false;
+        }
     }
 
+    // TODO(Misael): Move this from here!! And find a better name
     private double time_pass = 0;
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
@@ -224,9 +238,9 @@ public class GameBoard extends GameObject {
             if (array[index].CanSpaceBeUsed()) {
                 Vec2 position = new Vec2(this.start_x_position + ((x+1)*this.object_padding.x),
                                          this.start_y_position);
-                float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
-                                (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
-                Circle object = new Circle(this.r, position, radius,
+                float radius = ((objects_proportion / this.renderer.GetScreen().GetWidth()) +
+                                (objects_proportion / this.renderer.GetScreen().GetHeight())) / 2;
+                Circle object = new Circle(this.renderer, position, radius,
                                            color);
                 object.PositionToMove(object.GetPosition().Sub(0, (row+1)*this.object_padding.y));
                 array[index] = object;
@@ -248,7 +262,7 @@ public class GameBoard extends GameObject {
     private void DeleteObjectFromArray(GameBoardObject[] array, GameBoardObject object) {
         Vec2 position = GetIndexPositionFromScreenPosition(object.GetPosition());
         int index = VecToIndex(position);
-        array[index] = new GameBoardObject(this.r, object.GetPosition());
+        array[index] = new GameBoardObject(this.renderer, object.GetPosition());
     }
 
     private void UpdateObjectsArray(GameBoardObject[] array) {
@@ -337,24 +351,25 @@ public class GameBoard extends GameObject {
         }
 
         if (this.objects_connected.isEmpty() == false) {
-            Vec2 current_position = this.cursor_position;
+            Vec2 current_position = this.event.cursor_position;
             for (int index = this.objects_connected.size()-1;
                  index >= 0; index--) {
                 Circle c = (Circle)this.objects_connected.get(index);
                 Vec2 position = c.GetPosition();
-                this.r.DrawLine(current_position, position, 0.02f, c.GetColor());
+                this.renderer.DrawLine(current_position, position, 0.02f, c.GetColor());
                 current_position = position;
             }
         }
 
-        this.r.DrawText("Score: "+this.score, this.score_position, 0xFF131313);
+        this.renderer.DrawText("Score: "+this.score, this.score_position, 0xFF131313);
+        this.return_to_menu.Draw();
     }
 
     private boolean DidPlayerMakeMoveOnCircles(GameBoardObject[] array, ArrayList<GameBoardObject> list) {
         for (GameBoardObject object: array) {
             if (object instanceof Circle) {
                 Circle circle = (Circle) object;
-                if (circle.HasCollide(this.cursor_position) &&
+                if (circle.HasCollide(this.event.cursor_position) &&
                     (list.contains(circle) == false)) {
                     list.add(circle);
                     collect_sound.Play(1);
@@ -372,7 +387,7 @@ public class GameBoard extends GameObject {
         Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
         Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
         for (Circle c: circles_around_position) {
-            if(c != null && c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+            if(c != null && c.HasCollide(this.event.cursor_position) && color == c.GetColor()) {
                 int index = list.indexOf(c);
                 if (list_size > 1 && index == list_size-2) {
                     list.remove(list_size-1);
@@ -392,7 +407,7 @@ public class GameBoard extends GameObject {
         Vec2 last_index_position = GetIndexPositionFromScreenPosition(last_circle_conected.GetPosition());
         Circle[] circles_around_position = GetCirclesAroundIndexPosition(array, last_index_position);
         for (Circle c: circles_around_position) {
-            if(c != null && c.HasCollide(this.cursor_position) && color == c.GetColor()) {
+            if(c != null && c.HasCollide(this.event.cursor_position) && color == c.GetColor()) {
                 int index = list.indexOf(c);
                 if (index == -1) {
                     list.add(c);
@@ -412,8 +427,8 @@ public class GameBoard extends GameObject {
     private GameBoardObject[] InitGameObjectArray(String format) {
         GameBoardObject[] array = new GameBoardObject[width * height];
         float y_position = start_y_position;
-        float radius = ((objects_proportion / this.r.GetScreen().GetWidth()) +
-                        (objects_proportion / this.r.GetScreen().GetHeight())) / 2;
+        float radius = ((objects_proportion / this.renderer.GetScreen().GetWidth()) +
+                        (objects_proportion / this.renderer.GetScreen().GetHeight())) / 2;
         int object_format_offset = 9;
         for (int y = 0; y < height; y++) {
             float x_position = start_x_position;
@@ -427,11 +442,11 @@ public class GameBoard extends GameObject {
                 int color = (int)Long.parseLong(color_format, 16);
                 switch (type) {
                 case 'C': {
-                    array[index] = new Circle(this.r, x_position, y_position, radius,
+                    array[index] = new Circle(this.renderer, x_position, y_position, radius,
                                               color);
                 } break;
                 case 'W': {
-                    array[index] = new Wall(this.r, x_position, y_position, radius);
+                    array[index] = new Wall(this.renderer, x_position, y_position, radius);
                 } break;
                 default: {
                     OutputSystem.DebugPrint("Try to create an unknow type of GameObject! Wrong Format String!", 2);
@@ -442,16 +457,27 @@ public class GameBoard extends GameObject {
         return array;
     }
 
-    // TODO(Misael): Make a better way to actually save the game,
-    // since this is really not gone help in the long run, since every
-    // time I want to scale it i'm gone have problems.
+    public boolean WasExitRequested() {
+        return this.exit_requested;
+    }
+
+    public int GetWidth() {
+        return this.width;
+    }
+
+    public int GetHeight() {
+        return this.height;
+    }
+
+    public int GetScore() {
+        return this.score;
+    }
+
     public String ToFileFormat() {
-        String Result = ((char)width)+""+((char)height);
-        int index = 1;
+        String level_format = "";
         for (GameBoardObject o: objects_array) {
-            index++;
-            Result += o.ToFileFormat();
+            level_format += o.ToFileFormat();
         }
-        return Result;
+        return level_format;
     }
 }

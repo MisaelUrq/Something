@@ -10,46 +10,53 @@ import com.urquieta.something.platform.Audio;
 
 public class Button extends GameObject {
     private String message;
-    private float width;
-    private float height;
-    private int color_text;
-    private Sound sound;
+    private float  width;
+    private float  height;
+    private int    color_text;
+    private Sound  sound;
+    private Vec2   text_position;
+
+    public Button(Renderer renderer, Vec2 position, Vec2 dimensions,
+                  String message, int color, int color_text, Sound sound) {
+        super(renderer, position);
+        this.message = message;
+        this.width  = dimensions.x;
+        this.height = dimensions.y;
+        this.color = color;
+        this.color_text = color_text;
+        this.sound = sound;
+        this.text_position = this.position.Add(.03f, -0.06f);
+    }
 
     // TODO(Misael): Make one to display images.
-    public Button(Renderer render, Vec2 position, float width, float height,
+    public Button(Renderer renderer, Vec2 position, float width, float height,
                   String message, int color, int color_text, Sound sound) {
-        super(render, position);
+        super(renderer, position);
         this.message = message;
-        // float message_length = render.GetScreen().PixelsToLength(message.length());
         this.width  = width;
         this.height = height;
         this.color = color;
         this.color_text = color_text;
         this.sound = sound;
+        this.text_position = this.position.Add(.03f, -0.06f);
     }
 
     @Override
     public void Update(double delta) {
-
+        this.text_position = this.position.Add(.03f, -0.06f);
     }
 
     @Override
     public void Draw() {
-        float x = width/2;
-        float y = height/2;
-        super.renderer.DrawRect(position.x-x, position.y+y,
-                                position.x+x, position.y-y,
+        super.renderer.DrawRect(position.x, position.y,
+                                position.x+width, position.y-height,
                                 super.color);
-        super.renderer.DrawText(this.message, position.Add(-(x-.03f), -.02f), color_text);
+        super.renderer.DrawText(this.message, this.text_position, this.color_text);
     }
 
-    
-    
     private boolean HasCollide(Vec2 input) {
-        float x = this.width/2;
-        float y = this.height/2;
-        if (input.x >= position.x-x && input.x <= position.x+x &&
-            input.y >= position.y-y && input.y <= position.y+y) {
+        if ((input.x >= position.x && input.x <= position.x+width) &&
+            (input.y <= position.y && input.y >= position.y-height)) {
             return true;
         } else {
             return false;
@@ -66,5 +73,4 @@ public class Button extends GameObject {
             return false;
         }
     }
-
 }

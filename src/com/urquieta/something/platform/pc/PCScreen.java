@@ -14,8 +14,8 @@ import com.urquieta.something.platform.pc.Context;
 
 public class PCScreen extends Canvas {
     private static final long serialVersionUID = 1L;
-    public static int width  = 300;
-    public static int height = 450;
+    public static int width  = 600;
+    public static int height = 850;
     private Game game;
     private JFrame frame;
     BufferStrategy buffer;

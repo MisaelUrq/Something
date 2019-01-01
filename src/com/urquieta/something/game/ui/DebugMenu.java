@@ -25,7 +25,7 @@ public class DebugMenu extends GameObject {
     public DebugMenu(Renderer renderer, Sound sound) {
         super(renderer, new Vec2(-2f, 0));
         this.objects  = new ArrayList<GameObject>();
-        this.open_close = new Button(renderer, new Vec2(-.85f, .95f), .3f, .1f, "Debug",
+        this.open_close = new Button(renderer, new Vec2(-1f, 1f), .3f, .1f, "Debug",
                                      0xffafafaf, 0xff2d2d2d, sound);
         this.show_hide_fps = new Button(renderer, new Vec2(-1.75f, .9f), .2f, .1f, "FPS",
                                         0xffafafaf, 0xff2d2d2d, sound);
@@ -63,6 +63,11 @@ public class DebugMenu extends GameObject {
 
     @Override
     public void Update(double delta) {
+        this.open_close.Update(delta);
+        for (GameObject object: objects) {
+            object.Update(delta);
+        }
+
         if (this.is_done && open_close.IsPressed(event) && event.type == InputEvent.TOUCH_CLIC) {
             GameState.is_menu_active = !GameState.is_menu_active;
             float distance_to_move = 1f;

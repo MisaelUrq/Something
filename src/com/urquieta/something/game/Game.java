@@ -13,6 +13,7 @@ import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.ui.Button;
 import com.urquieta.something.game.ui.StartMenu;
 import com.urquieta.something.game.ui.DebugMenu;
+import com.urquieta.something.game.save.SaveState;
 import com.urquieta.something.output.OutputSystem;
 
 
@@ -36,6 +37,7 @@ public class Game implements Runnable
     private DebugMenu debug_menu;
     private Sound     background_sound;
     private StartMenu start_menu;
+    private SaveState savefile;
 
     public Game()
     {
@@ -66,10 +68,12 @@ public class Game implements Runnable
         }
     }
 
-    public void Init(Screen screen, Input input, Audio audio) {
+    public void Init(Screen screen, Input input, Audio audio,
+                     SaveState savefile) {
         this.SetScreen(screen);
         this.SetInput(input);
         this.SetAudio(audio);
+        this.SetSavefile(savefile);
     }
 
     @Override
@@ -130,7 +134,7 @@ public class Game implements Runnable
     }
 
     public String ToFileFormat() {
-        return this.game_board.ToFileFormat();
+        return "";
     }
 
     public void Pause() {
@@ -148,6 +152,7 @@ public class Game implements Runnable
         Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
         // TODO(Misael): Find a better button sound.
         Sound button_sound      = this.game_audio.CreateSound("button.wav");
+        // TODO(Misael): This sound does not play in Android.
         this.background_sound   = this.game_audio.CreateSound("background.wav");
 
         // NOTE(Misael): Make the sound initalize in another function maybe?
@@ -162,7 +167,7 @@ public class Game implements Runnable
         this.debug_menu = new DebugMenu(this.renderer, button_sound);
 
         GameState.SetAllDefault();
-        GameState.state ^= GameState.PLAYING; // NOTE(Misael): We need this for the game to think that we are playing, that way the prev game will continue.
+        GameState.state ^= GameState.PLAYING; // NOTE(Misael): We need this for the game to think that we are playing, that way the prev game will not be ignored.
         this.start_menu = new StartMenu(this.renderer, button_sound);
         this.background_sound.PlayLoop(1);
     }
@@ -186,18 +191,17 @@ public class Game implements Runnable
             }
 
             if (GameState.is_menu_active == false) {
-                switch (event.type) {
-                case InputEvent.TOUCH_DRAGGED: {
-                    // TODO(Misael): Rename this function.
-                    this.game_board.PlayerDragged(true);
-                } break;
-                default: {
-                    this.game_board.PlayerDragged(false);
-                }
-                }
-
-                this.game_board.UpdateCursor(event.cursor_position);
+                this.game_board.UpdateEvent(event);
                 this.game_board.Update(delta);
+            }
+
+            if (this.game_board.WasExitRequested()) {
+                this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
+                                             this.game_board.GetWidth(), this.game_board.GetHeight(),
+                                             this.game_board.GetScore(), "infinity");
+                GameState.current_mode = GameState.START_MENU;
+                this.savefile.SaveGame();
+                break;
             }
             this.game_board.Draw();
         } break;
@@ -211,8 +215,8 @@ public class Game implements Runnable
 
         this.debug_menu.UpdateEvent(event);
         this.debug_menu.Update(delta);
-
         this.debug_menu.Draw();
+
 
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
@@ -233,5 +237,9 @@ public class Game implements Runnable
 
     private void SetInput(Input input) {
         this.input = input;
+    }
+
+    private void SetSavefile(SaveState savefile) {
+        this.savefile = savefile;
     }
 }
