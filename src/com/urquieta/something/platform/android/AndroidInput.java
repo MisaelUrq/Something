@@ -17,7 +17,7 @@ public class AndroidInput implements OnTouchListener {
             this.input_event.type = InputEvent.TOUCH_CLIC;
         }
         else if (this.input_event.prev_type == InputEvent.TOUCH_UP &&
-            this.input_event.type == InputEvent.TOUCH_CLIC) {
+                 this.input_event.type == InputEvent.TOUCH_CLIC) {
             this.input_event.type = InputEvent.TOUCH_UP;
             this.input_event.prev_type = InputEvent.TOUCH_CLIC;
         }
@@ -30,6 +30,9 @@ public class AndroidInput implements OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         synchronized (this) {
+            // TODO(Misael): Compare this and the update logic to see
+            // if the input proccess in the same way if not, then we
+            // have to chage all of this.
             this.input_event.prev_type = this.input_event.type;
             switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:

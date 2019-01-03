@@ -83,7 +83,7 @@ public class Game implements Runnable
         int    fps = 0;
         long   last_fps_time = 0;
 
-        Initalize(format_board);
+        Initalize();
         while (GameState.IsRunning()) {
             long before_time   = System.nanoTime();
             long update_lenght = before_time - start_time;
@@ -146,7 +146,7 @@ public class Game implements Runnable
         this.startThread();
     }
 
-    private void Initalize(String board_format) {
+    private void Initalize() {
         Sound collect_sound = this.game_audio.CreateSound("collect.wav");
         Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
         Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
@@ -156,8 +156,11 @@ public class Game implements Runnable
         this.background_sound   = this.game_audio.CreateSound("background.wav");
 
         // NOTE(Misael): Make the sound initalize in another function maybe?
-        if (board_format.length() >= 10) {
-            this.game_board = new GameBoard(this.renderer, board_format,
+        savefile.LoadSaveGame();
+        if (savefile.WasGameNotFinish()) {
+            SaveState.LevelPaused level = savefile.GetSavedLevel();
+            this.game_board = new GameBoard(this.renderer,
+                                            level.width, level.height, level.score, level.format,
                                             collect_sound, drop_sound, clear_color_sound);
         } else {
             this.game_board = new GameBoard(this.renderer, 10, 10,
@@ -206,7 +209,12 @@ public class Game implements Runnable
             this.game_board.Draw();
         } break;
         case GameState.EXIT: {
-            // TODO(Misael): If you select this the game won't save...
+            // TODO(Misael): If you select this the game won't
+            // save... And on android I don't really think its the
+            // right way, Why? I don't know, I don't really care, it's
+            // stupid that you have to use a special function to exit
+            // your program. I really hope the're other ways to exits
+            // than just calling from the MainActivity.
             System.exit(0);
         } break;
         default:

@@ -47,13 +47,14 @@ public class GameBoard extends GameObject {
     // menus. But I'm not sure if that's a great idea.
     private Button return_to_menu;
 
-    public GameBoard(Renderer renderer, String format,
+    public GameBoard(Renderer renderer, int width, int height, int score, String format,
                      Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
         super(renderer, new Vec2(0, 0));
-        this.width  = (int)format.charAt(0);
-        this.height = (int)format.charAt(1);
+        this.width  = width;
+        this.height = height;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
-        this.objects_array = InitGameObjectArray(format.substring(2, format.length()));
+        this.score = score;
+        this.objects_array = InitGameObjectArray(format);
     }
 
     public GameBoard(Renderer renderer, int width, int height,
