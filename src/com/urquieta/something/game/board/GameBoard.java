@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 
 public class GameBoard extends GameObject {
+    private Goals level_goals;
     private GameBoardObject[] objects_array;
     private int width;
     private int height;
@@ -42,6 +43,7 @@ public class GameBoard extends GameObject {
     private Sound  clear_color_sound;
     private int    score;
     private boolean exit_requested;
+
     // NOTE(Misael): We could make this button in the main game, that
     // way we just renderer on top of every other mode except the
     // menus. But I'm not sure if that's a great idea.
@@ -72,6 +74,7 @@ public class GameBoard extends GameObject {
         this.clear_color_sound = clear_color_sound;
         this.random = new Random();
         this.color_palette    = new int[5];
+        this.level_goals = new Goals(renderer);
         this.player_move_init = false;
         Vec2 screen_size =  super.renderer.GetScreen().GetSize();
         this.score       = 0;
@@ -95,6 +98,11 @@ public class GameBoard extends GameObject {
         this.player_connected_color = false;
         this.return_to_menu = new Button(this.renderer, new Vec2(.80f, -.90f), .2f, .1f, "Exit",
                                          0xffafafaf, 0xff2d2d2d, drop_sound);
+    }
+
+    public void InitLevel(int width, int height, String format) {
+        InitNewBoard(width, height);
+        this.objects_array = InitGameObjectArray(format);
     }
 
     public void InitNewBoard(int width, int height) {
@@ -156,13 +164,18 @@ public class GameBoard extends GameObject {
                 this.score += objects_connected.size();
                 if (player_connected_color) {
                     this.clear_color_sound.Play(1);
+
                     int color = this.objects_connected.get(0).GetColor();
+                    int score_from_clear_color = ClearObjectsOfColor(this.objects_array, color);
                     last_color_clear = color;
+                    this.level_goals.AddToScore(color, score_from_clear_color);
                     this.objects_connected.clear();
-                    this.score += ClearObjectsOfColor(this.objects_array, color);
+                    this.score += score_from_clear_color;
                     this.player_connected_color = false;
                 }
                 else {
+                    this.level_goals.AddToScore(this.objects_connected.get(0).GetColor(),
+                                                this.objects_connected.size());
                     for (GameBoardObject object: this.objects_connected) {
                         DeleteObjectFromArray(this.objects_array, object);
                     }
@@ -177,11 +190,15 @@ public class GameBoard extends GameObject {
         this.time_pass += delta;
         if (this.is_update_done == false) {
             UpdateObjectsArray(this.objects_array);
+            this.level_goals.Update(delta);
             if (time_pass > 5) {
                 CreateNewObjects(this.objects_array);
                 this.time_pass = 0;
             }
             UpdateObjectPositions((float)delta, this.objects_array);
+            if (this.level_goals.WereGoalsCompleted() == true) {
+                this.exit_requested = true;
+            }
         } else {
             last_color_clear = 0;
         }
@@ -362,6 +379,7 @@ public class GameBoard extends GameObject {
             }
         }
 
+        this.level_goals.Draw();
         this.renderer.DrawText("Score: "+this.score, this.score_position, 0xFF131313);
         this.return_to_menu.Draw();
     }
@@ -480,5 +498,11 @@ public class GameBoard extends GameObject {
             level_format += o.ToFileFormat();
         }
         return level_format;
+    }
+
+    public void DEBUG_InitDummyGoals() {
+        this.level_goals.AddColorGoal(color_palette[1], 10);
+        this.level_goals.AddColorGoal(color_palette[3], 10);
+        this.level_goals.AddColorGoal(color_palette[0], 10);
     }
 }

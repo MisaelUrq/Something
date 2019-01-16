@@ -16,7 +16,6 @@ import com.urquieta.something.game.ui.DebugMenu;
 import com.urquieta.something.game.save.SaveState;
 import com.urquieta.something.output.OutputSystem;
 
-
 public class Game implements Runnable
 {
     private final int  TARGET_FPS = 30;
@@ -113,8 +112,7 @@ public class Game implements Runnable
                 thread.sleep(time_to_sleep);
             }
             catch (Exception e) {
-                // TODO(Misael): Change this for an actual loggin system.
-                System.out.println("SOMETHING_ERROR: "+e);
+                OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
             }
         }
     }
@@ -127,8 +125,7 @@ public class Game implements Runnable
                 break;
             }
             catch (Exception e) {
-                // TODO(Misael): Change this for an actual loggin system.
-                System.out.println("SOMETHING_ERROR: "+e);
+                OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
             }
         }
     }
@@ -141,8 +138,7 @@ public class Game implements Runnable
         this.stopThread();
     }
 
-    public void Resume(String format) {
-        this.format_board = format;
+    public void Resume() {
         this.startThread();
     }
 
@@ -155,22 +151,20 @@ public class Game implements Runnable
         // TODO(Misael): This sound does not play in Android.
         this.background_sound   = this.game_audio.CreateSound("background.wav");
 
-        // NOTE(Misael): Make the sound initalize in another function maybe?
+        GameState.SetAllDefault();
         savefile.LoadSaveGame();
         if (savefile.WasGameNotFinish()) {
             SaveState.LevelPaused level = savefile.GetSavedLevel();
             this.game_board = new GameBoard(this.renderer,
                                             level.width, level.height, level.score, level.format,
                                             collect_sound, drop_sound, clear_color_sound);
+            GameState.state ^= GameState.PLAYING;
         } else {
             this.game_board = new GameBoard(this.renderer, 10, 10,
                                             collect_sound, drop_sound, clear_color_sound);
         }
 
         this.debug_menu = new DebugMenu(this.renderer, button_sound);
-
-        GameState.SetAllDefault();
-        GameState.state ^= GameState.PLAYING; // NOTE(Misael): We need this for the game to think that we are playing, that way the prev game will not be ignored.
         this.start_menu = new StartMenu(this.renderer, button_sound);
         this.background_sound.PlayLoop(1);
     }
@@ -199,11 +193,28 @@ public class Game implements Runnable
             }
 
             if (this.game_board.WasExitRequested()) {
-                this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
-                                             this.game_board.GetWidth(), this.game_board.GetHeight(),
-                                             this.game_board.GetScore(), "infinity");
-                GameState.current_mode = GameState.START_MENU;
-                this.savefile.SaveGame();
+                GameState.state ^= GameState.PLAYING;
+                SaveGame();
+                break;
+            }
+            this.game_board.Draw();
+        } break;
+        case GameState.NORMAL_MODE: {
+            if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
+                this.game_board.InitNewBoard(5, 5);
+                this.game_board.DEBUG_InitDummyGoals();
+                // this.game_board.SetGoals(goals);
+                GameState.state ^= GameState.PLAYING;
+            }
+
+            if (GameState.is_menu_active == false) {
+                this.game_board.UpdateEvent(event);
+                this.game_board.Update(delta);
+            }
+
+            if (this.game_board.WasExitRequested()) {
+                GameState.state ^= GameState.PLAYING;
+                SaveGame();
                 break;
             }
             this.game_board.Draw();
@@ -232,6 +243,14 @@ public class Game implements Runnable
         }
 
         this.renderer.EndDraw();
+    }
+
+    public void SaveGame() {
+        this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
+                                     this.game_board.GetWidth(), this.game_board.GetHeight(),
+                                     this.game_board.GetScore(), "infinity");
+        GameState.current_mode = GameState.START_MENU;
+        this.savefile.SaveGame();
     }
 
     private void SetAudio(Audio audio) {

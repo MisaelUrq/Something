@@ -19,6 +19,16 @@ public class GameState {
     public static int current_mode = START_MENU;
 
 
+    public static void SetGameOver() {
+        state = state | GameState.PLAYING;
+        state = ~GameState.PLAYING;
+    }
+
+    public static void SetToPlaying() {
+        state = state | GameState.PLAYING;
+    }
+
+
     public static void SetAllDefault() {
         state = 0;
         is_menu_active = false;

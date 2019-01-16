@@ -53,9 +53,7 @@ public class MainActivity extends Activity
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-        editor.putString("game", game.ToFileFormat());
-        editor.commit();
+        game.SaveGame();
         game.Pause();
     }
 
@@ -63,8 +61,6 @@ public class MainActivity extends Activity
     public void onResume() {
         super.onResume();
         game.is_resuming = true;
-        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        String format = preferences.getString("game", "DEFAULT");
-        game.Resume(format);
+        game.Resume();
     }
 }

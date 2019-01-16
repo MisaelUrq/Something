@@ -15,7 +15,7 @@ public class PCAudio {
 
     public Sound CreateSound(String filename) {
         Sound Result = new Sound();
-
+        filename = "assets/"+filename;
         try {
             File sound_file = new File(filename);
             AudioInputStream audio = AudioSystem.getAudioInputStream(sound_file);
