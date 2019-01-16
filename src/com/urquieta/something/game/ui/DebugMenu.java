@@ -92,7 +92,7 @@ public class DebugMenu extends GameObject {
         }
 
         if (start_new_game.IsPressed(event)) {
-            GameState.SetGameOver();
+            GameState.restart_level_requested = true;
         }
 
         if (go_to_start_menu.IsPressed(event)) {

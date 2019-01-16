@@ -34,7 +34,7 @@ public class Goals extends  GameObject {
             }
         }
 
-        return true;
+        return (color_scores.size() > 0);
     }
 
     public void Update(double delta) {
@@ -70,6 +70,9 @@ public class Goals extends  GameObject {
 
         public void AddToScore(int score) {
             this.current_score += score;
+            if (this.current_score >= this.goal_score) {
+                this.current_score = goal_score;
+            }
         }
 
         public boolean IsGoalCompleted() {

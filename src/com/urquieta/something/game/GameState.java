@@ -8,30 +8,37 @@ public class GameState {
     public static final int SHOW_FPS   = (1 << 1);
     public static final int HIDE_FPS   = (0 << 1);
 
+
     public static final int START_MENU      = 0;
     public static final int INFINITE_MODE   = 1;
     public static final int NORMAL_MODE     = 2;
     public static final int EXIT            = 3;
 
     public static boolean is_menu_active   = false;
+    public static boolean restart_level_requested = false;
     private static volatile boolean is_game_running;
     public static int state;
     public static int current_mode = START_MENU;
 
 
     public static void SetGameOver() {
-        state = state | GameState.PLAYING;
-        state = ~GameState.PLAYING;
+        state = state | PLAYING;
+        state = ~PLAYING;
     }
 
     public static void SetToPlaying() {
-        state = state | GameState.PLAYING;
+        state = state | PLAYING;
+    }
+
+    public static boolean IsGameOver() {
+        return ((state & PLAYING) == GAME_OVER);
     }
 
 
     public static void SetAllDefault() {
         state = 0;
         is_menu_active = false;
+        restart_level_requested = false;
         current_mode   = START_MENU;
     }
 

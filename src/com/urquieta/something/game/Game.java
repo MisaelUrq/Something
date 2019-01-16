@@ -153,16 +153,6 @@ public class Game implements Runnable
 
         GameState.SetAllDefault();
         savefile.LoadSaveGame();
-        if (savefile.WasGameNotFinish()) {
-            SaveState.LevelPaused level = savefile.GetSavedLevel();
-            this.game_board = new GameBoard(this.renderer,
-                                            level.width, level.height, level.score, level.format,
-                                            collect_sound, drop_sound, clear_color_sound);
-            GameState.state ^= GameState.PLAYING;
-        } else {
-            this.game_board = new GameBoard(this.renderer, 10, 10,
-                                            collect_sound, drop_sound, clear_color_sound);
-        }
 
         this.debug_menu = new DebugMenu(this.renderer, button_sound);
         this.start_menu = new StartMenu(this.renderer, button_sound);
@@ -182,9 +172,27 @@ public class Game implements Runnable
             this.start_menu.Draw();
         } break;
         case GameState.INFINITE_MODE: {
-            if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
+            SaveState.LevelPaused level = this.savefile.GetSavedLevel(SaveState.INFINITE_MODE);
+            if (GameState.IsGameOver() && level != null) {
+                Sound collect_sound = this.game_audio.CreateSound("collect.wav");
+                Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
+                Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+                this.game_board = new GameBoard(this.renderer,
+                                                level.width, level.height, level.score, level.format,
+                                                collect_sound, drop_sound, clear_color_sound);
+                GameState.SetToPlaying();
+            }
+            else if (GameState.restart_level_requested) {
+                GameState.restart_level_requested = false;
                 this.game_board.InitNewBoard(10, 10);
-                GameState.state ^= GameState.PLAYING;
+                GameState.SetToPlaying();
+            } else if (this.game_board == null) {
+                Sound collect_sound = this.game_audio.CreateSound("collect.wav");
+                Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
+                Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+                this.game_board = new GameBoard(this.renderer, 10, 10,
+                                                collect_sound, drop_sound, clear_color_sound);
+                GameState.SetToPlaying();
             }
 
             if (GameState.is_menu_active == false) {
@@ -193,18 +201,36 @@ public class Game implements Runnable
             }
 
             if (this.game_board.WasExitRequested()) {
-                GameState.state ^= GameState.PLAYING;
+                GameState.SetGameOver();
                 SaveGame();
+                this.game_board = null;
                 break;
             }
             this.game_board.Draw();
         } break;
         case GameState.NORMAL_MODE: {
-            if ((GameState.state & GameState.PLAYING) == GameState.GAME_OVER) {
+            SaveState.LevelPaused level = this.savefile.GetSavedLevel(SaveState.NORMAL_MODE);
+            if (GameState.IsGameOver() && level != null) {
+                Sound collect_sound = this.game_audio.CreateSound("collect.wav");
+                Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
+                Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+                this.game_board = new GameBoard(this.renderer,
+                                                level.width, level.height, level.score, level.format,
+                                                collect_sound, drop_sound, clear_color_sound);
+                GameState.SetToPlaying();
+            }
+            else if (GameState.restart_level_requested) {
+                GameState.restart_level_requested = false;
                 this.game_board.InitNewBoard(5, 5);
                 this.game_board.DEBUG_InitDummyGoals();
-                // this.game_board.SetGoals(goals);
-                GameState.state ^= GameState.PLAYING;
+                GameState.SetToPlaying();
+            } else if (this.game_board == null) {
+                Sound collect_sound = this.game_audio.CreateSound("collect.wav");
+                Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
+                Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
+                this.game_board = new GameBoard(this.renderer, 5, 5,
+                                                collect_sound, drop_sound, clear_color_sound);
+                GameState.SetToPlaying();
             }
 
             if (GameState.is_menu_active == false) {
@@ -213,8 +239,9 @@ public class Game implements Runnable
             }
 
             if (this.game_board.WasExitRequested()) {
-                GameState.state ^= GameState.PLAYING;
+                GameState.SetGameOver();
                 SaveGame();
+                this.game_board = null;
                 break;
             }
             this.game_board.Draw();
@@ -226,6 +253,7 @@ public class Game implements Runnable
             // stupid that you have to use a special function to exit
             // your program. I really hope the're other ways to exits
             // than just calling from the MainActivity.
+            SaveGame();
             System.exit(0);
         } break;
         default:
@@ -236,7 +264,6 @@ public class Game implements Runnable
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
 
-
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
             this.renderer.DrawText(format_output, new Vec2(-1, -1), 0xFF000000);
@@ -246,9 +273,15 @@ public class Game implements Runnable
     }
 
     public void SaveGame() {
-        this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
-                                     this.game_board.GetWidth(), this.game_board.GetHeight(),
-                                     this.game_board.GetScore(), "infinity");
+        if (GameState.current_mode == GameState.INFINITE_MODE) {
+            this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
+                                         this.game_board.GetWidth(), this.game_board.GetHeight(),
+                                         this.game_board.GetScore(), SaveState.INFINITE_MODE);
+        } else if (GameState.current_mode == GameState.NORMAL_MODE) {
+            this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
+                                         this.game_board.GetWidth(), this.game_board.GetHeight(),
+                                         this.game_board.GetScore(), SaveState.NORMAL_MODE);
+        }
         GameState.current_mode = GameState.START_MENU;
         this.savefile.SaveGame();
     }

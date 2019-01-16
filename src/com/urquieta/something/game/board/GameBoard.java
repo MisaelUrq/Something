@@ -94,6 +94,7 @@ public class GameBoard extends GameObject {
         this.color_palette[3] =  0xFFFF00FF;
         this.color_palette[4] =  0xFF00FFFF;
         this.is_update_done = true;
+        this.exit_requested = false;
         this.last_color_clear = 0;
         this.player_connected_color = false;
         this.return_to_menu = new Button(this.renderer, new Vec2(.80f, -.90f), .2f, .1f, "Exit",
@@ -164,7 +165,6 @@ public class GameBoard extends GameObject {
                 this.score += objects_connected.size();
                 if (player_connected_color) {
                     this.clear_color_sound.Play(1);
-
                     int color = this.objects_connected.get(0).GetColor();
                     int score_from_clear_color = ClearObjectsOfColor(this.objects_array, color);
                     last_color_clear = color;
@@ -196,21 +196,17 @@ public class GameBoard extends GameObject {
                 this.time_pass = 0;
             }
             UpdateObjectPositions((float)delta, this.objects_array);
-            if (this.level_goals.WereGoalsCompleted() == true) {
-                this.exit_requested = true;
-            }
         } else {
             last_color_clear = 0;
         }
 
         if (this.return_to_menu.IsPressed(event)) {
             this.exit_requested = true;
-        } else {
-            // TODO(Misael): We don't really need this, find a better
-            // way to express this, since I don't want to set this to
-            // false, every time.
-            this.exit_requested = false;
         }
+    }
+
+    public boolean DidPlayerWinLevel() {
+        return this.level_goals.WereGoalsCompleted();
     }
 
     // TODO(Misael): Move this from here!! And find a better name

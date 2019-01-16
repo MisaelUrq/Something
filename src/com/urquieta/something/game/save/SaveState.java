@@ -8,33 +8,34 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
 
+
 // TODO(Misael): Maybe this should be a JSON or something reader...
 public class SaveState {
+    public static final String INFINITE_MODE = "INFINITE_MODE";
+    public static final String NORMAL_MODE   = "NORMAL_MODE";
+
 
     public class LevelPaused {
         public String format;
-        public String mode;
         public char   width;
         public char   height;
         public int    score;
 
         public LevelPaused() {
-            this("", 0, 0, 0, "");
+            this("", 0, 0, 0);
         }
 
-        public LevelPaused(String format, int width, int height, int score, String mode) {
+        public LevelPaused(String format, int width, int height, int score) {
             this.width  = (char)width;
             this.height = (char)height;
             this.format = format;
             this.score  = score;
-            this.mode   = mode;
         }
 
         public String toString() {
             return "score: " + score + "\n" +
                 "Dimension: (" + (int)width + ","+(int)height+")\n" +
-                "format: " + format + "\n" +
-                "mode: " + mode;
+                "format: " + format;
         }
 
         public String GetSaveFormat() {
@@ -45,8 +46,12 @@ public class SaveState {
             for (char c: array_score) {
                 result += c;
             }
-            result += format +mode;
+            result += format;
             return result;
+        }
+
+        public boolean IsGamePaused() {
+            return (format.length() != 0);
         }
     }
 
@@ -72,10 +77,12 @@ public class SaveState {
     }
 
 
-    private final String current_version = "0.0.1";
+    private final String current_version = "0.0.2";
+    private final String version_0_0_1  = "0.0.1";
     private File         save_parent;
     private boolean      was_a_level_being_played;
-    private LevelPaused  level_paused;
+    private LevelPaused  infinite_mode_level_paused;
+    private LevelPaused  normal_mode_level_paused;
 
     private String levels_complete; // This format is as follows
     private int    max_world_level; // Max
@@ -83,12 +90,19 @@ public class SaveState {
     public SaveState(File save_parent) {
         this.was_a_level_being_played = false;
         this.save_parent = save_parent;
-        this.level_paused = new LevelPaused();
+        this.infinite_mode_level_paused = new LevelPaused();
+        this.normal_mode_level_paused   = new LevelPaused();
     }
 
     public void SetLevelPaused(String level_format, int width, int height, int score, String mode) {
         this.was_a_level_being_played = true;
-        this.level_paused = new LevelPaused(level_format, width, height, score, mode);
+        if (mode.compareTo(INFINITE_MODE) == 0) {
+            this.infinite_mode_level_paused = new LevelPaused(level_format, width, height, score);
+        } else if (mode.compareTo(NORMAL_MODE) == 0) {
+            this.normal_mode_level_paused   = new LevelPaused(level_format, width, height, score);
+        } else {
+            OutputSystem.DebugPrint("Mode not recognize!", OutputSystem.ERRORS);
+        }
     }
 
     public String GetSaveFormat() {
@@ -99,24 +113,75 @@ public class SaveState {
         return was_a_level_being_played;
     }
 
-    public LevelPaused GetSavedLevel() {
-        return this.level_paused;
+    public LevelPaused GetSavedLevel(String mode) {
+        if (mode.compareTo(NORMAL_MODE) == 0 &&
+            normal_mode_level_paused.format.length() > 0) {
+            return normal_mode_level_paused;
+        } else if (mode.compareTo(INFINITE_MODE) == 0 &&
+                   infinite_mode_level_paused.format.length() > 0) {
+            return infinite_mode_level_paused;
+        } else {
+            return null;
+        }
     }
 
     private void LoadCurrentVersionTempFile() {
         File file = new File(this.save_parent, "temp");
         try {
             BufferedReader buffer_reader = new BufferedReader(new FileReader(file.getPath()));
-            this.level_paused.width  = (char)buffer_reader.read();
-            this.level_paused.height = (char)buffer_reader.read();
+            String infinite_mode_paused = buffer_reader.readLine();
+            if (infinite_mode_paused.compareTo("1") == 0) {
+                this.infinite_mode_level_paused.width  = (char)buffer_reader.read();
+                this.infinite_mode_level_paused.height = (char)buffer_reader.read();
+                char[] temp_array_score = new char[4];
+                int array_size = this.infinite_mode_level_paused.width * this.infinite_mode_level_paused.height * 9;
+                char[] temp_array_format = new char[array_size];
+                buffer_reader.read(temp_array_score, 0, 4);
+                buffer_reader.read(temp_array_format, 0, temp_array_format.length);
+                this.infinite_mode_level_paused.score  = FromCharArrayToInt(temp_array_score);
+                this.infinite_mode_level_paused.format = new String(temp_array_format);
+            }
+
+            String normal_mode_paused   = buffer_reader.readLine();
+            if (normal_mode_paused.compareTo("1") == 0) {
+                this.normal_mode_level_paused.width  = (char)buffer_reader.read();
+                this.normal_mode_level_paused.height = (char)buffer_reader.read();
+                char[] temp_array_score = new char[4];
+                int array_size = this.normal_mode_level_paused.width * this.normal_mode_level_paused.height * 9;
+                char[] temp_array_format = new char[array_size];
+                buffer_reader.read(temp_array_score, 0, 4);
+                buffer_reader.read(temp_array_format, 0, temp_array_format.length);
+                this.normal_mode_level_paused.score  = FromCharArrayToInt(temp_array_score);
+                this.normal_mode_level_paused.format = new String(temp_array_format);
+            }
+
+            buffer_reader.close();
+        } catch (Exception e) {
+            OutputSystem.DebugPrint("Could not load data from temp file: '"+file.getPath()+"'\nError Info: "+e,
+                                    OutputSystem.WARNINGS);
+        }
+    }
+
+    private void LoadLegacyVersionTempFile_0_0_1() {
+        File file = new File(this.save_parent, "temp");
+        try {
+            BufferedReader buffer_reader = new BufferedReader(new FileReader(file.getPath()));
+            char width  = (char)buffer_reader.read();
+            char height = (char)buffer_reader.read();
             char[] temp_array_score = new char[4];
-            char[] temp_array_format = new char[this.level_paused.width * this.level_paused.height * 9];
+            char[] temp_array_format = new char[width * height * 9];
             buffer_reader.read(temp_array_score, 0, 4);
             buffer_reader.read(temp_array_format, 0, temp_array_format.length);
-            this.level_paused.mode = buffer_reader.readLine();
-            this.level_paused.score  = FromCharArrayToInt(temp_array_score);
-            this.level_paused.format = new String(temp_array_format);
+            String mode = buffer_reader.readLine();
+            int score  = FromCharArrayToInt(temp_array_score);
+            String format = new String(temp_array_format);
             buffer_reader.close();
+
+            if (format.compareTo("infinity") == 0) {
+                this.infinite_mode_level_paused = new LevelPaused(format, width, height, score);
+            } else {
+                OutputSystem.DebugPrint("Error in legacy save file, version 0.0.1", OutputSystem.ERRORS);
+            }
         } catch (Exception e) {
             OutputSystem.DebugPrint("Could not load data from temp file: '"+file.getPath()+"'\nError Info: "+e,
                                     OutputSystem.WARNINGS);
@@ -138,7 +203,17 @@ public class SaveState {
                     LoadCurrentVersionTempFile();
                 } else if (line.compareTo("0") == 0) {
                     this.was_a_level_being_played = false;
-                    // TODO(Misael): Don't do anything?
+                } else {
+                    OutputSystem.DebugPrint("Wrong file format", OutputSystem.WARNINGS);
+                }
+            } break;
+            case version_0_0_1: {
+                String line = buffer_reader.readLine();
+                if (line.compareTo("1") == 0) {
+                    this.was_a_level_being_played = true;
+                    LoadLegacyVersionTempFile_0_0_1();
+                } else if (line.compareTo("0") == 0) {
+                    this.was_a_level_being_played = false;
                 } else {
                     OutputSystem.DebugPrint("Wrong file format", OutputSystem.WARNINGS);
                 }
@@ -155,13 +230,25 @@ public class SaveState {
     public void SaveGame() {
         File file = new File(this.save_parent, "general");
         try {
-
             file.createNewFile();
             File level_paused_file = new File(this.save_parent, "temp");
             if (this.was_a_level_being_played) {
                 level_paused_file.createNewFile();
                 FileOutputStream stream = new FileOutputStream(level_paused_file);
-                stream.write(this.level_paused.GetSaveFormat().getBytes());
+                if (this.infinite_mode_level_paused.IsGamePaused()) {
+                    stream.write("1\n".getBytes());
+                    stream.write(this.infinite_mode_level_paused.GetSaveFormat().getBytes());
+                } else {
+                    stream.write("0\n".getBytes());
+                }
+
+                if (this.normal_mode_level_paused.IsGamePaused()) {
+                    stream.write("1\n".getBytes());
+                    stream.write(this.normal_mode_level_paused.GetSaveFormat().getBytes());
+                } else {
+                    stream.write("0\n".getBytes());
+                }
+
                 stream.close();
             } else {
                 level_paused_file.delete();
