@@ -25,14 +25,14 @@ public class DebugMenu extends GameObject {
     public DebugMenu(Renderer renderer, Sound sound) {
         super(renderer, new Vec2(-2f, 0));
         this.objects  = new ArrayList<GameObject>();
-        this.open_close = new Button(renderer, new Vec2(-1f, 1f), .3f, .1f, "Debug",
-                                     0xffafafaf, 0xff2d2d2d, sound);
-        this.show_hide_fps = new Button(renderer, new Vec2(-1.75f, .9f), .2f, .1f, "FPS",
-                                        0xffafafaf, 0xff2d2d2d, sound);
-        this.start_new_game = new Button(renderer, new Vec2(-1.75f, .78f), .42f, .1f, "New Game",
-                                         0xffafafaf, 0xff2d2d2d, sound);
-        this.go_to_start_menu = new Button(renderer, new Vec2(-1.75f, .66f), .42f, .1f, "Start Menu",
-                                           0xffafafaf, 0xff2d2d2d, sound);
+        this.open_close       = new Button(renderer, new Vec2(-1f, 1f), .3f, .1f,
+                                           "Debug", 0xffafafaf, 0xff2d2d2d, sound);
+        this.show_hide_fps    = new Button(renderer, new Vec2(-1.75f, .9f), .2f, .1f,
+                                           "FPS", 0xffafafaf, 0xff2d2d2d, sound);
+        this.start_new_game   = new Button(renderer, new Vec2(-1.75f, .78f), .42f, .1f,
+                                           "New Game", 0xffafafaf, 0xff2d2d2d, sound);
+        this.go_to_start_menu = new Button(renderer, new Vec2(-1.75f, .66f), .42f, .1f,
+                                           "Start Menu", 0xffafafaf, 0xff2d2d2d, sound);
         this.objects.add(this.show_hide_fps);
         this.objects.add(this.start_new_game);
         this.objects.add(this.go_to_start_menu);
@@ -88,14 +88,14 @@ public class DebugMenu extends GameObject {
         }
 
         if (show_hide_fps.IsPressed(event)) {
-            GameState.state ^= GameState.SHOW_FPS;
+            GameState.ToggleState(GameState.SHOW_FPS);
         }
 
-        if (start_new_game.IsPressed(event)) {
+        if (!GameState.IsGameOver() && start_new_game.IsPressed(event)) {
             GameState.restart_level_requested = true;
         }
 
-        if (go_to_start_menu.IsPressed(event)) {
+        if (!GameState.IsGameOver() && go_to_start_menu.IsPressed(event)) {
             GameState.current_mode = GameState.START_MENU;
         }
 

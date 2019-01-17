@@ -130,10 +130,6 @@ public class Game implements Runnable
         }
     }
 
-    public String ToFileFormat() {
-        return "";
-    }
-
     public void Pause() {
         this.stopThread();
     }
@@ -217,6 +213,7 @@ public class Game implements Runnable
                 this.game_board = new GameBoard(this.renderer,
                                                 level.width, level.height, level.score, level.format,
                                                 collect_sound, drop_sound, clear_color_sound);
+                this.game_board.DEBUG_InitDummyGoals();
                 GameState.SetToPlaying();
             }
             else if (GameState.restart_level_requested) {
@@ -230,7 +227,9 @@ public class Game implements Runnable
                 Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
                 this.game_board = new GameBoard(this.renderer, 5, 5,
                                                 collect_sound, drop_sound, clear_color_sound);
+                this.game_board.DEBUG_InitDummyGoals();
                 GameState.SetToPlaying();
+
             }
 
             if (GameState.is_menu_active == false) {
