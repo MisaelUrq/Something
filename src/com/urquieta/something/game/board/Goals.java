@@ -57,6 +57,28 @@ public class Goals extends  GameObject {
         }
     }
 
+    public int GetNumObjectives() {
+        return color_scores.size();
+    }
+
+    public String GetFormat() {
+        String format = new String();
+
+        for (ColorScores c : color_scores) {
+            format += "C" + Integer.toHexString(c.color);
+        }
+        return format;
+    }
+
+    public char[] GetObjectivesCount() {
+        char[] result = new char[color_scores.size()];
+        for (int i = 0; i < color_scores.size(); i++) {
+            result[i] = (char)color_scores.get(i).current_score;
+        }
+
+        return result;
+    }
+
     class ColorScores {
         public int color;
         public int current_score;

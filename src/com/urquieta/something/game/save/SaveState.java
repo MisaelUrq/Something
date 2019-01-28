@@ -17,24 +17,40 @@ public class SaveState {
 
     public class LevelPaused {
         public String format;
+        public String objectives;
+        public char   num_objectives;
+        public char[] objectives_count;
         public char   width;
         public char   height;
         public int    score;
 
+
         public LevelPaused() {
-            this("", 0, 0, 0);
+            this("", 0, 0, 0, 0, null, "");
         }
 
-        public LevelPaused(String format, int width, int height, int score) {
+        public LevelPaused(String format, int width, int height, int score,
+                           int num_objectives, char[] objectives_count, String objectives) {
             this.width  = (char)width;
             this.height = (char)height;
             this.format = format;
+            this.num_objectives = (char)num_objectives;
+            this.objectives = objectives;
+            if (objectives_count != null) {
+                this.objectives_count = new char[objectives_count.length];
+                for (int i = 0; i < objectives_count.length; i++) {
+                    this.objectives_count[i] = objectives_count[i];
+                }
+            } else {
+                this.objectives_count = null;
+            }
             this.score  = score;
         }
 
         public String toString() {
             return "score: " + score + "\n" +
                 "Dimension: (" + (int)width + ","+(int)height+")\n" +
+                "objective(" + (int)num_objectives +"); " + objectives +
                 "format: " + format;
         }
 
@@ -47,6 +63,13 @@ public class SaveState {
                 result += c;
             }
             result += format;
+            result += num_objectives;
+            if (objectives_count != null) {
+                for (char c: objectives_count) {
+                    result += c;
+                }
+            }
+            result += objectives;
             return result;
         }
 
@@ -76,7 +99,6 @@ public class SaveState {
         return result;
     }
 
-
     private final String current_version = "0.0.2";
     private final String version_0_0_1  = "0.0.1";
     private File         save_parent;
@@ -94,12 +116,14 @@ public class SaveState {
         this.normal_mode_level_paused   = new LevelPaused();
     }
 
-    public void SetLevelPaused(String level_format, int width, int height, int score, String mode) {
+    public void SetLevelPaused(String level_format, int width, int height, int score, String mode,
+                               int num_objectives, char[] objectives_count, String objective) {
         this.was_a_level_being_played = true;
         if (mode.compareTo(INFINITE_MODE) == 0) {
-            this.infinite_mode_level_paused = new LevelPaused(level_format, width, height, score);
+            this.infinite_mode_level_paused = new LevelPaused(level_format, width, height, score, 0, null, "");
         } else if (mode.compareTo(NORMAL_MODE) == 0) {
-            this.normal_mode_level_paused   = new LevelPaused(level_format, width, height, score);
+            this.normal_mode_level_paused   = new LevelPaused(level_format, width, height, score,
+                                                              num_objectives, objectives_count, objective);
         } else {
             OutputSystem.DebugPrint("Mode not recognize!", OutputSystem.ERRORS);
         }
@@ -140,6 +164,7 @@ public class SaveState {
                 buffer_reader.read(temp_array_format, 0, temp_array_format.length);
                 this.infinite_mode_level_paused.score  = FromCharArrayToInt(temp_array_score);
                 this.infinite_mode_level_paused.format = new String(temp_array_format);
+                this.infinite_mode_level_paused.num_objectives = (char)buffer_reader.read();
             }
 
             String normal_mode_paused   = buffer_reader.readLine();
@@ -153,6 +178,15 @@ public class SaveState {
                 buffer_reader.read(temp_array_format, 0, temp_array_format.length);
                 this.normal_mode_level_paused.score  = FromCharArrayToInt(temp_array_score);
                 this.normal_mode_level_paused.format = new String(temp_array_format);
+                this.normal_mode_level_paused.num_objectives = (char)buffer_reader.read();
+                char[] temp_array_objectives = new char[this.normal_mode_level_paused.num_objectives];
+                this.normal_mode_level_paused.objectives_count = new char[this.normal_mode_level_paused.num_objectives];
+                for (char c: this.normal_mode_level_paused.objectives_count) {
+                    c = (char)buffer_reader.read();
+                }
+                buffer_reader.read(temp_array_objectives, 0, temp_array_objectives.length);
+                this.normal_mode_level_paused.objectives = new String(temp_array_objectives);
+                System.out.println(this.normal_mode_level_paused);
             }
 
             buffer_reader.close();
@@ -178,7 +212,7 @@ public class SaveState {
             buffer_reader.close();
 
             if (format.compareTo("infinity") == 0) {
-                this.infinite_mode_level_paused = new LevelPaused(format, width, height, score);
+                this.infinite_mode_level_paused = new LevelPaused(format, width, height, score, 0, null, "");
             } else {
                 OutputSystem.DebugPrint("Error in legacy save file, version 0.0.1", OutputSystem.ERRORS);
             }

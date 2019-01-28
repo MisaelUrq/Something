@@ -275,11 +275,13 @@ public class Game implements Runnable
         if (GameState.current_mode == GameState.INFINITE_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
-                                         this.game_board.GetScore(), SaveState.INFINITE_MODE);
+                                         this.game_board.GetScore(), SaveState.INFINITE_MODE, 0, null, "");
         } else if (GameState.current_mode == GameState.NORMAL_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
-                                         this.game_board.GetScore(), SaveState.NORMAL_MODE);
+                                         this.game_board.GetScore(), SaveState.NORMAL_MODE,
+                                         this.game_board.GetNumObjectives(), this.game_board.GetObjectivesCount(),
+                                         this.game_board.GetGoalsFormat());
         }
         GameState.current_mode = GameState.START_MENU;
         this.savefile.SaveGame();

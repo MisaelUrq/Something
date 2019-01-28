@@ -19,7 +19,6 @@ import com.urquieta.something.platform.Renderer;
 import java.util.Random;
 import java.util.ArrayList;
 
-
 public class GameBoard extends GameObject {
     private Goals level_goals;
     private GameBoardObject[] objects_array;
@@ -494,6 +493,18 @@ public class GameBoard extends GameObject {
             level_format += o.ToFileFormat();
         }
         return level_format;
+    }
+
+    public int GetNumObjectives() {
+        return level_goals.GetNumObjectives();
+    }
+
+    public String GetGoalsFormat() {
+        return level_goals.GetFormat();
+    }
+
+    public char[] GetObjectivesCount() {
+        return level_goals.GetObjectivesCount();
     }
 
     public void DEBUG_InitDummyGoals() {
