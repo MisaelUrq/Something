@@ -3,6 +3,7 @@ package com.urquieta.something.game;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.GameBoard;
+import com.urquieta.something.game.board.Goals;
 import com.urquieta.something.game.util.Vec2;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
@@ -15,6 +16,7 @@ import com.urquieta.something.game.ui.StartMenu;
 import com.urquieta.something.game.ui.DebugMenu;
 import com.urquieta.something.game.save.SaveState;
 import com.urquieta.something.output.OutputSystem;
+
 
 public class Game implements Runnable
 {
@@ -213,7 +215,9 @@ public class Game implements Runnable
                 this.game_board = new GameBoard(this.renderer,
                                                 level.width, level.height, level.score, level.format,
                                                 collect_sound, drop_sound, clear_color_sound);
-                this.game_board.DEBUG_InitDummyGoals();
+                this.game_board.InitGoals(new Goals(renderer,
+                                                    level.objectives_count, level.objectives_current_score,
+                                                    level.objectives));
                 GameState.SetToPlaying();
             }
             else if (GameState.restart_level_requested) {
@@ -275,12 +279,13 @@ public class Game implements Runnable
         if (GameState.current_mode == GameState.INFINITE_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
-                                         this.game_board.GetScore(), SaveState.INFINITE_MODE, 0, null, "");
+                                         this.game_board.GetScore(), SaveState.INFINITE_MODE, 0, null, null, "");
         } else if (GameState.current_mode == GameState.NORMAL_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
                                          this.game_board.GetScore(), SaveState.NORMAL_MODE,
-                                         this.game_board.GetNumObjectives(), this.game_board.GetObjectivesCount(),
+                                         this.game_board.GetNumObjectives(),
+                                         this.game_board.GetObjectivesCount(), this.game_board.GetObjectivesScore(),
                                          this.game_board.GetGoalsFormat());
         }
         GameState.current_mode = GameState.START_MENU;

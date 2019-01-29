@@ -14,6 +14,19 @@ public class Goals extends  GameObject {
         color_scores = new ArrayList<ColorScores>();
     }
 
+    public Goals(Renderer renderer, char[] objectives_count, char[] objectives_current_score,  String objectives) {
+        this(renderer);
+        for (int index = 0; index < objectives_count.length; index++) {
+            char game_object = objectives.charAt(index*9);
+            String color_format = objectives.substring(index*9+1,
+                                                       index*9+9);
+            int color = (int)Long.parseLong(color_format, 16);
+            System.out.println("color: ("+color+") - count("+objectives_count[index]+")");
+            AddColorGoal(color, objectives_count[index]);
+            AddToScore(color, objectives_current_score[index]);
+        }
+    }
+
     public void AddColorGoal(int color, int goal_score) {
         color_scores.add(new ColorScores(color, goal_score));
     }
@@ -70,10 +83,21 @@ public class Goals extends  GameObject {
         return format;
     }
 
-    public char[] GetObjectivesCount() {
+    public char[] GetObjectivesScore() {
         char[] result = new char[color_scores.size()];
         for (int i = 0; i < color_scores.size(); i++) {
             result[i] = (char)color_scores.get(i).current_score;
+            System.out.println((int)result[i]);
+        }
+
+        return result;
+    }
+
+    public char[] GetObjectivesCount() {
+        char[] result = new char[color_scores.size()];
+        for (int i = 0; i < color_scores.size(); i++) {
+            result[i] = (char)color_scores.get(i).goal_score;
+            System.out.println((int)result[i]);
         }
 
         return result;

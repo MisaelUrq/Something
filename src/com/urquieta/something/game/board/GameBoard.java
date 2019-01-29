@@ -507,6 +507,14 @@ public class GameBoard extends GameObject {
         return level_goals.GetObjectivesCount();
     }
 
+    public char[] GetObjectivesScore() {
+        return level_goals.GetObjectivesScore();
+    }
+
+    public void InitGoals(Goals goals) {
+        this.level_goals = goals;
+    }
+
     public void DEBUG_InitDummyGoals() {
         this.level_goals.AddColorGoal(color_palette[1], 10);
         this.level_goals.AddColorGoal(color_palette[3], 10);
