@@ -215,8 +215,12 @@ public class GameBoard extends GameObject {
     // TODO(Misael): Move this from here!! And find a better name
     private double time_pass = 0;
 
+    public void Randomize(double delta) {
+        SwapGameObjects(delta, this.objects_array);
+    }
+
     private void SwapGameObjects(double delta, GameBoardObject[] array) {
-        float speed = 0.001f;
+        float speed = 0.003f;
         this.is_update_done = false;
         for (int index = 0; index < (width*height)/2; index++) {
             GameBoardObject object = array[index];
@@ -232,7 +236,7 @@ public class GameBoard extends GameObject {
     }
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
-        float speed = 0.007f;
+        float speed = 0.003f;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.IsMoving()) {

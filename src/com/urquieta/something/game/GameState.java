@@ -17,6 +17,7 @@ public class GameState {
     public static boolean restart_level_requested = false;
     public static int state;
     public static int current_mode = START_MENU;
+    public static boolean randomize = false;
 
     private static volatile boolean is_game_running;
 

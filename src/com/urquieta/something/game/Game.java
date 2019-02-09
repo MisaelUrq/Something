@@ -267,6 +267,11 @@ public class Game implements Runnable
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
 
+        if (GameState.randomize) {
+            GameState.randomize = false;
+            this.game_board.Randomize(delta);
+        }
+
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
             this.renderer.DrawText(format_output, new Vec2(-1, -1), 0xFF000000);
