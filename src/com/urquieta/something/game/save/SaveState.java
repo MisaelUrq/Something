@@ -199,7 +199,6 @@ public class SaveState {
                 }
                 buffer_reader.read(temp_array_objectives, 0, temp_array_objectives.length);
                 this.normal_mode_level_paused.objectives = new String(temp_array_objectives);
-                System.out.println(this.normal_mode_level_paused);
             }
 
             buffer_reader.close();
