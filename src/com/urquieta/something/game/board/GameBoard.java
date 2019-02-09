@@ -197,7 +197,6 @@ public class GameBoard extends GameObject {
             UpdateObjectPositions((float)delta, this.objects_array);
         } else {
             if (AreNoMoveLeft(this.objects_array)) {
-                OutputSystem.DebugPrint("HELLO", OutputSystem.WARNINGS);
                 SwapGameObjects(delta, this.objects_array);
             }
             last_color_clear = 0;
@@ -220,15 +219,14 @@ public class GameBoard extends GameObject {
     }
 
     private void SwapGameObjects(double delta, GameBoardObject[] array) {
-        float speed = 0.003f;
         this.is_update_done = false;
-        for (int index = 0; index < (width*height)/2; index++) {
+        for (int index = 0; index < (width*height); index += 2) {
             GameBoardObject object = array[index];
             int random_index = random.nextInt(width*height);
             GameBoardObject object_swap = array[random_index];
             if ((object_swap instanceof Circle) && !object_swap.IsMoving() &&
                 (object instanceof Circle) && !object.IsMoving()) {
-                SwapArrayGameObjectsWithUpdatePosition(array, index, random_index);
+                SwapArrayGameObjects(array, index, random_index);
             } else {
                 continue;
             }
@@ -241,7 +239,7 @@ public class GameBoard extends GameObject {
         for (GameBoardObject object: array) {
             if (object.IsMoving()) {
                 this.is_update_done = false;
-                Vec2 a = new Vec2(speed, speed); // Acceleration
+                Vec2 a = new Vec2(speed/2, speed); // Acceleration
                 object.ComputeMove((float)delta, a);
 
                 if (object.IsMoving() == false) {
@@ -339,15 +337,19 @@ public class GameBoard extends GameObject {
         }
     }
 
-    private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
-                                                        int a, int b) {
+    private void SwapArrayGameObjects(GameBoardObject[] array, int a, int b) {
         GameBoardObject Temp = array[a];
         array[a] = array[b];
         array[b] = Temp;
         array[a].PositionToMove(array[b].GetPosition());
+        array[b].PositionToMove(array[a].GetPosition());
+    }
+
+    private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
+                                                        int a, int b) {
+        SwapArrayGameObjects(array, a, b);
         // TODO(Misael): Is this right?
         array[b].SetPosition(array[a].GetPosition());
-        array[b].PositionToMove(array[a].GetPosition());
     }
 
     // NOTE(Misael): Asumes that the input position is of another board object.
