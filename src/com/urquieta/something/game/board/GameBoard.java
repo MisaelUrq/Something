@@ -5,11 +5,14 @@ import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.Wall;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
+import com.urquieta.something.game.util.Color;
 import com.urquieta.something.game.ui.Button;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.output.OutputSystem;
 import com.urquieta.something.platform.InputEvent;
+import com.urquieta.something.platform.Image;
+import com.urquieta.something.platform.ImageLoader;
 import com.urquieta.something.game.save.SaveState;
 
 // TODO(Misael): Make the renderer static, so we can envoke it from
@@ -20,6 +23,8 @@ import java.util.Random;
 import java.util.ArrayList;
 
 public class GameBoard extends GameObject {
+    private ImageLoader image_loader;
+
     private Goals level_goals;
     private GameBoardObject[] objects_array;
     private int width;
@@ -27,7 +32,8 @@ public class GameBoard extends GameObject {
     private float  objects_proportion;
     private Random random;
     // TODO(Misael): Make a color class and maybe a color palette class?
-    private int[]   color_palette;
+    private Color[]   color_palette;
+    private Image[]   bubble_images;
     private InputEvent event;
     private boolean player_move_init;
     private ArrayList<GameBoardObject> objects_connected;
@@ -49,8 +55,9 @@ public class GameBoard extends GameObject {
     private Button return_to_menu;
 
     public GameBoard(Renderer renderer, int width, int height, int score, String format,
-                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
+                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound, ImageLoader image_loader) {
         super(renderer, new Vec2(0, 0));
+        this.image_loader = image_loader;
         this.width  = width;
         this.height = height;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
@@ -59,8 +66,9 @@ public class GameBoard extends GameObject {
     }
 
     public GameBoard(Renderer renderer, int width, int height,
-                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound) {
+                     Sound collect_sound, Sound drop_sound, Sound clear_color_sound, ImageLoader image_loader) {
         super(renderer, new Vec2(0, 0));
+        this.image_loader = image_loader;
         this.width = width;
         this.height = height;
         CommonInit(collect_sound, drop_sound, clear_color_sound);
@@ -72,7 +80,8 @@ public class GameBoard extends GameObject {
         this.drop_sound    = drop_sound;
         this.clear_color_sound = clear_color_sound;
         this.random = new Random();
-        this.color_palette    = new int[5];
+        this.color_palette    = new Color[5];
+        this.bubble_images    = new Image[5];
         this.level_goals = new Goals(renderer);
         this.player_move_init = false;
         Vec2 screen_size =  super.renderer.GetScreen().GetSize();
@@ -87,11 +96,14 @@ public class GameBoard extends GameObject {
 
         this.start_x_position = -((this.object_padding.x * (float)(this.width+1)  / 2.0f));
         this.start_y_position =  ((this.object_padding.y * (float)(this.height+1) / 2.0f));
-        this.color_palette[0] =  0xFFFF0000;
-        this.color_palette[1] =  0xFF00FF00;
-        this.color_palette[2] =  0xFF0000FF;
-        this.color_palette[3] =  0xFFFF00FF;
-        this.color_palette[4] =  0xFF00FFFF;
+        this.color_palette[0] =  new Color(0xFFFF0000);
+        this.color_palette[1] =  new Color(0xFF00FF00);
+        this.color_palette[2] =  new Color(0xFF0000FF);
+        this.color_palette[3] =  new Color(0xFFFF00FF);
+        this.color_palette[4] =  new Color(0xFF00FFFF);
+        for (int index = 0; index < 5; index++) {
+            bubble_images[index] = image_loader.CreateImage("bubble.png", this.color_palette[index]);
+        }
         this.is_update_done = true;
         this.exit_requested = false;
         this.last_color_clear = 0;
@@ -126,11 +138,11 @@ public class GameBoard extends GameObject {
             for (int x = 0; x < width; x++) {
                 int index = width * y + x;
                 x_position += this.object_padding.x;
-                int color = this.color_palette[Math.abs(random.nextInt() % 5)];
+                Image image = this.bubble_images[Math.abs(random.nextInt() % 5)];
                 if ((index+1) % wall_random == magic_number) {
                     array[index] = new Wall(this.renderer, x_position, y_position, radius*10);
                 } else {
-                    array[index] = new Circle(this.renderer, x_position, y_position, radius,
+                    array[index] = new Circle(this.renderer, image, x_position, y_position, radius,
                                               color);
                 }
             }
@@ -239,8 +251,10 @@ public class GameBoard extends GameObject {
             }
 
             int color = 0;
+            int index_color = 0;
             for(;;) {
-                color = this.color_palette[Math.abs(random.nextInt() % 5)];
+                index_color = Math.abs(random.nextInt() % 5);
+                color = this.color_palette[index_color].GetColorInt();
                 if (color == last_color_clear) {
                     continue;
                 } else {
@@ -253,7 +267,7 @@ public class GameBoard extends GameObject {
                                          this.start_y_position);
                 float radius = ((objects_proportion / this.renderer.GetScreen().GetWidth()) +
                                 (objects_proportion / this.renderer.GetScreen().GetHeight())) / 2;
-                Circle object = new Circle(this.renderer, position, radius,
+                Circle object = new Circle(this.renderer, bubble_images[index_color], position, radius,
                                            color);
                 object.PositionToMove(object.GetPosition().Sub(0, (row+1)*this.object_padding.y));
                 array[index] = object;
@@ -456,7 +470,13 @@ public class GameBoard extends GameObject {
                 int color = (int)Long.parseLong(color_format, 16);
                 switch (type) {
                 case 'C': {
-                    array[index] = new Circle(this.renderer, x_position, y_position, radius,
+                    Image image = new Image();
+                    for (Image temp: bubble_images) {
+                        if (temp.color_blend.GetColorInt() == color) {
+                            image = temp;
+                        }
+                    }
+                    array[index] = new Circle(this.renderer, image, x_position, y_position, radius,
                                               color);
                 } break;
                 case 'W': {
@@ -516,8 +536,8 @@ public class GameBoard extends GameObject {
     }
 
     public void DEBUG_InitDummyGoals() {
-        this.level_goals.AddColorGoal(color_palette[1], 10);
-        this.level_goals.AddColorGoal(color_palette[3], 10);
-        this.level_goals.AddColorGoal(color_palette[0], 10);
+        this.level_goals.AddColorGoal(bubble_images[1].color_blend.GetColorInt(), 10);
+        this.level_goals.AddColorGoal(bubble_images[3].color_blend.GetColorInt(), 10);
+        this.level_goals.AddColorGoal(bubble_images[0].color_blend.GetColorInt(), 10);
     }
 }

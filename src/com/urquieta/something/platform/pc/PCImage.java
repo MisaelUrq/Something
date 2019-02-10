@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 public class PCImage  {
     private BufferedImage buffer;
-
+    
     public PCImage() {
         buffer = null;
     }

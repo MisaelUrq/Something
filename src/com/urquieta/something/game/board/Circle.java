@@ -1,23 +1,26 @@
 package com.urquieta.something.game.board;
 
 import com.urquieta.something.platform.Renderer;
+import com.urquieta.something.platform.Image;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
 
 public class Circle extends GameBoardObject {
     private float radius;
     private final double bounce_animation_time;
+    private Image bubble_image;
 
-    public Circle(Renderer renderer, Vec2 position, float radius, int color) {
+    public Circle(Renderer renderer, Image image, Vec2 position, float radius, int color) {
         super(renderer, position, color, true, false, true);
         this.radius  = radius;
+        this.bubble_image = image;
         this.DEBUG_area_position_1 = this.position.Add(-radius, radius);
         this.DEBUG_area_position_2 = this.position.Add(radius, -radius);
         this.bounce_animation_time = 0.7;
     }
 
-    public Circle(Renderer renderer, float x, float y, float radius, int color) {
-        this(renderer, new Vec2(x, y), radius, color);
+    public Circle(Renderer renderer, Image image, float x, float y, float radius, int color) {
+        this(renderer, image, new Vec2(x, y), radius, color);
     }
 
     public float GetRadius() {
@@ -32,8 +35,7 @@ public class Circle extends GameBoardObject {
 
     @Override
     public void Draw() {
-        super.renderer.DrawCircle(this.position.x, this.position.y,
-                                  this.radius, this.color);
+        super.renderer.DrawImage(bubble_image, this.position.x, this.position.y);
     }
 
     // TODO(Misael): Find a way to implement animations. This I think

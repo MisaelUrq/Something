@@ -10,6 +10,7 @@ import java.awt.BasicStroke;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.Font;
+import java.awt.image.BufferedImage;
 
 public class PCRenderer {
     protected Screen screen;
@@ -33,7 +34,10 @@ public class PCRenderer {
 
     public void DrawImage(PCImage image, int x, int y) {
         if (this.graphics != null) {
-            this.graphics.drawImage(image.GetBuffer(), x, y, null);
+            BufferedImage bitmap = image.GetBuffer();
+            this.graphics.drawImage(bitmap,
+                                    x - (bitmap.getWidth()/2), y - (bitmap.getHeight()/2),
+                                    null);
         }
     }
 

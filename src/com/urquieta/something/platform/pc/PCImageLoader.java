@@ -15,7 +15,7 @@ public class PCImageLoader {
 
     public Image CreateImage(String path, Color color_blend) {
         Image result = CreateImage(path);
-
+        result.color_blend = color_blend;
         BufferedImage buffer = result.GetBuffer();
         int width  = buffer.getWidth();
         int height = buffer.getHeight();

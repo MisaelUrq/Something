@@ -3,8 +3,10 @@ package com.urquieta.something.platform.android;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Canvas;
+import android.graphics.Bitmap;
 
 import com.urquieta.something.platform.Screen;
+
 
 public class AndroidRenderer {
     public Screen screen;
@@ -46,7 +48,10 @@ public class AndroidRenderer {
 
     public void DrawImage(AndroidImage image, int x, int y) {
         if (this.screen.getCanvas() != null && image.GetBuffer() != null) {
-            this.screen.getCanvas().drawBitmap(image.GetBuffer(), x, y, null);
+            Bitmap bitmap = image.GetBuffer();
+                this.screen.getCanvas().drawBitmap(bitmap,
+                                                   x - (bitmap.getWidth()/2), y - (bitmap.getHeight()/2),
+                                                   null);
         }
     }
 

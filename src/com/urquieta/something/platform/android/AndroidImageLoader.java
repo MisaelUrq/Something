@@ -32,7 +32,7 @@ public class AndroidImageLoader {
 
     public Image CreateImage(String path, Color color_blend) {
         Image result = CreateImage(path);
-
+        result.color_blend = color_blend;
         Bitmap buffer = result.GetBuffer();
         int width  = buffer.getWidth();
         int height = buffer.getHeight();

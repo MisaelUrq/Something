@@ -186,7 +186,7 @@ public class Game implements Runnable
                 Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
                 this.game_board = new GameBoard(this.renderer,
                                                 level.width, level.height, level.score, level.format,
-                                                collect_sound, drop_sound, clear_color_sound);
+                                                collect_sound, drop_sound, clear_color_sound, game_image_loader);
                 GameState.SetToPlaying();
             }
             else if (GameState.restart_level_requested) {
@@ -198,7 +198,7 @@ public class Game implements Runnable
                 Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
                 Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
                 this.game_board = new GameBoard(this.renderer, 10, 10,
-                                                collect_sound, drop_sound, clear_color_sound);
+                                                collect_sound, drop_sound, clear_color_sound, game_image_loader);
                 GameState.SetToPlaying();
             }
 
@@ -223,7 +223,7 @@ public class Game implements Runnable
                 Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
                 this.game_board = new GameBoard(this.renderer,
                                                 level.width, level.height, level.score, level.format,
-                                                collect_sound, drop_sound, clear_color_sound);
+                                                collect_sound, drop_sound, clear_color_sound, game_image_loader);
                 this.game_board.InitGoals(new Goals(renderer,
                                                     level.objectives_count, level.objectives_current_score,
                                                     level.objectives));
@@ -239,7 +239,7 @@ public class Game implements Runnable
                 Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
                 Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
                 this.game_board = new GameBoard(this.renderer, 5, 5,
-                                                collect_sound, drop_sound, clear_color_sound);
+                                                collect_sound, drop_sound, clear_color_sound, game_image_loader);
                 this.game_board.DEBUG_InitDummyGoals();
                 GameState.SetToPlaying();
 
@@ -275,8 +275,6 @@ public class Game implements Runnable
         this.debug_menu.UpdateEvent(event);
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
-
-        this.renderer.DrawImage(test_image, 0.0f, 0.0f);
 
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
