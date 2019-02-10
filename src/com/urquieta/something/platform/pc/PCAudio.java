@@ -5,7 +5,9 @@ import java.io.File;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+
 import com.urquieta.something.platform.Sound;
+import com.urquieta.something.output.OutputSystem;
 
 public class PCAudio {
 
@@ -24,7 +26,7 @@ public class PCAudio {
             Result.Init(clip);
         }
         catch (Exception e) {
-            System.out.println("SOMETHING_ERROR: "+e);
+            OutputSystem.DebugPrint("SOMETHING_ERROR: "+e, OutputSystem.ERRORS);
         }
         return Result;
     }

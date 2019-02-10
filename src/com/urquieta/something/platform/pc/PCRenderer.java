@@ -1,6 +1,7 @@
 package com.urquieta.something.platform.pc;
 
 import com.urquieta.something.platform.Screen;
+import com.urquieta.something.platform.pc.PCImage;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -27,6 +28,12 @@ public class PCRenderer {
         if (this.graphics != null) {
             this.graphics.setColor(new Color(color, true));
             this.graphics.drawString(str, x, y);
+        }
+    }
+
+    public void DrawImage(PCImage image, int x, int y) {
+        if (this.graphics != null) {
+            this.graphics.drawImage(image.GetBuffer(), x, y, null);
         }
     }
 

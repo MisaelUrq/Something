@@ -5,10 +5,13 @@ import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.GameBoard;
 import com.urquieta.something.game.board.Goals;
 import com.urquieta.something.game.util.Vec2;
+import com.urquieta.something.game.util.Color;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
+import com.urquieta.something.platform.ImageLoader;
+import com.urquieta.something.platform.Image;
 import com.urquieta.something.platform.Audio;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.ui.Button;
@@ -16,7 +19,6 @@ import com.urquieta.something.game.ui.StartMenu;
 import com.urquieta.something.game.ui.DebugMenu;
 import com.urquieta.something.game.save.SaveState;
 import com.urquieta.something.output.OutputSystem;
-
 
 public class Game implements Runnable
 {
@@ -31,6 +33,7 @@ public class Game implements Runnable
     private GameState game_state;
     private Thread thread;
     private Audio  game_audio;
+    private ImageLoader game_image_loader;
 
     public  String    format_board = new String();
     public  boolean   is_resuming = false;
@@ -39,6 +42,8 @@ public class Game implements Runnable
     private Sound     background_sound;
     private StartMenu start_menu;
     private SaveState savefile;
+
+    private Image test_image;
 
     public Game()
     {
@@ -70,11 +75,12 @@ public class Game implements Runnable
     }
 
     public void Init(Screen screen, Input input, Audio audio,
-                     SaveState savefile) {
+                     ImageLoader image_loader, SaveState savefile) {
         this.SetScreen(screen);
         this.SetInput(input);
         this.SetAudio(audio);
         this.SetSavefile(savefile);
+        this.SetImageLoader(image_loader);
     }
 
     @Override
@@ -148,6 +154,8 @@ public class Game implements Runnable
         Sound button_sound      = this.game_audio.CreateSound("button.wav");
         // TODO(Misael): This sound does not play in Android.
         this.background_sound   = this.game_audio.CreateSound("background.wav");
+
+        test_image = this.game_image_loader.CreateImage("bubble.png", new Color(255, 0, 0));
 
         GameState.SetAllDefault();
         savefile.LoadSaveGame();
@@ -267,6 +275,8 @@ public class Game implements Runnable
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
 
+        this.renderer.DrawImage(test_image, 0.0f, 0.0f);
+
         if ((GameState.state & GameState.SHOW_FPS) != 0) {
             String format_output = String.format("Delta: %.10f - FPS: %2d", delta, this.average_fps);
             this.renderer.DrawText(format_output, new Vec2(-1, -1), 0xFF000000);
@@ -307,5 +317,9 @@ public class Game implements Runnable
 
     private void SetSavefile(SaveState savefile) {
         this.savefile = savefile;
+    }
+
+    private void SetImageLoader(ImageLoader loader) {
+        this.game_image_loader = loader;
     }
 }

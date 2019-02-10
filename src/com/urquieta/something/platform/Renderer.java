@@ -42,6 +42,11 @@ public class Renderer extends PCRenderer { // @Class
                        distance_point.y, color);
     }
 
+    public void DrawImage(Image image, float x, float y) {
+        PixelPoint pixel_point = new PixelPoint(this, x, -y);
+        super.DrawImage(image, pixel_point.x, pixel_point.y);
+    }
+
     public void DrawCircle(float x, float y, float radius, int color) {
         PixelPoint pixel_point = new PixelPoint(this, x, -y);
         int pixel_radius  = super.screen.lengthInPixels(radius);
