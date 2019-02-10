@@ -22,7 +22,6 @@ SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.ja
 SET PC_CODE=%SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java %SRC%/game/ui/*.java %SRC%/output/*.java %SRC%/game/save/*.java
 SET FILES_CLASSES=%CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class %CODE%/game/ui/*.class %CODE%/output/*.class %CODE%/game/save/*.class
 
-
 if %BUILD_FOR_ANDROID% == 1 (
    if %DEGUG% == 1 (
       py -3 switch_build.py "Android"
