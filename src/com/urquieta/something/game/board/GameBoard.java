@@ -208,6 +208,9 @@ public class GameBoard extends GameObject {
             }
             UpdateObjectPositions((float)delta, this.objects_array);
         } else {
+            if (AreNoMoveLeft(this.objects_array)) {
+                SwapGameObjects(delta, this.objects_array);
+            }
             last_color_clear = 0;
         }
 
@@ -223,20 +226,59 @@ public class GameBoard extends GameObject {
     // TODO(Misael): Move this from here!! And find a better name
     private double time_pass = 0;
 
+    public void Randomize(double delta) {
+        SwapGameObjects(delta, this.objects_array);
+    }
+
+    private void SwapGameObjects(double delta, GameBoardObject[] array) {
+        this.is_update_done = false;
+        for (int index = 0; index < (width*height); index += 2) {
+            GameBoardObject object = array[index];
+            int random_index = random.nextInt(width*height);
+            GameBoardObject object_swap = array[random_index];
+            if ((object_swap instanceof Circle) && !object_swap.IsMoving() &&
+                (object instanceof Circle) && !object.IsMoving()) {
+                SwapArrayGameObjects(array, index, random_index);
+            } else {
+                continue;
+            }
+        }
+    }
+
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
         float speed = 0.003f;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
-            if (object.GetPosition().Equals(object.GetPositionToGo()) == false) {
+            if (object.IsMoving()) {
                 this.is_update_done = false;
-                Vec2 a = new Vec2(0, -speed); // Acceleration
+                Vec2 a = new Vec2(speed/2, speed); // Acceleration
                 object.ComputeMove((float)delta, a);
 
-                if (object.GetPosition().y < object.GetPositionToGo().y) {
+                if (object.IsMoving() == false) {
                     object.EndMove();
+                }
+            } else {
+                object.EndMove();
+            }
+        }
+    }
+
+    public boolean AreNoMoveLeft(GameBoardObject[] array) {
+        for (int y = 0; y < height-1;y++) {
+            for (int x = 0; x < width-1; x++) {
+                GameBoardObject current_object = array[y*width+x];
+                if (current_object.is_touchable) {
+                    Circle[] closest_circles = GetCirclesAroundIndexPosition(array, x, y);
+                    for (Circle circle : closest_circles) {
+                        if (circle == null) { continue; }
+                        if (current_object.GetColor() == circle.GetColor()) {
+                            return false;
+                        }
+                    }
                 }
             }
         }
+        return true;
     }
 
     private void CreateNewObjects(GameBoardObject[] array) {
@@ -309,14 +351,19 @@ public class GameBoard extends GameObject {
         }
     }
 
-    private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
-                                                        int a, int b) {
+    private void SwapArrayGameObjects(GameBoardObject[] array, int a, int b) {
         GameBoardObject Temp = array[a];
         array[a] = array[b];
         array[b] = Temp;
         array[a].PositionToMove(array[b].GetPosition());
-        array[b].SetPosition(array[a].GetPosition());
         array[b].PositionToMove(array[a].GetPosition());
+    }
+
+    private void SwapArrayGameObjectsWithUpdatePosition(GameBoardObject[] array,
+                                                        int a, int b) {
+        SwapArrayGameObjects(array, a, b);
+        // TODO(Misael): Is this right?
+        array[b].SetPosition(array[a].GetPosition());
     }
 
     // NOTE(Misael): Asumes that the input position is of another board object.
@@ -324,11 +371,9 @@ public class GameBoard extends GameObject {
         return (int)position.y * this.width + (int)position.x;
     }
 
-    private Circle[] GetCirclesAroundIndexPosition(GameBoardObject[] board_array, Vec2 position) {
+    private Circle[] GetCirclesAroundIndexPosition(GameBoardObject[] board_array, int x, int y) {
         int array_size = 4;
         int size = 0;
-        int x = (int)position.x;
-        int y = (int)position.y;
         int left = y * this.width + (x-1);
         int right = y * this.width + (x+1);
         int up = (y-1) * this.width + x;
@@ -356,6 +401,10 @@ public class GameBoard extends GameObject {
             array[size++] = (Circle)board_array[down];
         }
         return array;
+    }
+
+    private Circle[] GetCirclesAroundIndexPosition(GameBoardObject[] board_array, Vec2 position) {
+        return GetCirclesAroundIndexPosition(board_array, (int)position.x, (int)position.y);
     }
 
     private Vec2 GetIndexPositionFromScreenPosition(Vec2 entity_position) {

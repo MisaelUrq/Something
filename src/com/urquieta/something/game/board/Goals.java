@@ -21,7 +21,6 @@ public class Goals extends  GameObject {
             String color_format = objectives.substring(index*9+1,
                                                        index*9+9);
             int color = (int)Long.parseLong(color_format, 16);
-            System.out.println("color: ("+color+") - count("+objectives_count[index]+")");
             AddColorGoal(color, objectives_count[index]);
             AddToScore(color, objectives_current_score[index]);
         }
@@ -87,7 +86,6 @@ public class Goals extends  GameObject {
         char[] result = new char[color_scores.size()];
         for (int i = 0; i < color_scores.size(); i++) {
             result[i] = (char)color_scores.get(i).current_score;
-            System.out.println((int)result[i]);
         }
 
         return result;
@@ -97,7 +95,6 @@ public class Goals extends  GameObject {
         char[] result = new char[color_scores.size()];
         for (int i = 0; i < color_scores.size(); i++) {
             result[i] = (char)color_scores.get(i).goal_score;
-            System.out.println((int)result[i]);
         }
 
         return result;

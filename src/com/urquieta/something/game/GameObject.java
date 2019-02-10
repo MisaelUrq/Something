@@ -33,12 +33,26 @@ public abstract class GameObject {
         Vec2 v = GetDeltaPosition();
         Vec2 p = GetPosition();
 
+        if (GetPositionToGo().x > p.x) {
+            acceleration.x = Math.abs(acceleration.x);
+        }
+        else if (GetPositionToGo().x < p.x) {
+            acceleration.x = -Math.abs(acceleration.x);
+        }
+
+        if (GetPositionToGo().y > p.y) {
+            acceleration.y = Math.abs(acceleration.y);
+        }
+        else if (GetPositionToGo().y < p.y) {
+            acceleration.y = -Math.abs(acceleration.y);
+        }
+
         Vec2 offset = acceleration.Mul(t*t*.5f);
         offset.AddSelf(v.Mul(t));
         offset.AddSelf(p);
 
         SetPosition(offset);
-        SetDeltaPosition(acceleration.Mul(t).Add(v));
+        SetDeltaPosition(acceleration.Mul(t).Add(v.Mul(0.9f)));
     }
 
     public void EndMove() {
@@ -96,6 +110,20 @@ public abstract class GameObject {
 
     public void PositionToMove(float x, float y) {
         PositionToMove(new Vec2(x, y));
+    }
+
+    public boolean IsMoving() {
+        if (position.Equals(position_to_go)) {
+            return false;
+        }
+
+        // if (Math.abs(Math.abs(position.x) - Math.abs(position_to_go.x)) < 0.01f) {
+        //     if (Math.abs(Math.abs(position.y) - Math.abs(position_to_go.y)) < 0.01f) {
+        //         return false;
+        //     }
+        // }
+
+        return true;
     }
 
     public Vec2 GetPositionToGo() {

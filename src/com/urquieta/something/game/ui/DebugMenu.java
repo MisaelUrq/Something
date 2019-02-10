@@ -16,6 +16,7 @@ public class DebugMenu extends GameObject {
     private Button show_hide_fps;
     private Button start_new_game;
     private Button go_to_start_menu;
+    private Button swap_board;
     private boolean is_open;
     private InputEvent event;
     private boolean is_done;
@@ -33,9 +34,12 @@ public class DebugMenu extends GameObject {
                                            "New Game", 0xffafafaf, 0xff2d2d2d, sound);
         this.go_to_start_menu = new Button(renderer, new Vec2(-1.75f, .66f), .42f, .1f,
                                            "Start Menu", 0xffafafaf, 0xff2d2d2d, sound);
+        this.swap_board       = new Button(renderer, new Vec2(-1.75f, .54f), .42f, .1f,
+                                           "Swap board", 0xffafafaf, 0xff2d2d2d, sound);
         this.objects.add(this.show_hide_fps);
         this.objects.add(this.start_new_game);
         this.objects.add(this.go_to_start_menu);
+        this.objects.add(this.swap_board);
 
         this.is_open = false;
         this.event = new InputEvent();
@@ -97,6 +101,10 @@ public class DebugMenu extends GameObject {
 
         if (!GameState.IsGameOver() && go_to_start_menu.IsPressed(event)) {
             GameState.current_mode = GameState.START_MENU;
+        }
+
+        if (!GameState.IsGameOver() && swap_board.IsPressed(event)) {
+            GameState.randomize = true;
         }
 
         if (is_done == false) {
