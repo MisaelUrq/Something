@@ -9,6 +9,7 @@ import android.content.res.AssetManager;
 import android.content.res.AssetFileDescriptor;
 
 import com.urquieta.something.platform.Sound;
+import com.urquieta.something.output.OutputSystem;
 
 public class AndroidAudio {
     SoundPool sound_pool;
@@ -28,7 +29,7 @@ public class AndroidAudio {
             sound.Init(this.sound_pool, sound_id);
             return sound;
         } catch (IOException e) {
-            System.out.println("SOMETHING_ERROR: "+e);
+            OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
             return null;
         }
     }

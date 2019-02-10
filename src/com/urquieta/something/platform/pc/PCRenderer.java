@@ -13,8 +13,8 @@ import java.awt.Font;
 
 public class PCRenderer {
     protected Screen screen;
-    private Graphics graphics;
-    private Font font;
+    private   Graphics graphics;
+    private   Font font;
 
     public PCRenderer(Screen screen) {
         this.screen = screen;

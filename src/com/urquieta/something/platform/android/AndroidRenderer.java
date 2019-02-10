@@ -44,6 +44,12 @@ public class AndroidRenderer {
         }
     }
 
+    public void DrawImage(AndroidImage image, int x, int y) {
+        if (this.screen.getCanvas() != null && image.GetBuffer() != null) {
+            this.screen.getCanvas().drawBitmap(image.GetBuffer(), x, y, null);
+        }
+    }
+
     public void DrawLine(int x1, int y1, int x2, int y2,
                          int thickness, int color) {
         if (this.screen.getCanvas() != null) {

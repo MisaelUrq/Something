@@ -147,15 +147,16 @@ public class Game implements Runnable
     }
 
     private void Initalize() {
+        // TODO(Misael): This sound does not play in Android.
+        this.background_sound   = this.game_audio.CreateSound("background.wav");
+
+        this.test_image = this.game_image_loader.CreateImage("bubble.png", new Color(255, 0, 0));
+
         Sound collect_sound = this.game_audio.CreateSound("collect.wav");
         Sound drop_sound    = this.game_audio.CreateSound("drop.wav");
         Sound clear_color_sound = this.game_audio.CreateSound("clear_color.wav");
         // TODO(Misael): Find a better button sound.
         Sound button_sound      = this.game_audio.CreateSound("button.wav");
-        // TODO(Misael): This sound does not play in Android.
-        this.background_sound   = this.game_audio.CreateSound("background.wav");
-
-        test_image = this.game_image_loader.CreateImage("bubble.png", new Color(255, 0, 0));
 
         GameState.SetAllDefault();
         savefile.LoadSaveGame();

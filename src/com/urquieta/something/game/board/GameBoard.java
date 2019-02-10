@@ -80,8 +80,8 @@ public class GameBoard extends GameObject {
         // TODO(Misael): Find a way to make the padding more dependent
         // on the width and height of the board itself.
 
-        float padding = 45;
-        this.objects_proportion = padding/3.3f;
+        float padding = 120;
+        this.objects_proportion = padding/2.9f;
         this.object_padding     = new Vec2(padding/screen_size.x, padding/screen_size.y);
         this.objects_connected  = new ArrayList<GameBoardObject>();
 

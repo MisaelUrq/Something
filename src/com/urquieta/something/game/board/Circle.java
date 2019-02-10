@@ -29,7 +29,7 @@ public class Circle extends GameBoardObject {
         String Result = "C" + Integer.toHexString(color);
         return Result;
     }
-    
+
     @Override
     public void Draw() {
         super.renderer.DrawCircle(this.position.x, this.position.y,

@@ -13,6 +13,7 @@ import com.urquieta.something.game.save.SaveState;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.Audio;
+import com.urquieta.something.platform.ImageLoader;
 import com.urquieta.something.output.OutputSystem;
 
 import java.io.File;
@@ -40,14 +41,16 @@ public class MainActivity extends Activity
         Input game_input   = new Input();
         Point size         = new Point();
         Audio game_audio   = new Audio();
+        ImageLoader image  = new ImageLoader();
         File file_temp = new File(this.getFilesDir()+"/saves");
         file_temp.mkdir();
         SaveState savefile = new SaveState(file_temp);
         game_audio.Init(this);
+        image.Init(this);
         getWindowManager().getDefaultDisplay().getSize(size);
         game_screen.SetSize(size.x, size.y);
         game_screen.setOnTouchListener(game_input);
-        this.game.Init(game_screen, game_input, game_audio, savefile);
+        this.game.Init(game_screen, game_input, game_audio, image, savefile);
     }
 
     @Override
