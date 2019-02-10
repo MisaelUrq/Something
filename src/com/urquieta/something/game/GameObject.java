@@ -52,7 +52,7 @@ public abstract class GameObject {
         offset.AddSelf(p);
 
         SetPosition(offset);
-        SetDeltaPosition(acceleration.Mul(t).Add(v.Mul(0.9f)));
+        SetDeltaPosition(acceleration.Mul(t).Add(v.Mul(0.7f)));
     }
 
     public void EndMove() {
@@ -116,13 +116,6 @@ public abstract class GameObject {
         if (position.Equals(position_to_go)) {
             return false;
         }
-
-        // if (Math.abs(Math.abs(position.x) - Math.abs(position_to_go.x)) < 0.01f) {
-        //     if (Math.abs(Math.abs(position.y) - Math.abs(position_to_go.y)) < 0.01f) {
-        //         return false;
-        //     }
-        // }
-
         return true;
     }
 

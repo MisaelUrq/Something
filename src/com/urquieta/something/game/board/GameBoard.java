@@ -246,12 +246,12 @@ public class GameBoard extends GameObject {
     }
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
-        float speed = 0.003f;
+        float speed = 0.001f;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.IsMoving()) {
                 this.is_update_done = false;
-                Vec2 a = new Vec2(speed/2, speed); // Acceleration
+                Vec2 a = new Vec2(speed, speed*2); // Acceleration
                 object.ComputeMove((float)delta, a);
 
                 if (object.IsMoving() == false) {

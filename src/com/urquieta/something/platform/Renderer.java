@@ -84,7 +84,7 @@ public class Renderer extends PCRenderer { // @Class
 
     public void BeginDraw() {
         super.screen.beginDraw();
-        this.DrawRect(-1f, 1f, 1f, -1f, 0xffbcd2ee);
+        this.DrawRect(-1f, 1f, 1f, -1f, 0xffa2b5cd);
     }
 
     public void DrawPoint(float x, float y, int color) {
