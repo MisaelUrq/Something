@@ -16,11 +16,11 @@ public class StartMenu extends GameObject {
 
     public StartMenu(Renderer renderer, Sound sound) {
         super(renderer, new Vec2(0, 0));
-        this.infinite_mode = new Button(renderer, new Vec2(-.5f, .25f), .5f, .1f,
+        this.infinite_mode = new Button(renderer, new Vec2(-.25f, .25f), .2f, .1f,
                                         "Modo Infinito", 0xff7b68ee, 0xfff0ffff, sound);
-        this.normal_mode = new Button(renderer, new Vec2(.5f, .25f), .4f, .1f,
+        this.normal_mode = new Button(renderer, new Vec2(.25f, .25f), .2f, .1f,
                                       "Levels", 0xff7b68ee, 0xfff0ffff, sound);
-        this.exit = new Button(renderer, new Vec2(-.5f, -.25f), .4f, .1f,
+        this.exit = new Button(renderer, new Vec2(-.25f, -.25f), .2f, .1f,
                                "Salir", 0xff7b68ee, 0xfff0ffff, sound);
         event = new InputEvent();
     }

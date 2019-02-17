@@ -16,6 +16,8 @@ public class Button extends GameObject {
     private Sound  sound;
     private Vec2   text_position;
 
+    // TODO(Misael): Maybe the button needs to have a center point and
+    // then change add and substract the width and the height?
     public Button(Renderer renderer, Vec2 position, Vec2 dimensions,
                   String message, int color, int color_text, Sound sound) {
         super(renderer, position);
@@ -33,8 +35,8 @@ public class Button extends GameObject {
                   String message, int color, int color_text, Sound sound) {
         super(renderer, position);
         this.message = message;
-        this.width  = width;
-        this.height = height;
+        this.width  = position.x + width;
+        this.height = position.y - height;
         this.color = color;
         this.color_text = color_text;
         this.sound = sound;
@@ -43,20 +45,19 @@ public class Button extends GameObject {
 
     @Override
     public void Update(double delta) {
+        // NOTE(Misael): Why I am doing this?
         this.text_position = this.position.Add(.03f, -0.06f);
     }
 
     @Override
     public void Draw() {
-        super.renderer.DrawRect(position.x, position.y,
-                                position.x+width, position.y-height,
-                                super.color);
+        super.renderer.DrawRect(position.x, position.y, width, height, color);
         super.renderer.DrawText(this.message, this.text_position, this.color_text);
     }
 
     private boolean HasCollide(Vec2 input) {
-        if ((input.x >= position.x && input.x <= position.x+width) &&
-            (input.y <= position.y && input.y >= position.y-height)) {
+        if ((input.x >= position.x && input.x <= width) &&
+            (input.y <= position.y && input.y >= height)) {
             return true;
         } else {
             return false;

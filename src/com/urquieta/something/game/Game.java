@@ -276,6 +276,16 @@ public class Game implements Runnable
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
 
+        Button test_buttton = new Button(renderer, new Vec2(-.1f, .1f), .2f, .2f, "", 0xFF0000FF, 0, null);
+        test_buttton.Draw();
+        if (test_buttton.IsPressed(event)) {
+            this.renderer.DrawRect(event.cursor_position.x-.5f, event.cursor_position.y+.5f,
+                                   event.cursor_position.x+.5f, event.cursor_position.y-.5f, 0xFFFFFF00);
+        }
+
+        this.renderer.DrawRect(event.cursor_position.x-.1f, event.cursor_position.y+.1f,
+                               event.cursor_position.x+.1f, event.cursor_position.y-.1f, 0xFFFF0000);
+
         if (GameState.randomize) {
             GameState.randomize = false;
             this.game_board.Randomize(delta);

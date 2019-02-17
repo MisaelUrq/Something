@@ -34,12 +34,7 @@ public class Renderer extends PCRenderer { // @Class
     }
 
     public void DrawRect(float x, float y, float width, float height, int color) {
-        PixelPoint pixel_point = new PixelPoint(this, x, -y);
-        PixelPoint distance_point = new PixelPoint(this, width, -height);
-        super.DrawRect(pixel_point.x,
-                       pixel_point.y,
-                       distance_point.x,
-                       distance_point.y, color);
+        super.DrawRect(x, y, width, height, color);
     }
 
     public void DrawImage(Image image, float x, float y) {
@@ -83,14 +78,14 @@ public class Renderer extends PCRenderer { // @Class
     }
 
     public void BeginDraw() {
-        super.screen.beginDraw();
-        this.DrawRect(-1f, 1f, 1f, -1f, 0xffa2b5cd);
+        // super.screen.beginDraw();
+        // super.DrawRect(-1f, 1f, 1f, -1f, 0xffa2b5cd);
     }
 
     public void DrawPoint(float x, float y, int color) {
-        this.DrawRect(x - point_size, y + point_size,
-                      x + point_size, y - point_size,
-                      color);
+        super.DrawRect(x - point_size, y + point_size,
+                       x + point_size, y - point_size,
+                       color);
     }
 
     public void EndDraw() {

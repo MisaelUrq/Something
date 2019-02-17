@@ -13,17 +13,14 @@ public class AndroidScreen extends GLSurfaceView  {
     protected static int height;
     private Game game;
     private Canvas game_canvas;
-    private AndroidRenderer renderer;
 
     public AndroidScreen(Game game, Context context) {
         super(context);
         this.game = game;
 
         setEGLContextClientVersion(2);
-        renderer = new AndroidRenderer();
-        setRenderer(renderer);
+        setRenderer(new AndroidRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
         setFocusable(true);
     }
 
@@ -32,6 +29,6 @@ public class AndroidScreen extends GLSurfaceView  {
     }
 
     public void endDraw() {
-
+        requestRender();
     }
 }

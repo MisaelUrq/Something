@@ -24,4 +24,8 @@ public class InputEvent {
         this.cursor_position_pixels = new Vec2(0, 0);
         this.type                   = 0;
     }
+
+    public String toString() {
+        return "Cursor: "+cursor_position;
+    }
 }

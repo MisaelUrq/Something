@@ -7,110 +7,76 @@ package com.urquieta.something.platform.android;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.urquieta.something.platform.Screen;
+import com.urquieta.something.platform.renderer.figures.Rect;
+import com.urquieta.something.game.util.Vec4;
+import com.urquieta.something.game.util.Color;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 public class AndroidRenderer implements GLSurfaceView.Renderer {
     public Screen screen;
-    public class Rect {
-        private final String vertex_shader = "attribute vec4 vertex_position; void main() { gl_Position  = vertex_position; }";
-        private final String fragment_shader = "uniform vec4 fragment_color;  void main() { gl_FragColor = fragment_color; }";
-
-        private final int program;
-        ByteBuffer byte_buffer_positions;
-        ByteBuffer byte_buffer_order;
-        FloatBuffer vertex_buffer;
-
-        float color[] = {.6f, 0.7f, 0.3f, 1.0f };
-        float position[] = {
-            -0.5f,  0.5f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.5f,  0.5f, 0.0f
-        };
-        short draw_order[] = {
-            0, 1, 2, 0, 2, 3
-        };
-
-        public Rect(int x, int y, int width, int height) {
-            byte_buffer_positions = ByteBuffer.allocateDirect(position.length * 4);
-            byte_buffer_positions.order(ByteOrder.nativeOrder());
-            vertex_buffer = byte_buffer_positions.asFloatBuffer();
-            vertex_buffer.put(position);
-            vertex_buffer.position(0);
-
-            byte_buffer_order = ByteBuffer.allocateDirect(draw_order.length * 2);
-            byte_buffer_order.order(ByteOrder.nativeOrder());
-            ShortBuffer draw_buffer = byte_buffer_order.asShortBuffer();
-            draw_buffer.put(draw_order);
-            draw_buffer.position(0);
-
-            int vertex_shader_id   = AndroidRenderer.LoadShader(GLES20.GL_VERTEX_SHADER, vertex_shader);
-            int fragment_shader_id = AndroidRenderer.LoadShader(GLES20.GL_FRAGMENT_SHADER, fragment_shader);
-            {
-                int vertex_id   = AndroidRenderer.LoadShader(GLES20.GL_VERTEX_SHADER, vertex_shader);
-                int fragment_id = AndroidRenderer.LoadShader(GLES20.GL_FRAGMENT_SHADER, fragment_shader);
-                int other_program = GLES20.glCreateProgram();
-                System.out.println("SOMETHING PROGRAM: " + other_program + " - " + vertex_id + " - " + fragment_id);
-            }
-            program = GLES20.glCreateProgram();
-            System.out.println("SOMETHING PROGRAM: " + program + " - " + vertex_shader_id + " - " + fragment_shader_id);
-            GLES20.glAttachShader(program, vertex_shader_id);
-            GLES20.glAttachShader(program, fragment_shader_id);
-            GLES20.glLinkProgram(program);
-            GLES20.glDeleteShader(vertex_shader_id);
-            GLES20.glDeleteShader(fragment_shader_id);
-        }
-
-        public void Draw() {
-            int error;
-            GLES20.glUseProgram(program);
-            int position_handle = GLES20.glGetAttribLocation(program, "vertex_position");
-            GLES20.glEnableVertexAttribArray(position_handle);
-            GLES20.glVertexAttribPointer(position_handle, 3, GLES20.GL_FLOAT, false, 3*4, vertex_buffer);
-            int uniform_color_handle = GLES20.glGetUniformLocation(program, "fragment_color");
-            GLES20.glUniform4fv(uniform_color_handle, 1, color, 0);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6,  GLES20.GL_UNSIGNED_SHORT, byte_buffer_order);
-            GLES20.glDisableVertexAttribArray(position_handle);
-        }
-    }
-
-    Rect test_rect;
+    private float projection_matrix[];
+    private float view_matrix[];
+    private float mvp_matrix[];
+    private float ratio;
+    private static ArrayDeque<Vec4> rects_to_draw;
+    private static ArrayDeque<Color> rects_colors;
 
     public AndroidRenderer(Screen screen) {
         this.screen = screen;
+        this.projection_matrix = null;
+        this.mvp_matrix        = null;
+        this.view_matrix       = null;
+        this.rects_to_draw     = new ArrayDeque<Vec4>(16);
+        this.ratio = 0;
     }
 
     public AndroidRenderer() {
         super();
+        this.projection_matrix = new float[4*4];
+        this.view_matrix       = new float[4*4];
+        this.mvp_matrix        = new float[4*4];
+        this.rects_to_draw     = new ArrayDeque<Vec4>();
+        this.rects_colors      = new ArrayDeque<Color>();
         this.screen = null;
+        this.ratio = 0;
     }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        GLES20.glClearColor(0.6f, 0.5f, 1.0f, 1.0f);
-        this.test_rect = new Rect(0, 0, 0, 0);
+        GLES20.glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
+        Matrix.setLookAtM(view_matrix, 0, 0, 0, 0, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        test_rect.Draw();
+        Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
+
+        synchronized(this) {
+            Vec4 temp = AndroidRenderer.rects_to_draw.poll();
+            while (temp != null) {
+                Rect rect = new Rect(temp.x, temp.y, temp.z, temp.w, AndroidRenderer.rects_colors.poll());
+                rect.Draw(mvp_matrix);
+                rect.Delete();
+                temp = AndroidRenderer.rects_to_draw.poll();
+            }
+        }
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+        ratio = (float)width/(float)height;
+        Matrix.frustumM(projection_matrix, 0, ratio, -ratio, -1, 1, 3, 7);
+
     }
 
     public static int LoadShader(int type, String source) {
@@ -120,22 +86,21 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
         return shader;
     }
 
-
     public void DrawText(String str, int x, int y, int color) {
         /* if (this.screen.getCanvas() != null) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            this.screen.getCanvas().drawText(str, x, y, paint);
-            } */
+           Paint paint = new Paint();
+           paint.setColor(color);
+           this.screen.getCanvas().drawText(str, x, y, paint);
+           } */
     }
 
-    public void DrawRect(int x, int y, int width, int height, int color) {
-        // if (this.screen.getCanvas() != null)
-        // {
-        //     Paint paint = new Paint();
-        //     paint.setColor(color);
-        //     this.screen.getCanvas().drawRect(x, y, width, height, paint);
-        // }
+    public void DrawRect(float x, float y, float width, float height, int color_raw) {
+        Vec4 temp = new Vec4(x, y, width, height);
+        Color color = new Color(color_raw);
+        synchronized(this) {
+            AndroidRenderer.rects_to_draw.push(temp);
+            AndroidRenderer.rects_colors.push(color);
+        }
     }
 
     public void DrawCircle(int x, int y, int radius, int color) {

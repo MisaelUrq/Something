@@ -50,7 +50,8 @@ public class AndroidInput implements OnTouchListener {
                 break;
             }
 
-            input_event.cursor_position.x =  (((event.getX() / v.getWidth())  * 2) - 1.0f);
+            float ratio = (float)v.getWidth() / (float)v.getHeight();
+            input_event.cursor_position.x =  (((event.getX() / v.getWidth())  * 2) - 1.0f) * ratio;
             input_event.cursor_position.y = -(((event.getY() / v.getHeight()) * 2) - 1.0f);
             return true;
         }
@@ -68,8 +69,10 @@ public class AndroidInput implements OnTouchListener {
         }
     }
 
-    protected void SetEvent(int a, int b) {
-
+    protected void SetInputEvent(InputEvent input_event) {
+        synchronized(this) {
+            this.input_event = input_event;
+        }
     }
 
     public InputEvent GetInputEvent() {

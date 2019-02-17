@@ -108,7 +108,7 @@ public class GameBoard extends GameObject {
         this.exit_requested = false;
         this.last_color_clear = 0;
         this.player_connected_color = false;
-        this.return_to_menu = new Button(this.renderer, new Vec2(.80f, -.90f), .2f, .1f, "Exit",
+        this.return_to_menu = new Button(this.renderer, new Vec2(.40f, -.90f), .2f, .1f, "Exit",
                                          0xffafafaf, 0xff2d2d2d, drop_sound);
     }
 
