@@ -13,13 +13,13 @@ import com.urquieta.something.game.util.Color;
 
 public class Rect {
     private final String vertex_shader =
-        "uniform mat4 mvp_matrix; attribute vec4 vertex_position; " +
+        "uniform mat4 mvp_matrix; attribute vec4 vertex_position;" +
         "void main() { gl_Position  = mvp_matrix * vertex_position; }";
     private final String fragment_shader =
         "uniform vec4 fragment_color;"+
         " void main() { gl_FragColor = fragment_color; }";
 
-    private final int program;
+    private int program;
     ByteBuffer byte_buffer_positions;
     ByteBuffer byte_buffer_order;
     FloatBuffer vertex_buffer;
@@ -30,12 +30,12 @@ public class Rect {
         0, 1, 2, 0, 2, 3
     };
 
-    public Rect(float x, float y, float width, float height, Color color) {
+    public Rect(float x, float y, float width, float height, float z, Color color) {
         float position[] = {
-            x, y, 0.0f,
-            x, height, 0.0f,
-            width, height, 0.0f,
-            width, y, 0.0f
+            x,     y,      z,
+            x,     height, z,
+            width, height, z,
+            width, y,      z
         };
         this.position = position;
         this.color = color;
@@ -50,7 +50,13 @@ public class Rect {
         ShortBuffer draw_buffer = byte_buffer_order.asShortBuffer();
         draw_buffer.put(draw_order);
         draw_buffer.position(0);
+    }
 
+    public boolean HasBeenCreated() {
+        return (program != 0);
+    }
+
+    public void CreateProgram() {
         int vertex_shader_id   = AndroidRenderer.LoadShader(GLES20.GL_VERTEX_SHADER, vertex_shader);
         int fragment_shader_id = AndroidRenderer.LoadShader(GLES20.GL_FRAGMENT_SHADER, fragment_shader);
         program = GLES20.glCreateProgram();
@@ -59,6 +65,21 @@ public class Rect {
         GLES20.glLinkProgram(program);
         GLES20.glDeleteShader(vertex_shader_id);
         GLES20.glDeleteShader(fragment_shader_id);
+    }
+
+    public void UpdatePosition(float x, float y, float width, float height, float z) {
+        float position[] = {
+            x,     y,      z,
+            x,     height, z,
+            width, height, z,
+            width, y,      z
+        };
+        byte_buffer_positions = ByteBuffer.allocateDirect(position.length * 4);
+        byte_buffer_positions.order(ByteOrder.nativeOrder());
+        vertex_buffer = byte_buffer_positions.asFloatBuffer();
+        vertex_buffer.put(position);
+        vertex_buffer.position(0);
+        this.position = position;
     }
 
     public void Draw(float[] mvp_matrix) {
@@ -75,11 +96,11 @@ public class Rect {
         GLES20.glUniform4fv(uniform_color_handle, 1, color.GetNormalizeArray(), 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6,  GLES20.GL_UNSIGNED_SHORT, byte_buffer_order);
         GLES20.glDisableVertexAttribArray(position_handle);
-
     }
 
     public void Delete() {
         GLES20.glDeleteProgram(program);
+        program = 0;
     }
 
     public String toString() {

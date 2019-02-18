@@ -34,7 +34,11 @@ public class Renderer extends PCRenderer { // @Class
     }
 
     public void DrawRect(float x, float y, float width, float height, int color) {
-        super.DrawRect(x, y, width, height, color);
+        super.DrawRect(x, y, width, height, 0.0f, color);
+    }
+
+    public void DrawRect(float x, float y, float width, float height, float z, int color) {
+        super.DrawRect(x, y, width, height, z, color);
     }
 
     public void DrawImage(Image image, float x, float y) {
@@ -85,7 +89,7 @@ public class Renderer extends PCRenderer { // @Class
     public void DrawPoint(float x, float y, int color) {
         super.DrawRect(x - point_size, y + point_size,
                        x + point_size, y - point_size,
-                       color);
+                       0, color);
     }
 
     public void EndDraw() {

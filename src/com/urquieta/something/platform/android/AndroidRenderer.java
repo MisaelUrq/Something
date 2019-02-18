@@ -18,6 +18,7 @@ import com.urquieta.something.game.util.Vec4;
 import com.urquieta.something.game.util.Color;
 
 import java.util.ArrayDeque;
+import java.util.Vector;
 
 public class AndroidRenderer implements GLSurfaceView.Renderer {
     public Screen screen;
@@ -25,15 +26,16 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
     private float view_matrix[];
     private float mvp_matrix[];
     private float ratio;
-    private static ArrayDeque<Vec4> rects_to_draw;
-    private static ArrayDeque<Color> rects_colors;
+    private static ArrayDeque<Rect> rects_to_draw_queue;
+    private static Vector<Rect>     rects_to_draw;
 
     public AndroidRenderer(Screen screen) {
         this.screen = screen;
         this.projection_matrix = null;
         this.mvp_matrix        = null;
         this.view_matrix       = null;
-        this.rects_to_draw     = new ArrayDeque<Vec4>(16);
+        this.rects_to_draw_queue = new ArrayDeque<Rect>();
+        this.rects_to_draw       = new Vector<Rect>();
         this.ratio = 0;
     }
 
@@ -42,33 +44,41 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
         this.projection_matrix = new float[4*4];
         this.view_matrix       = new float[4*4];
         this.mvp_matrix        = new float[4*4];
-        this.rects_to_draw     = new ArrayDeque<Vec4>();
-        this.rects_colors      = new ArrayDeque<Color>();
+        this.rects_to_draw_queue = new ArrayDeque<Rect>();
+        this.rects_to_draw       = new Vector<Rect>();
         this.screen = null;
         this.ratio = 0;
     }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
-        Matrix.setLookAtM(view_matrix, 0, 0, 0, 0, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
 
         synchronized(this) {
-            Vec4 temp = AndroidRenderer.rects_to_draw.poll();
-            while (temp != null) {
-                Rect rect = new Rect(temp.x, temp.y, temp.z, temp.w, AndroidRenderer.rects_colors.poll());
+            for (Rect rect: AndroidRenderer.rects_to_draw) {
+                if (rect.HasBeenCreated() == false) {
+                    rect.CreateProgram();
+                }
                 rect.Draw(mvp_matrix);
-                rect.Delete();
-                temp = AndroidRenderer.rects_to_draw.poll();
+            }
+
+            Rect temp = AndroidRenderer.rects_to_draw_queue.poll();
+            while (temp != null) {
+                temp.CreateProgram();
+                temp.Draw(mvp_matrix);
+                temp.Delete();
+                temp = AndroidRenderer.rects_to_draw_queue.poll();
             }
         }
+        GLES20.glFlush();
     }
 
     @Override
@@ -94,12 +104,18 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
            } */
     }
 
-    public void DrawRect(float x, float y, float width, float height, int color_raw) {
-        Vec4 temp = new Vec4(x, y, width, height);
-        Color color = new Color(color_raw);
+    public void DrawFigure(Rect rect) {
         synchronized(this) {
-            AndroidRenderer.rects_to_draw.push(temp);
-            AndroidRenderer.rects_colors.push(color);
+            if (AndroidRenderer.rects_to_draw.contains(rect) == false) {
+                AndroidRenderer.rects_to_draw.add(rect);
+            }
+        }
+    }
+
+    public void DrawRect(float x, float y, float width, float height, float z, int color_raw) {
+        Rect temp = new Rect(x, y, width, height, z, new Color(color_raw));
+        synchronized(this) {
+            AndroidRenderer.rects_to_draw_queue.push(temp);
         }
     }
 

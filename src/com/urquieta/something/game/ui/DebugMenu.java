@@ -26,15 +26,15 @@ public class DebugMenu extends GameObject {
     public DebugMenu(Renderer renderer, Sound sound) {
         super(renderer, new Vec2(-2f, 0));
         this.objects  = new ArrayList<GameObject>();
-        this.open_close       = new Button(renderer, new Vec2(-.60f, 1f), .15f, .1f,
+        this.open_close       = new Button(renderer, new Vec2(-.60f, 1f), .2f, .1f,
                                            "Debug", 0xffafafaf, 0xff2d2d2d, sound);
-        this.show_hide_fps    = new Button(renderer, new Vec2(-0.75f, .9f), .2f, .1f,
+        this.show_hide_fps    = new Button(renderer, new Vec2(-0.95f, .9f), .3f, .1f,
                                            "FPS", 0xffafafaf, 0xff2d2d2d, sound);
-        this.start_new_game   = new Button(renderer, new Vec2(-0.75f, .78f), .2f, .1f,
+        this.start_new_game   = new Button(renderer, new Vec2(-0.95f, .78f), .3f, .1f,
                                            "New Game", 0xffafafaf, 0xff2d2d2d, sound);
-        this.go_to_start_menu = new Button(renderer, new Vec2(-0.75f, .66f), .2f, .1f,
+        this.go_to_start_menu = new Button(renderer, new Vec2(-0.95f, .66f), .3f, .1f,
                                            "Start Menu", 0xffafafaf, 0xff2d2d2d, sound);
-        this.swap_board       = new Button(renderer, new Vec2(-0.75f, .54f), .2f, .1f,
+        this.swap_board       = new Button(renderer, new Vec2(-0.95f, .54f), .3f, .1f,
                                            "Swap board", 0xffafafaf, 0xff2d2d2d, sound);
         this.objects.add(this.show_hide_fps);
         this.objects.add(this.start_new_game);
@@ -53,7 +53,7 @@ public class DebugMenu extends GameObject {
     @Override
     public void Draw() {
         if (is_open || is_done == false) {
-            super.renderer.DrawRect(position.x, 1f, position.x+1.3f, -1f, 0x88121212);
+            super.renderer.DrawRect(position.x, 1f, position.x+1.3f, -1f, .3f, 0x88121212);
             for (GameObject object: objects) {
                 object.Draw();
             }
@@ -108,14 +108,14 @@ public class DebugMenu extends GameObject {
         }
 
         if (is_done == false) {
-            float speed = (this.is_open) ? .005f : -0.005f;
+            float speed = (this.is_open) ? .008f : -0.008f;
             Vec2 a = new Vec2(speed, 0); // Acceleration
             float t = (float)delta;
             for (GameObject object: objects) {
                 object.ComputeMove(t, a);
             }
             open_close.ComputeMove(t, a);
-            ComputeMove(t*1.025f, a);
+            ComputeMove(t*1.04f, a);
 
             float x_current = this.open_close.GetPosition().x;
             float x_dest = this.open_close.GetPositionToGo().x;

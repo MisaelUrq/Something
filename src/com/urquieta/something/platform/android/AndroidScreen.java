@@ -2,7 +2,7 @@ package com.urquieta.something.platform.android;
 
 import android.content.Context;
 import android.graphics.Canvas;
-
+import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLSurfaceView;
 
 import com.urquieta.something.game.Game;
@@ -19,6 +19,7 @@ public class AndroidScreen extends GLSurfaceView  {
         this.game = game;
 
         setEGLContextClientVersion(2);
+        setEGLConfigChooser(8, 8, 8, 8, 8, 0);
         setRenderer(new AndroidRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         setFocusable(true);
