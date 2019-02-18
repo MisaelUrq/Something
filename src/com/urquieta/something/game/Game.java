@@ -1,6 +1,7 @@
 package com.urquieta.something.game;
 
 import com.urquieta.something.game.GameState;
+import com.urquieta.something.game.GameModes;
 import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.GameBoard;
 import com.urquieta.something.game.board.Goals;
@@ -171,14 +172,14 @@ public class Game implements Runnable
         InputEvent event = this.input.GetInputEvent();
 
         switch (GameState.current_mode) {
-        case GameState.START_MENU: {
+        case START_MENU: {
             if (GameState.is_menu_active == false) {
                 this.start_menu.UpdateEvent(event);
                 this.start_menu.Update(delta);
             }
             this.start_menu.Draw();
         } break;
-        case GameState.INFINITE_MODE: {
+        case INFINITE_MODE: {
             SaveState.LevelPaused level = this.savefile.GetSavedLevel(SaveState.INFINITE_MODE);
             if (GameState.IsGameOver() && level != null) {
                 Sound collect_sound = this.game_audio.CreateSound("collect.wav");
@@ -215,7 +216,7 @@ public class Game implements Runnable
             }
             this.game_board.Draw();
         } break;
-        case GameState.NORMAL_MODE: {
+        case NORMAL_MODE: {
             SaveState.LevelPaused level = this.savefile.GetSavedLevel(SaveState.NORMAL_MODE);
             if (GameState.IsGameOver() && level != null) {
                 Sound collect_sound = this.game_audio.CreateSound("collect.wav");
@@ -258,7 +259,7 @@ public class Game implements Runnable
             }
             this.game_board.Draw();
         } break;
-        case GameState.EXIT: {
+        case EXIT: {
             // TODO(Misael): If you select this the game won't
             // save... And on android I don't really think its the
             // right way, Why? I don't know, I don't really care, it's
@@ -293,11 +294,11 @@ public class Game implements Runnable
     }
 
     public void SaveGame() {
-        if (GameState.current_mode == GameState.INFINITE_MODE) {
+        if (GameState.current_mode == GameModes.INFINITE_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
                                          this.game_board.GetScore(), SaveState.INFINITE_MODE, 0, null, null, "");
-        } else if (GameState.current_mode == GameState.NORMAL_MODE) {
+        } else if (GameState.current_mode == GameModes.NORMAL_MODE) {
             this.savefile.SetLevelPaused(this.game_board.ToFileFormat(),
                                          this.game_board.GetWidth(), this.game_board.GetHeight(),
                                          this.game_board.GetScore(), SaveState.NORMAL_MODE,
@@ -305,7 +306,7 @@ public class Game implements Runnable
                                          this.game_board.GetObjectivesCount(), this.game_board.GetObjectivesScore(),
                                          this.game_board.GetGoalsFormat());
         }
-        GameState.current_mode = GameState.START_MENU;
+        GameState.current_mode = GameModes.START_MENU;
         this.savefile.SaveGame();
     }
 

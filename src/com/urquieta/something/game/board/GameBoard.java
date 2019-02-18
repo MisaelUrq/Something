@@ -246,7 +246,7 @@ public class GameBoard extends GameObject {
     }
 
     private void UpdateObjectPositions(double delta, GameBoardObject[] array) {
-        float speed = 0.001f;
+        float speed = 0.006f;
         this.is_update_done = true;
         for (GameBoardObject object: array) {
             if (object.IsMoving()) {
@@ -331,6 +331,9 @@ public class GameBoard extends GameObject {
     private void DeleteObjectFromArray(GameBoardObject[] array, GameBoardObject object) {
         Vec2 position = GetIndexPositionFromScreenPosition(object.GetPosition());
         int index = VecToIndex(position);
+        if (array[index] instanceof Circle) {
+            renderer.RemoveFigure(((Circle)array[index]).circle_texture);
+        }
         array[index] = new GameBoardObject(this.renderer, object.GetPosition());
     }
 

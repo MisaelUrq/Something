@@ -8,6 +8,7 @@ import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Sound;
 
 import com.urquieta.something.game.GameState;
+import com.urquieta.something.game.GameModes;
 
 import java.util.ArrayList;
 
@@ -100,7 +101,7 @@ public class DebugMenu extends GameObject {
         }
 
         if (!GameState.IsGameOver() && go_to_start_menu.IsPressed(event)) {
-            GameState.current_mode = GameState.START_MENU;
+            GameState.current_mode = GameModes.START_MENU;
         }
 
         if (!GameState.IsGameOver() && swap_board.IsPressed(event)) {

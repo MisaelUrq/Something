@@ -5,6 +5,7 @@ import com.urquieta.something.game.util.Vec2;
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Sound;
 import com.urquieta.something.game.GameState;
+import com.urquieta.something.game.GameModes;
 import com.urquieta.something.platform.InputEvent;
 
 public class StartMenu extends GameObject {
@@ -40,11 +41,11 @@ public class StartMenu extends GameObject {
     @Override
     public void Update(double delta) {
         if (this.infinite_mode.IsPressed(event)) {
-            GameState.current_mode = GameState.INFINITE_MODE;
+            GameState.current_mode = GameModes.INFINITE_MODE;
         } else if (this.normal_mode.IsPressed(event)) {
-            GameState.current_mode = GameState.NORMAL_MODE;
+            GameState.current_mode = GameModes.NORMAL_MODE;
         } else if (this.exit.IsPressed(event)) {
-            GameState.current_mode = GameState.EXIT;
+            GameState.current_mode = GameModes.EXIT;
         }
     }
 }

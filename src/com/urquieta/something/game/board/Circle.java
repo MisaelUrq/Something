@@ -1,22 +1,28 @@
 package com.urquieta.something.game.board;
 
 import com.urquieta.something.platform.Renderer;
+import com.urquieta.something.platform.renderer.figures.Rect;
 import com.urquieta.something.platform.Image;
 import com.urquieta.something.game.board.GameBoardObject;
 import com.urquieta.something.game.util.Vec2;
+import com.urquieta.something.game.util.Color;
 
 public class Circle extends GameBoardObject {
     private float radius;
     private final double bounce_animation_time;
     private Image bubble_image;
 
+    public Rect circle_texture;
+
     public Circle(Renderer renderer, Image image, Vec2 position, float radius, int color) {
         super(renderer, position, color, true, false, true);
-        this.radius  = radius;
+        this.radius  = radius/2;
         this.bubble_image = image;
         this.DEBUG_area_position_1 = this.position.Add(-radius, radius);
         this.DEBUG_area_position_2 = this.position.Add(radius, -radius);
         this.bounce_animation_time = 0.7;
+        this.circle_texture = new Rect(position.x-radius, position.y+radius, position.x+radius, position.y-radius,
+                                       1f, new Color(color));
     }
 
     public Circle(Renderer renderer, Image image, float x, float y, float radius, int color) {
@@ -35,7 +41,10 @@ public class Circle extends GameBoardObject {
 
     @Override
     public void Draw() {
-        super.renderer.DrawImage(bubble_image, this.position.x, this.position.y);
+        // super.renderer.DrawImage(bubble_image, this.position.x, this.position.y);
+        // super.renderer.DrawRect(position.x-radius, position.y+radius, position.x+radius, position.y-radius, 0, color);
+        circle_texture.UpdatePosition(position.x-radius, position.y+radius, position.x+radius, position.y-radius, 0);
+        super.renderer.DrawFigure(circle_texture);
     }
 
     // TODO(Misael): Find a way to implement animations. This I think

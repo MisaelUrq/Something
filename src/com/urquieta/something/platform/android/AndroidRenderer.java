@@ -17,6 +17,9 @@ import com.urquieta.something.platform.renderer.figures.Rect;
 import com.urquieta.something.game.util.Vec4;
 import com.urquieta.something.game.util.Color;
 
+import com.urquieta.something.game.GameModes;
+import com.urquieta.something.game.GameState;
+
 import java.util.ArrayDeque;
 import java.util.Vector;
 
@@ -28,6 +31,8 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
     private float ratio;
     private static ArrayDeque<Rect> rects_to_draw_queue;
     private static Vector<Rect>     rects_to_draw;
+
+    private GameModes prev_game_mode;
 
     public AndroidRenderer(Screen screen) {
         this.screen = screen;
@@ -59,6 +64,14 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
+        if (prev_game_mode != GameState.current_mode) {
+            prev_game_mode = GameState.current_mode;
+            for (Rect rect: AndroidRenderer.rects_to_draw) {
+                rect.Delete();
+            }
+            rects_to_draw.clear();
+            rects_to_draw_queue.clear();
+        }
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
 
@@ -86,7 +99,6 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
         ratio = (float)width/(float)height;
         Matrix.frustumM(projection_matrix, 0, ratio, -ratio, -1, 1, 3, 7);
-
     }
 
     public static int LoadShader(int type, String source) {
@@ -102,6 +114,17 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
            paint.setColor(color);
            this.screen.getCanvas().drawText(str, x, y, paint);
            } */
+    }
+
+    public void RemoveFigure(Rect rect) {
+        synchronized(this) {
+            int index = AndroidRenderer.rects_to_draw.indexOf(rect);
+            if (index >= 0) {
+                Rect temp = rects_to_draw.get(index);
+                temp.Delete();
+                rects_to_draw.remove(index);
+            }
+        }
     }
 
     public void DrawFigure(Rect rect) {
@@ -155,6 +178,7 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
     }
 
     public void DrawLine(int x1, int y1, int x2, int y2, int color) {
+        
         // if (this.screen.getCanvas() != null) {
         //     Paint paint = new Paint();
         //     paint.setColor(color);
