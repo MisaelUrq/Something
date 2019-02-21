@@ -13,14 +13,10 @@ import com.urquieta.something.output.OutputSystem;
 import com.urquieta.something.game.util.Color;
 
 public class AndroidImageLoader {
-    AssetManager asset_manager;
+    private static AssetManager asset_manager;
 
-    public AndroidImageLoader() {
-
-    }
-
-    public void Init(Activity activity) {
-        this.asset_manager = activity.getAssets();
+    public static void Init(Activity activity) {
+        asset_manager = activity.getAssets();
         try {
             for (String asset : asset_manager.list("")) {
                 System.out.println("SOMETHING ASSETS: "+asset);
@@ -30,7 +26,7 @@ public class AndroidImageLoader {
         }
     }
 
-    public Image CreateImage(String path, Color color_blend) {
+    public static Image CreateImage(String path, Color color_blend) {
         Image result = CreateImage(path);
         result.color_blend = color_blend;
         Bitmap buffer = result.GetBuffer();
@@ -50,10 +46,10 @@ public class AndroidImageLoader {
         return result;
     }
 
-    public Image CreateImage(String filename) {
+    public static Image CreateImage(String filename) {
         Image image = new Image();
         try {
-            InputStream input_stream = this.asset_manager.open(filename);
+            InputStream input_stream = asset_manager.open(filename);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inMutable = true;
             Bitmap buffer_image = BitmapFactory.decodeStream(input_stream, null, options);

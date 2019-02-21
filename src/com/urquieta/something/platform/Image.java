@@ -9,6 +9,6 @@ public class Image extends PCImage { // @Class
     public Color color_blend;
 
     public Image() {
-
+        
     }
 }

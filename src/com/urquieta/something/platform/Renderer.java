@@ -6,10 +6,12 @@ import com.urquieta.something.platform.pc.PCRenderer;// @PC
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.game.util.Vec2;
 
+// TODO(Misael): Move this to a renderer directory.
 public class Renderer extends PCRenderer { // @Class
     private float point_size = 0.01f;
 
     // NOTE(Misael): Should this be here? or in the parent class?
+
     // NOTE(Misael): We should pass only the screen, not the renderer.
     private class PixelPoint {
         public int x, y;

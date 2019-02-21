@@ -14,6 +14,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.renderer.figures.Rect;
+import com.urquieta.something.platform.renderer.figures.Circle;
 import com.urquieta.something.game.util.Vec4;
 import com.urquieta.something.game.util.Color;
 
@@ -57,8 +58,12 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glDepthMask(true);
         Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
@@ -78,19 +83,25 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
         synchronized(this) {
             for (Rect rect: AndroidRenderer.rects_to_draw) {
                 if (rect.HasBeenCreated() == false) {
-                    rect.CreateProgram();
+                    rect.Create();
                 }
                 rect.Draw(mvp_matrix);
             }
 
             Rect temp = AndroidRenderer.rects_to_draw_queue.poll();
             while (temp != null) {
-                temp.CreateProgram();
+                temp.Create();
                 temp.Draw(mvp_matrix);
                 temp.Delete();
                 temp = AndroidRenderer.rects_to_draw_queue.poll();
             }
         }
+
+        Circle circle = new Circle(0f, 0f, 1f, .5f, new Color(0xFFFF0000));
+        circle.Create();
+        circle.Draw(mvp_matrix);
+        circle.Delete();
+
         GLES20.glFlush();
     }
 
@@ -178,7 +189,7 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
     }
 
     public void DrawLine(int x1, int y1, int x2, int y2, int color) {
-        
+
         // if (this.screen.getCanvas() != null) {
         //     Paint paint = new Paint();
         //     paint.setColor(color);

@@ -19,7 +19,7 @@ public class AndroidScreen extends GLSurfaceView  {
         this.game = game;
 
         setEGLContextClientVersion(2);
-        setEGLConfigChooser(8, 8, 8, 8, 8, 0);
+        setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         setRenderer(new AndroidRenderer());
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         setFocusable(true);

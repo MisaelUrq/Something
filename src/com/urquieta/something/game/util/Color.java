@@ -35,6 +35,11 @@ public class Color {
         blue  = (int)((float)other.blue  * luminece / 255.0);
     }
 
+    public float[] GetArray() {
+        float result[] = { red, green, blue, alfa };
+        return result;
+    }
+
     public float[] GetNormalizeArray() {
         float result[] = { red/255.0f, green/255.0f, blue/255.0f, alfa/255.0f };
         return result;

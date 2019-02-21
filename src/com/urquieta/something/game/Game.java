@@ -2,13 +2,13 @@ package com.urquieta.something.game;
 
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.GameModes;
-import com.urquieta.something.game.board.Circle;
 import com.urquieta.something.game.board.GameBoard;
 import com.urquieta.something.game.board.Goals;
 import com.urquieta.something.game.util.Vec2;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
+import com.urquieta.something.platform.renderer.figures.Circle;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.ImageLoader;
@@ -276,9 +276,6 @@ public class Game implements Runnable
         this.debug_menu.UpdateEvent(event);
         this.debug_menu.Update(delta);
         this.debug_menu.Draw();
-
-        this.renderer.DrawRect(event.cursor_position.x-.01f, event.cursor_position.y+.01f,
-                               event.cursor_position.x+.01f, event.cursor_position.y-.01f, 0xFFFF0000);
 
         if (GameState.randomize) {
             GameState.randomize = false;
