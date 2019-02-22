@@ -13,7 +13,7 @@ public class PCImageLoader {
 
     }
 
-    public Image CreateImage(String path, Color color_blend) {
+    public static Image CreateImage(String path, Color color_blend) {
         Image result = CreateImage(path);
         result.color_blend = color_blend;
         BufferedImage buffer = result.GetBuffer();
@@ -32,7 +32,7 @@ public class PCImageLoader {
         return result;
     }
 
-    public Image CreateImage(String path) {
+    public static Image CreateImage(String path) {
         Image image = new Image();
         path = "assets/"+path;
         try {

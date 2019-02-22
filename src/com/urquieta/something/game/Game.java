@@ -8,7 +8,6 @@ import com.urquieta.something.game.util.Vec2;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.platform.Screen;
 import com.urquieta.something.platform.Renderer;
-import com.urquieta.something.platform.renderer.figures.Circle;
 import com.urquieta.something.platform.Input;
 import com.urquieta.something.platform.InputEvent;
 import com.urquieta.something.platform.ImageLoader;
@@ -151,7 +150,7 @@ public class Game implements Runnable
         // TODO(Misael): This sound does not play in Android.
         this.background_sound   = this.game_audio.CreateSound("background.wav");
 
-        this.test_image = this.game_image_loader.CreateImage("bubble.png", new Color(255, 0, 0));
+        this.test_image = ImageLoader.CreateImage("bubble.png", new Color(255, 0, 0));
 
         Sound collect_sound = this.game_audio.CreateSound("collect.wav");
         Sound drop_sound    = this.game_audio.CreateSound("drop.wav");

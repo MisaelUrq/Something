@@ -102,7 +102,7 @@ public class GameBoard extends GameObject {
         this.color_palette[3] =  new Color(0xFFFF00FF);
         this.color_palette[4] =  new Color(0xFF00FFFF);
         for (int index = 0; index < 5; index++) {
-            bubble_images[index] = image_loader.CreateImage("bubble.png", this.color_palette[index]);
+            bubble_images[index] = ImageLoader.CreateImage("bubble.png", this.color_palette[index]);
         }
         this.is_update_done = true;
         this.exit_requested = false;

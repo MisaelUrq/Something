@@ -6,7 +6,7 @@ package com.urquieta.something.platform.android;
 // import android.graphics.Bitmap;
 
 import android.opengl.GLSurfaceView;
-import android.opengl.GLES20;
+import static android.opengl.GLES20.*;
 import android.opengl.Matrix;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -25,7 +25,7 @@ import java.util.ArrayDeque;
 import java.util.Vector;
 
 public class AndroidRenderer implements GLSurfaceView.Renderer {
-    public Screen screen;
+    protected Screen screen;
     private float projection_matrix[];
     private float view_matrix[];
     private float mvp_matrix[];
@@ -58,12 +58,12 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        GLES20.glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        glClearColor(0.9f, 0.9f, 1.0f, 1.0f);
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-        GLES20.glDepthMask(true);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(true);
         Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
@@ -77,7 +77,7 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
             rects_to_draw.clear();
             rects_to_draw_queue.clear();
         }
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
 
         synchronized(this) {
@@ -97,25 +97,20 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
             }
         }
 
-        Circle circle = new Circle(0f, 0f, 1f, .5f, new Color(0xFFFF0000));
-        circle.Create();
-        circle.Draw(mvp_matrix);
-        circle.Delete();
-
-        GLES20.glFlush();
+        glFlush();
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
+        glViewport(0, 0, width, height);
         ratio = (float)width/(float)height;
         Matrix.frustumM(projection_matrix, 0, ratio, -ratio, -1, 1, 3, 7);
     }
 
     public static int LoadShader(int type, String source) {
-        int shader = GLES20.glCreateShader(type);
-        GLES20.glShaderSource(shader, source);
-        GLES20.glCompileShader(shader);
+        int shader = glCreateShader(type);
+        glShaderSource(shader, source);
+        glCompileShader(shader);
         return shader;
     }
 

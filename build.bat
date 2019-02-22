@@ -1,7 +1,6 @@
 @echo off
 
-rm -rd obj_android/*
-
+if exist rm -rd obj_android/*
 
 SET AAPT="C:\Android\android-sdk\build-tools\28.0.3\aapt.exe"
 SET DX="C:\Android\android-sdk\build-tools\28.0.3\dx.bat"
@@ -11,7 +10,6 @@ SET APKSIGNER="C:\Android\android-sdk\build-tools\26.0.2\apksigner.bat"
 
 SET BUILD_FOR_ANDROID=1
 SET INSTALL_ON_PHONE=0
-SET RUN_AVD= 0
 SET BUILD_FOR_PC=0
 SET DEGUG=1
 
@@ -19,18 +17,17 @@ SET APP_NAME=Something
 SET CODE=com/urquieta/something
 SET SRC=src/%CODE%
 SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/android/*.java %SRC%/game/util/*.java
-SET PC_CODE=%SRC%/PCMain.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/pc/*.java %SRC%/game/util/*.java %SRC%/game/ui/*.java %SRC%/output/*.java %SRC%/game/save/*.java
-SET FILES_CLASSES=%CODE%/*.class %CODE%/game/*.class %CODE%/platform/*.class %CODE%/platform/pc/*.class %CODE%/game/board/*.class %CODE%/game/util/*.class %CODE%/game/ui/*.class %CODE%/output/*.class %CODE%/game/save/*.class
 
 if %BUILD_FOR_ANDROID% == 1 (
    if %DEGUG% == 1 (
       py -3 switch_build.py "Android"
+      py -3 get_android_source.py
 
       echo "Generating R.java file"
       %AAPT% package -f -m -0 apk -J "gen" -M AndroidManifest.xml -A "assets" -S "res" -I %PLATFORM_ANDROID% -F "bin\resources.ap_" || goto END
 
       echo "Compiling source code"
-      javac -d "obj_android" -classpath "src;gen;obj_android" -sourcepath "gen;src;" -bootclasspath %PLATFORM_ANDROID% -g -source 7 -target   7 -encoding UTF-8 %ANDROID_CODE% || goto END
+      javac -d "obj_android" -classpath "src;gen;obj_android" -sourcepath "gen;src;" -bootclasspath %PLATFORM_ANDROID% -g -source 7 -target   7 -encoding UTF-8 @android_sourcefiles || goto END
       javac -d "obj_android" -classpath "src;gen;obj_android" -sourcepath "gen;src"  -bootclasspath %PLATFORM_ANDROID% -g -source 7 -target   7 -encoding UTF-8 "gen/com/urquieta/something/R.java" || goto END
 
       echo "Translation bytecode"
@@ -54,7 +51,8 @@ if %BUILD_FOR_ANDROID% == 1 (
 
 if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
-     javac -g -Xdiags:verbose -Xlint:all -d bin %PC_CODE%
+     if not exist bin\classes mkdir bin\classes
+     javac -g -cp jars/lwjgl.jar;jars/lwjgl-opengl.jar -Xdiags:verbose -Xlint:all -d bin\classes @sourcefiles
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar %FILES_CLASSES%
+     jar -cvmf ..\MANIFEST.MF Something.jar -C classes .
      popd ))
