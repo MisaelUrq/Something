@@ -11,7 +11,7 @@ import java.util.Arrays;
 // import android.opengl.GLUtils;
 // import android.graphics.Bitmap;
 
-import static com.urquieta.something.platform.pc.PCOpenGL.*;
+import static com.urquieta.something.platform.OpenGL.*;
 
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Image;

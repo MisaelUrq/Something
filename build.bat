@@ -8,9 +8,9 @@ SET PLATFORM_ANDROID="C:\Android\android-sdk\platforms\android-16\android.jar"
 SET ZIPALIGN="C:\Android\android-sdk\build-tools\28.0.3\zipalign.exe"
 SET APKSIGNER="C:\Android\android-sdk\build-tools\26.0.2\apksigner.bat"
 
-SET BUILD_FOR_ANDROID=0
+SET BUILD_FOR_ANDROID=1
 SET INSTALL_ON_PHONE=0
-SET BUILD_FOR_PC=1
+SET BUILD_FOR_PC=0
 SET DEGUG=1
 
 SET APP_NAME=Something

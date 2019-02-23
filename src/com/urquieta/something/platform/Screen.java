@@ -68,4 +68,9 @@ public class Screen extends PCScreen { // @Class
     public int GetHeight() {
         return Screen.height;
     }
+
+    @Override
+    public void InitOpenGLContext() {
+        super.InitOpenGLContext();
+    }
 }

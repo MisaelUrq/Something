@@ -9,7 +9,7 @@ import java.util.Arrays;
 // import static android.opengl.GLES20.*;
 
 // NOTE(Misael): This is gone be the class for the OpenGL abstraction.
-import static com.urquieta.something.platform.pc.PCOpenGL.*;
+import static com.urquieta.something.platform.OpenGL.*;
 
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.game.util.Color;
@@ -66,11 +66,7 @@ public class RawModel {
 
         int position_handle = GLActiveVertexAttrib("vertex_position", vertex_buffer, 3, 4);
         GLUniformMatrix4fv("mvp_matrix", mvp_matrix);
-        GLUniformMatrix4fv("fragment_color", color.GetNormalizeArray());
-
-        // int uniform_color_handle = glGetUniformLocation(program, "fragment_color");
-        // FloatBuffer color_buffer = Buffers.ArrayToBuffer(color.GetNormalizeArray());
-        // glUniform4fv(uniform_color_handle, 1, color.GetNormalizeArray(), 0);
+        GLUniform4fv("fragment_color", color.GetNormalizeArray());
 
         GLDrawElements(byte_buffer);
         GLDisableVertexAttrib(position_handle);

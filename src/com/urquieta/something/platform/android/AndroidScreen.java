@@ -32,4 +32,8 @@ public class AndroidScreen extends GLSurfaceView  {
     public void endDraw() {
         requestRender();
     }
+
+    public void InitOpenGLContext() {
+
+    }
 }

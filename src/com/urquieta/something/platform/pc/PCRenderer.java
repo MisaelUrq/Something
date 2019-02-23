@@ -70,9 +70,6 @@ public class PCRenderer {
         this.rects_to_draw       = new Vector<Rect>();
         this.screen = null;
         this.ratio = 0;
-
-
-
     }
 
     public void RenderScene() {
