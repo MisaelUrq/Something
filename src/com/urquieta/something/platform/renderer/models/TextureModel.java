@@ -7,19 +7,17 @@ import java.nio.IntBuffer;
 import java.util.Arrays;
 
 // TODO(Misael): Make sure all of this dependencies are platform free.
-import static android.opengl.GLES20.*;
-import android.opengl.GLUtils;
-import android.graphics.Bitmap;
+// import static android.opengl.GLES20.*;
+// import android.opengl.GLUtils;
+// import android.graphics.Bitmap;
 
-// import static org.lwjgl.opengl.GL20.*;
-// import static org.lwjgl.opengl.GL13.*;
+import static com.urquieta.something.platform.pc.PCOpenGL.*;
 
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.platform.Image;
 import com.urquieta.something.platform.ImageLoader;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.utils.Buffers;
-
 
 public class TextureModel {
     // TODO(Misael): Do we need more shaders right now?
@@ -67,26 +65,12 @@ public class TextureModel {
     }
 
     public void CreateProgram() {
-        int vertex_shader_id   = Renderer.LoadShader(GL_VERTEX_SHADER, vertex_shader);
-        int fragment_shader_id = Renderer.LoadShader(GL_FRAGMENT_SHADER, fragment_shader);
+        int vertex_shader_id   = Renderer.LoadShader(GL_SHADER_VERTEX, vertex_shader);
+        int fragment_shader_id = Renderer.LoadShader(GL_SHADER_FRAGMENT, fragment_shader);
 
-        program = glCreateProgram();
-        glAttachShader(program, vertex_shader_id);
-        glAttachShader(program, fragment_shader_id);
-        glLinkProgram(program);
-        glDeleteShader(vertex_shader_id);
-        glDeleteShader(fragment_shader_id);
-
-        int temp_texture_id[] = new int[1];
-        glGenTextures(1, temp_texture_id, 0);
-        texture_id = temp_texture_id[0];
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        GLUtils.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.GetBuffer(), 0);
+        program = GLCreateProgramAndLinkShaders(vertex_shader_id, fragment_shader_id);
+        texture_id = GLGenDefaultTexture();
+        // GLUtils.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.GetBuffer(), 0);
     }
 
     public void UpdatePosition(float positions[]) {
@@ -96,40 +80,23 @@ public class TextureModel {
 
     public void Draw(float[] mvp_matrix) {
         // TODO(Misael): Maybe uses VAOs VBOs? I don't know how they work on android.
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glUseProgram(program);
-        int mvp_matrix_handle    = glGetUniformLocation(program, "mvp_matrix");
-        FloatBuffer mvp_buffer = Buffers.ArrayToBuffer(mvp_matrix);
-        glUniformMatrix4fv(mvp_matrix_handle, 1, false, mvp_matrix, 0);
-
-        int position_handle = glGetAttribLocation(program, "vertex_position");
-        glEnableVertexAttribArray(position_handle);
-        glVertexAttribPointer(position_handle, 3, GL_FLOAT, false, 3*4, vertex_buffer);
-
-        int texture_handle = glGetAttribLocation(program, "texture_coords_in");
-        glEnableVertexAttribArray(texture_handle);
-        glVertexAttribPointer(texture_handle, 2, GL_FLOAT, false, 2*4, texture_coords_buffer);
-
-        int sampler_texture_handle = glGetUniformLocation(program, "texture_sampler");
-        glUniform1i(sampler_texture_handle, 0);
-
-        int uniform_color_handle = glGetUniformLocation(program, "fragment_color");
-        glUniform4fv(uniform_color_handle, 1, color.GetNormalizeArray(), 0);
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glDrawElements(GL_TRIANGLES, 6,  GL_UNSIGNED_SHORT, byte_buffer);
-        glDisableVertexAttribArray(position_handle);
-        glDisableVertexAttribArray(texture_handle);
-        glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
+        GLUseTexture(texture_id);
+        GLUseProgram(program);
+        GLUniformMatrix4fv("mvp_matrix", mvp_matrix);
+        int position_handle = GLActiveVertexAttrib("vertex_position", vertex_buffer, 3, 4);
+        int texture_handle  = GLActiveVertexAttrib("texture_coords_in", texture_coords_buffer, 2, 4);
+        GLUniform1i("texture_sampler");
+        GLUniform4fv("fragment_color", color.GetNormalizeArray());
+        GLInitBlendConfig();
+        GLDrawElements(byte_buffer);
+        GLDisableVertexAttrib(position_handle);
+        GLDisableVertexAttrib(texture_handle);
+        GLEndBlendConfig();
     }
 
     public void Delete() {
-        int temp[] = { texture_id};
-        glDeleteTextures(1, temp, 0);
-        glDeleteProgram(program);
+        GLDeleteProgram(program);
+        GLDeleteTexture(texture_id);
         program = 0;
     }
 

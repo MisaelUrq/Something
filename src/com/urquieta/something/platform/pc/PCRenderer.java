@@ -14,14 +14,23 @@ import java.awt.Font;
 import java.awt.image.BufferedImage;
 
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.*;
 
 import com.urquieta.something.game.GameModes;
 import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.platform.renderer.figures.Rect;
+import com.urquieta.something.utils.Buffers;
 
 import java.util.ArrayDeque;
 import java.util.Vector;
+
+
+
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
 
 
 public class PCRenderer {
@@ -40,11 +49,17 @@ public class PCRenderer {
     private GameModes prev_game_mode;
 
     public PCRenderer(Screen screen) {
+        this();
         this.screen = screen;
         if (this.screen.getCanvas() != null) {
-            graphics = this.screen.getCanvas().getBufferStrategy().getDrawGraphics();
-            this.font = new Font(Font.SANS_SERIF, 0, 8);
+
         }
+    }
+
+    public int[] GetBuffer(int width, int height) {
+        int buffer[] = new int[width*height*4];
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_INT, Buffers.ArrayToBuffer(buffer));
+        return buffer;
     }
 
     public PCRenderer() {
@@ -55,6 +70,44 @@ public class PCRenderer {
         this.rects_to_draw       = new Vector<Rect>();
         this.screen = null;
         this.ratio = 0;
+
+
+
+    }
+
+    public void RenderScene() {
+
+        // if (prev_game_mode != GameState.current_mode) {
+        //     prev_game_mode = GameState.current_mode;
+        //     for (Rect rect: rects_to_draw) {
+        //         rect.Delete();
+        //     }
+        //     rects_to_draw.clear();
+        //     rects_to_draw_queue.clear();
+        // }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
+
+        // synchronized(this) {
+        //     for (Rect rect: rects_to_draw) {
+        //         if (rect.HasBeenCreated() == false) {
+        //             rect.Create();
+        //         }
+        //         rect.Draw(mvp_matrix);
+        //     }
+
+        //     Rect temp = rects_to_draw_queue.poll();
+        //     while (temp != null) {
+        //         temp.Create();
+        //         temp.Draw(mvp_matrix);
+        //         temp.Delete();
+        //         temp = rects_to_draw_queue.poll();
+        //     }
+        // }
+
+        glFlush();
     }
 
     public void DrawText(String str, float x, float y, Color color) {
@@ -62,6 +115,13 @@ public class PCRenderer {
         //     this.graphics.setColor(new Color(color, true));
         //     this.graphics.drawString(str, x, y);
         // }
+    }
+
+    public void Draw(BufferedImage buffer) {
+        if (this.graphics != null) {
+            this.graphics.drawImage(buffer, 0, 0,null);
+        }
+
     }
 
     public void DrawImage(PCImage image, float x, float y) {

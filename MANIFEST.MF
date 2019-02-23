@@ -1,1 +1,2 @@
 Main-Class: com.urquieta.something.PCMain
+Class-Path: ..\jars\2\lwjgl.jar ..\jars\2\lwjgl_utils.jar ..\jars\lwjgl.dll ..\jars\lwjgl64.dll

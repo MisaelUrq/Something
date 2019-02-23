@@ -6,15 +6,14 @@ import java.nio.ShortBuffer;
 import java.util.Arrays;
 
 // TODO(Misael): Make sure all of this dependencies are platform free.
-import static android.opengl.GLES20.*;
+// import static android.opengl.GLES20.*;
 
-// import static org.lwjgl.opengl.GL20.*;
-// import static org.lwjgl.opengl.GL13.*;
+// NOTE(Misael): This is gone be the class for the OpenGL abstraction.
+import static com.urquieta.something.platform.pc.PCOpenGL.*;
 
 import com.urquieta.something.platform.Renderer;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.utils.Buffers;
-
 
 public class RawModel {
     // TODO(Misael): Do we need more shaders right now?
@@ -51,14 +50,9 @@ public class RawModel {
     }
 
     public void CreateProgram() {
-        int vertex_shader_id   = Renderer.LoadShader(GL_VERTEX_SHADER, vertex_shader);
-        int fragment_shader_id = Renderer.LoadShader(GL_FRAGMENT_SHADER, fragment_shader);
-        program = glCreateProgram();
-        glAttachShader(program, vertex_shader_id);
-        glAttachShader(program, fragment_shader_id);
-        glLinkProgram(program);
-        glDeleteShader(vertex_shader_id);
-        glDeleteShader(fragment_shader_id);
+        int vertex_shader_id   = Renderer.LoadShader(GL_SHADER_VERTEX, vertex_shader);
+        int fragment_shader_id = Renderer.LoadShader(GL_SHADER_FRAGMENT, fragment_shader);
+        program = GLCreateProgramAndLinkShaders(vertex_shader_id, fragment_shader_id);
     }
 
     public void UpdatePosition(float positions[]) {
@@ -68,24 +62,22 @@ public class RawModel {
 
     public void Draw(float[] mvp_matrix) {
         // TODO(Misael): Maybe uses VAOs VBOs? I don't know how they work on android.
-        glUseProgram(program);
-        int mvp_matrix_handle    = glGetUniformLocation(program, "mvp_matrix");
-        FloatBuffer mvp_buffer = Buffers.ArrayToBuffer(mvp_matrix);
-        glUniformMatrix4fv(mvp_matrix_handle, 1, false, mvp_matrix, 0);
+        GLUseProgram(program);
 
-        int position_handle = glGetAttribLocation(program, "vertex_position");
-        glEnableVertexAttribArray(position_handle);
-        glVertexAttribPointer(position_handle, 3, GL_FLOAT, false, 3*4, vertex_buffer);
+        int position_handle = GLActiveVertexAttrib("vertex_position", vertex_buffer, 3, 4);
+        GLUniformMatrix4fv("mvp_matrix", mvp_matrix);
+        GLUniformMatrix4fv("fragment_color", color.GetNormalizeArray());
 
-        int uniform_color_handle = glGetUniformLocation(program, "fragment_color");
-        FloatBuffer color_buffer = Buffers.ArrayToBuffer(color.GetNormalizeArray());
-        glUniform4fv(uniform_color_handle, 1, color.GetNormalizeArray(), 0);
-        glDrawElements(GL_TRIANGLES, 6,  GL_UNSIGNED_SHORT, byte_buffer);
-        glDisableVertexAttribArray(position_handle);
+        // int uniform_color_handle = glGetUniformLocation(program, "fragment_color");
+        // FloatBuffer color_buffer = Buffers.ArrayToBuffer(color.GetNormalizeArray());
+        // glUniform4fv(uniform_color_handle, 1, color.GetNormalizeArray(), 0);
+
+        GLDrawElements(byte_buffer);
+        GLDisableVertexAttrib(position_handle);
     }
 
     public void Delete() {
-        glDeleteProgram(program);
+        GLDeleteProgram(program);
         program = 0;
     }
 

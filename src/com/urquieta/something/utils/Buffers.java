@@ -28,6 +28,16 @@ public class Buffers {
         return result;
     }
 
+    public static IntBuffer ArrayToBuffer(int array[]) {
+        IntBuffer result;
+        ByteBuffer temp_buffer = ByteBuffer.allocateDirect(array.length*4);
+        temp_buffer.order(ByteOrder.nativeOrder());
+        result = temp_buffer.asIntBuffer();
+        result.put(array);
+        result.position(0);
+        return result;
+    }
+
     // NOTE(Misael): SO i can't create a normal byteBuffer from a byte
     // array, I have to pass a short wich is 2 bytes. Create a
     // bytebuffer and then overwrite its contents creating a dummy

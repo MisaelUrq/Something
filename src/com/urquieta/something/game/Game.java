@@ -85,6 +85,7 @@ public class Game implements Runnable
 
     @Override
     public void run() {
+        main_canvas.InitOpenGLContext();
         long   start_time = System.nanoTime();
         double delta = 0.0;
         int    fps = 0;
@@ -325,5 +326,9 @@ public class Game implements Runnable
 
     private void SetImageLoader(ImageLoader loader) {
         this.game_image_loader = loader;
+    }
+
+    public Renderer GetRenderer() {
+        return renderer;
     }
 }

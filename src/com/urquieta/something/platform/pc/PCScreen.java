@@ -5,9 +5,13 @@ import com.urquieta.something.game.Game;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import static com.urquieta.something.platform.pc.PCOpenGL.*;
+import com.urquieta.something.platform.Renderer;
+import org.lwjgl.opengl.Display;
 
 // NOTE(Misael): Not necesary for the PC build.
 import com.urquieta.something.platform.pc.Context;
@@ -18,7 +22,6 @@ public class PCScreen extends Canvas {
     public static int height = 850;
     private Game game;
     private JFrame frame;
-    BufferStrategy buffer;
 
     public PCScreen(Game game, Context context) {
         Dimension screenSize = new Dimension(width, height);
@@ -30,7 +33,26 @@ public class PCScreen extends Canvas {
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setLocationRelativeTo(null);
         this.frame.setVisible(true);
-        createBufferStrategy(3);
+        this.game = game;
+    }
+
+    public Graphics DrawToGGraphics(Graphics g, int buffer[]) {
+        for (int y = 0; y < width; y++) {
+            for (int x = 0; x < height; x++) {
+                g.drawLine(x, y, x, y);
+            }
+        }
+        return g;
+    }
+
+    public void InitOpenGLContext() {
+        try {
+            Display.setParent(this);
+            Display.create();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        GLInit(width, height);
     }
 
     public Canvas getCanvas() {
@@ -42,9 +64,11 @@ public class PCScreen extends Canvas {
     }
 
     public void endDraw() {
-        if (getBufferStrategy().getDrawGraphics() != null) {
-            getBufferStrategy().getDrawGraphics().dispose();
-            getBufferStrategy().show();
-        }
+        game.GetRenderer().RenderScene();
+        Display.update();
+        int buffer[] = game.GetRenderer().GetBuffer(width, height);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        image.setRGB(0, 0, width, height, buffer, 0, width);
+        game.GetRenderer().Draw(image);
     }
 }

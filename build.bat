@@ -8,15 +8,12 @@ SET PLATFORM_ANDROID="C:\Android\android-sdk\platforms\android-16\android.jar"
 SET ZIPALIGN="C:\Android\android-sdk\build-tools\28.0.3\zipalign.exe"
 SET APKSIGNER="C:\Android\android-sdk\build-tools\26.0.2\apksigner.bat"
 
-SET BUILD_FOR_ANDROID=1
+SET BUILD_FOR_ANDROID=0
 SET INSTALL_ON_PHONE=0
-SET BUILD_FOR_PC=0
+SET BUILD_FOR_PC=1
 SET DEGUG=1
 
 SET APP_NAME=Something
-SET CODE=com/urquieta/something
-SET SRC=src/%CODE%
-SET ANDROID_CODE=%SRC%/MainActivity.java %SRC%/game/*.java %SRC%/game/board/*.java %SRC%/platform/*.java %SRC%/platform/android/*.java %SRC%/game/util/*.java
 
 if %BUILD_FOR_ANDROID% == 1 (
    if %DEGUG% == 1 (
@@ -52,7 +49,7 @@ if %BUILD_FOR_ANDROID% == 1 (
 if %BUILD_FOR_PC% == 1 (
    if %DEGUG% == 1 (
      if not exist bin\classes mkdir bin\classes
-     javac -g -cp jars/lwjgl.jar;jars/lwjgl-opengl.jar -Xdiags:verbose -Xlint:all -d bin\classes @sourcefiles
+     javac -g -cp jars/2/lwjgl.jar;jars/2/lwjgl_util.jar -Xdiags:verbose -Xlint:all -d bin\classes @sourcefiles
      pushd bin
-     jar -cvmf ..\MANIFEST.MF Something.jar -C classes .
+     jar -cvmf  ..\MANIFEST.MF Something.jar -C classes .
      popd ))
