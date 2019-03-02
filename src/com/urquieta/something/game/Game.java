@@ -121,7 +121,7 @@ public class Game implements Runnable
                 thread.sleep(time_to_sleep);
             }
             catch (Exception e) {
-                OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
+                OutputSystem.DebugPrint(e.toString(), OutputSystem.Levels.ERRORS);
             }
         }
     }
@@ -134,7 +134,7 @@ public class Game implements Runnable
                 break;
             }
             catch (Exception e) {
-                OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
+                OutputSystem.DebugPrint(e.toString(), OutputSystem.Levels.ERRORS);
             }
         }
     }

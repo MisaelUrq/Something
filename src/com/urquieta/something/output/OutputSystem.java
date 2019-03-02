@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 public class OutputSystem {
-    private static int level    = 0;
-    private static boolean did_error_occur = false;
 
-    public  static final int NONE     = 0;
-    public  static final int WARNINGS = 1;
-    public  static final int ERRORS   = 2;
+    public enum Levels {
+        NONE,
+        MESSAGES,
+        WARNINGS,
+        ERRORS,
+    }
+
+    private static Levels  level    = Levels.NONE;
+    private static boolean did_error_occur = false;
 
     private static boolean write_on_file = false;
     private static File   file = null;
@@ -19,32 +23,34 @@ public class OutputSystem {
         OutputSystem.file = new File(path, filename);
     }
 
-    public static void SetLevel(int level) {
+    public static void SetLevel(Levels level) {
         OutputSystem.level = level;
     }
 
-    public static void DebugPrint(String message, int level) {
-        if (level <= OutputSystem.level) {
-            switch (level) {
-            case WARNINGS: {
-                String output_message = "SOMETHING_WARNING: "+message;
-                if (write_on_file && OutputSystem.file != null) {
-                   OutputSystem.WriteToFile(output_message);
-                }
-                new Exception(output_message).printStackTrace(System.out);
-            } break;
-            case ERRORS: {
-                // TODO(Misael): Make a option to  display this  in the game as a window or something.
-                String output_message = "SOMETHING_ERROR: "+message;
-                if (write_on_file && OutputSystem.file != null) {
-                    OutputSystem.WriteToFile(output_message);
-                }
-                new Exception(output_message).printStackTrace(System.err);
-                OutputSystem.did_error_occur = true;
-            } break;
-            default:
-                break;
+    public static void DebugPrint(String message, Levels level) {
+        switch (level) {
+        case WARNINGS: {
+            String output_message = "SOMETHING_WARNING: "+message;
+            if (write_on_file && OutputSystem.file != null) {
+                OutputSystem.WriteToFile(output_message);
             }
+            new Exception(output_message).printStackTrace(System.out);
+        } break;
+        case ERRORS: {
+            // TODO(Misael): Make a option to  display this  in the game as a window or something.
+            String output_message = "SOMETHING_ERROR: "+message;
+            if (write_on_file && OutputSystem.file != null) {
+                OutputSystem.WriteToFile(output_message);
+            }
+            new Exception(output_message).printStackTrace(System.err);
+            OutputSystem.did_error_occur = true;
+        } break;
+        case MESSAGES: {
+            String output_message = "SOMETHING_MESSAGE: "+message;
+            System.out.println(output_message);
+        } break;
+        default:
+            break;
         }
     }
 

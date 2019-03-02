@@ -535,7 +535,7 @@ public class GameBoard extends GameObject {
                     array[index] = new Wall(this.renderer, x_position, y_position, radius);
                 } break;
                 default: {
-                    OutputSystem.DebugPrint("Try to create an unknow type of GameObject! Wrong Format String!", 2);
+                    OutputSystem.DebugPrint("Try to create an unknow type of GameObject! Wrong Format String!", OutputSystem.Levels.ERRORS);
                 }
                 }
             }

@@ -21,17 +21,15 @@ import com.urquieta.something.game.GameState;
 import com.urquieta.something.game.util.Color;
 import com.urquieta.something.platform.renderer.figures.Rect;
 import com.urquieta.something.utils.Buffers;
+import com.urquieta.something.utils.Matrix;
 
 import java.util.ArrayDeque;
 import java.util.Vector;
-
-
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
-
 
 public class PCRenderer {
     protected Screen screen;
@@ -70,39 +68,41 @@ public class PCRenderer {
         this.rects_to_draw       = new Vector<Rect>();
         this.screen = null;
         this.ratio = 0;
+        Matrix.ViewMatrix(view_matrix, new float[] {0, 0, -3.0f},
+                          new float[] {0f, 0f, 0f},
+                          new float[] {0f, 1.0f, 0.0f});
+        float ratio = 400/650;
+        projection_matrix = Matrix.ProjectionMatrix(ratio, 1, 3, 7);
     }
 
     public void RenderScene() {
-
-        // if (prev_game_mode != GameState.current_mode) {
-        //     prev_game_mode = GameState.current_mode;
-        //     for (Rect rect: rects_to_draw) {
-        //         rect.Delete();
-        //     }
-        //     rects_to_draw.clear();
-        //     rects_to_draw_queue.clear();
-        // }
+        if (prev_game_mode != GameState.current_mode) {
+            prev_game_mode = GameState.current_mode;
+            for (Rect rect: rects_to_draw) {
+                rect.Delete();
+            }
+            rects_to_draw.clear();
+            rects_to_draw_queue.clear();
+        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
+        Matrix.Multiply(mvp_matrix, projection_matrix, view_matrix);
 
-        // synchronized(this) {
-        //     for (Rect rect: rects_to_draw) {
-        //         if (rect.HasBeenCreated() == false) {
-        //             rect.Create();
-        //         }
-        //         rect.Draw(mvp_matrix);
-        //     }
+        for (Rect rect: rects_to_draw) {
+            if (rect.HasBeenCreated() == false) {
+                rect.Create();
+            }
+            rect.Draw(mvp_matrix);
+        }
 
-        //     Rect temp = rects_to_draw_queue.poll();
-        //     while (temp != null) {
-        //         temp.Create();
-        //         temp.Draw(mvp_matrix);
-        //         temp.Delete();
-        //         temp = rects_to_draw_queue.poll();
-        //     }
-        // }
+        Rect temp = rects_to_draw_queue.poll();
+        while (temp != null) {
+            temp.Create();
+            temp.Draw(mvp_matrix);
+            temp.Delete();
+            temp = rects_to_draw_queue.poll();
+        }
 
         glFlush();
     }
@@ -131,10 +131,8 @@ public class PCRenderer {
     }
 
     public void DrawRect(float x, float y, float width, float height, Color color) {
-        // if (this.graphics != null) {
-        //     this.graphics.setColor(new Color(color, true));
-        //     this.graphics.fillRect(x, y, width - x, height - y);
-        // }
+        Rect temp = new Rect(x, y, width, height, 1, color);
+        rects_to_draw_queue.push(temp);
     }
 
     public void DrawCircle(float x, float y, float radius, Color color) {

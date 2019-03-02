@@ -39,7 +39,7 @@ public class PCImageLoader {
             BufferedImage buffer_image = ImageIO.read(new File(path));
             image.SetBuffer(buffer_image);
         } catch (Exception e) {
-            OutputSystem.DebugPrint("SOMETHING_ERROR: "+e, OutputSystem.ERRORS);
+            OutputSystem.DebugPrint("SOMETHING_ERROR: "+e, OutputSystem.Levels.ERRORS);
         }
         return image;
     }

@@ -132,7 +132,7 @@ public class SaveState {
                                                               num_objectives, objectives_count, objectives_current_score,
                                                               objective);
         } else {
-            OutputSystem.DebugPrint("Mode not recognize!", OutputSystem.ERRORS);
+            OutputSystem.DebugPrint("Mode not recognize!", OutputSystem.Levels.ERRORS);
         }
     }
 
@@ -204,7 +204,7 @@ public class SaveState {
             buffer_reader.close();
         } catch (Exception e) {
             OutputSystem.DebugPrint("Could not load data from temp file: '"+file.getPath()+"'\nError Info: "+e,
-                                    OutputSystem.WARNINGS);
+                                    OutputSystem.Levels.WARNINGS);
         }
     }
 
@@ -243,7 +243,7 @@ public class SaveState {
             buffer_reader.close();
         } catch (Exception e) {
             OutputSystem.DebugPrint("Could not load data from temp file: '"+file.getPath()+"'\nError Info: "+e,
-                                    OutputSystem.WARNINGS);
+                                    OutputSystem.Levels.WARNINGS);
         }
     }
 
@@ -263,7 +263,7 @@ public class SaveState {
                 } else if (line.compareTo("0") == 0) {
                     this.was_a_level_being_played = false;
                 } else {
-                    OutputSystem.DebugPrint("Wrong file format", OutputSystem.WARNINGS);
+                    OutputSystem.DebugPrint("Wrong file format", OutputSystem.Levels.WARNINGS);
                 }
             } break;
             case version_0_0_2: {
@@ -274,15 +274,15 @@ public class SaveState {
                 } else if (line.compareTo("0") == 0) {
                     this.was_a_level_being_played = false;
                 } else {
-                    OutputSystem.DebugPrint("Wrong file format", OutputSystem.WARNINGS);
+                    OutputSystem.DebugPrint("Wrong file format", OutputSystem.Levels.WARNINGS);
                 }
             } break;
             default:
-                OutputSystem.DebugPrint("Unknow file version.", OutputSystem.WARNINGS);
+                OutputSystem.DebugPrint("Unknow file version.", OutputSystem.Levels.WARNINGS);
             }
             buffer_reader.close();
         } catch (Exception e) {
-            OutputSystem.DebugPrint("Could not save data: "+file.getPath()+"\nError Info: "+e, OutputSystem.WARNINGS);
+            OutputSystem.DebugPrint("Could not save data: "+file.getPath()+"\nError Info: "+e, OutputSystem.Levels.WARNINGS);
         }
     }
 
@@ -317,7 +317,7 @@ public class SaveState {
             stream.write(this.GetSaveFormat().getBytes());
             stream.close();
         } catch (Exception e) {
-            OutputSystem.DebugPrint("Could not save data: "+file.getPath(), 1);
+            OutputSystem.DebugPrint("Could not save data: "+file.getPath(), OutputSystem.Levels.WARNINGS);
         }
     }
 }

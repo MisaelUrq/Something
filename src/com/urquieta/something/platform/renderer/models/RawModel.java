@@ -21,11 +21,11 @@ public class RawModel {
     // TODO(Misael): Find if the shaders work the same on OpenGL and OpenGL ES.
     private final String vertex_shader =
         "uniform mat4 mvp_matrix; attribute vec4 vertex_position;" +
-        "void main() { gl_Position  = mvp_matrix * vertex_position; }";
+        "void main() { gl_Position = mvp_matrix * vertex_position; }";
 
     private final String fragment_shader =
         "uniform vec4 fragment_color;"+
-        " void main() { gl_FragColor = fragment_color; }";
+        "void main() { gl_FragColor = fragment_color; }";
 
     private int program;
     FloatBuffer vertex_buffer;
@@ -61,7 +61,6 @@ public class RawModel {
     }
 
     public void Draw(float[] mvp_matrix) {
-        // TODO(Misael): Maybe uses VAOs VBOs? I don't know how they work on android.
         GLUseProgram(program);
 
         int position_handle = GLActiveVertexAttrib("vertex_position", vertex_buffer, 3, 4);
@@ -78,6 +77,6 @@ public class RawModel {
     }
 
     public String toString() {
-        return String.format("RawModel { program: %d, positions { "+Arrays.toString(position)+"}}", program);
+        return String.format("RawModel { program: %d, positions {"+Arrays.toString(position)+"}}", program);
     }
 }

@@ -55,7 +55,7 @@ public class AndroidImageLoader {
             Bitmap buffer_image = BitmapFactory.decodeStream(input_stream, null, options);
             image.SetBuffer(buffer_image);
         } catch (Exception e) {
-            OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
+            OutputSystem.DebugPrint(e.toString(), OutputSystem.Levels.ERRORS);
         }
 
         return image;

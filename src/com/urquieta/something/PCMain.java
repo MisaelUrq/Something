@@ -17,7 +17,7 @@ public class PCMain
     public static void main(String[] args)
     {
         OutputSystem.WriteErrosOnFile("dump/", "pc_something.output");
-        OutputSystem.SetLevel(OutputSystem.ERRORS);
+        OutputSystem.SetLevel(OutputSystem.Levels.ERRORS);
         Game   game        = new Game();
         Screen game_screen = null;
         try {

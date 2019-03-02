@@ -26,7 +26,7 @@ public class PCAudio {
             Result.Init(clip);
         }
         catch (Exception e) {
-            OutputSystem.DebugPrint("SOMETHING_ERROR: "+e, OutputSystem.ERRORS);
+            OutputSystem.DebugPrint("SOMETHING_ERROR: "+e, OutputSystem.Levels.ERRORS);
         }
         return Result;
     }

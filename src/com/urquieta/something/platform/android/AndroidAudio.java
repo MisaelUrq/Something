@@ -29,7 +29,7 @@ public class AndroidAudio {
             sound.Init(this.sound_pool, sound_id);
             return sound;
         } catch (IOException e) {
-            OutputSystem.DebugPrint(e.toString(), OutputSystem.ERRORS);
+            OutputSystem.DebugPrint(e.toString(), OutputSystem.Levels.ERRORS);
             return null;
         }
     }

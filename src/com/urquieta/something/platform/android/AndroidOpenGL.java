@@ -21,6 +21,14 @@ public class AndroidOpenGL {
     public final static int GL_SHADER_VERTEX   = GL_VERTEX_SHADER;
     public final static int GL_SHADER_FRAGMENT = GL_FRAGMENT_SHADER;
 
+    public static void GLReportErrors() {
+        int error = glGetError();
+        while (error != GL_NO_ERROR) {
+            System.out.println("OpenGL Error: "+error);
+            error = glGetError();
+        }
+    }
+
     public static void GLInit(int width, int height) {
         glViewport(0, 0, width, height);
         glClearColor(0.9f, 0.9f, 1.0f, 1.0f);

@@ -1,13 +1,7 @@
 package com.urquieta.something.platform.android;
 
-// import android.graphics.Paint;
-// import android.graphics.RectF;
-// import android.graphics.Canvas;
-// import android.graphics.Bitmap;
-
 import android.opengl.GLSurfaceView;
 import static android.opengl.GLES20.*;
-import android.opengl.Matrix;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -17,6 +11,7 @@ import com.urquieta.something.platform.renderer.figures.Rect;
 import com.urquieta.something.platform.renderer.figures.Circle;
 import com.urquieta.something.game.util.Vec4;
 import com.urquieta.something.game.util.Color;
+import com.urquieta.something.utils.Matrix;
 
 import com.urquieta.something.game.GameModes;
 import com.urquieta.something.game.GameState;
@@ -64,7 +59,9 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
 
         glDepthFunc(GL_LEQUAL);
         glDepthMask(true);
-        Matrix.setLookAtM(view_matrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.ViewMatrix(view_matrix, new float[] {0, 0, -3.0f},
+                                                       new float[] {0f, 0f, 0f},
+                                                       new float[] {0f, 1.0f, 0.0f});
     }
 
     @Override
@@ -78,7 +75,9 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
             rects_to_draw_queue.clear();
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Matrix.multiplyMM(mvp_matrix, 0, projection_matrix, 0, view_matrix, 0);
+
+
+        Matrix.Multiply(mvp_matrix, projection_matrix, view_matrix);
 
         synchronized(this) {
             for (Rect rect: AndroidRenderer.rects_to_draw) {
@@ -104,7 +103,7 @@ public class AndroidRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         glViewport(0, 0, width, height);
         ratio = (float)width/(float)height;
-        Matrix.frustumM(projection_matrix, 0, ratio, -ratio, -1, 1, 3, 7);
+        projection_matrix = Matrix.ProjectionMatrix(ratio, 1, 3, 7);
     }
 
     public static int LoadShader(int type, String source) {

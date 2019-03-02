@@ -30,7 +30,7 @@ public class MainActivity extends Activity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                              WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        OutputSystem.SetLevel(OutputSystem.ERRORS);
+        OutputSystem.SetLevel(OutputSystem.Levels.ERRORS);
         InitGame();
         setContentView(game.GetScreen());
     }
